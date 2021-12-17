@@ -1,0 +1,7 @@
+class Point(var x : Integer , y: Integer, var name: String) is {
+
+var static next : Integer;
+  def static incr() : Integer is
+     { Point.next := Point.next + 1; result := Point.next; }
+
+}
