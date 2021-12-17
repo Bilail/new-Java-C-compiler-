@@ -76,8 +76,8 @@
 
 (* Non-terminaux et leur type équivalent OCaml (voir Ast.ml) *)
 
-%type <Ast.classType> class
-%type <Ast.instrType> instruction (* A faire* )
+%type <Ast.classType> classe
+%type <Ast.instrType> instruction (* A faire *)
 %type varableParam (* A faire *)
 %type <string> extends (* A faire *)
 %type anyClassDecl (* A faire *)
