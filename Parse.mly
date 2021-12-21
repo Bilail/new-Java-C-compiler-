@@ -76,7 +76,7 @@
 
 (* Non-terminaux et leur type équivalent OCaml (voir Ast.ml) *)
 
-%type <Ast.classType> classe
+%type <Ast.classType> class
 %type <Ast.instrType> instruction (* A faire *)
 %type varableParam (* A faire *)
 %type <string> extends (* A faire *)
@@ -84,7 +84,7 @@
 
 
 (* Axiom *)
-%start <Ast.progType> prog (* Existence of progType must be checked *)
+%start <Ast.progType> prog (* Do we have progType ? *)
 %%
 
 
