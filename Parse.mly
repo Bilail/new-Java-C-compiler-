@@ -105,8 +105,8 @@ varableParam: option(VAR) separated_list(COMMA, ID) COLON ID
 
 
 
-(* Déclaration dans une classe *)
-anyClassDecl: 
+(* Une déclaration quelconque dans une classe : méthodes, attributs, constructeur *)
+anyClassDecl:
 
 
 
