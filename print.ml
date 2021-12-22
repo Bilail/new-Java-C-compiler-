@@ -24,29 +24,54 @@ let rec printExpr e =
     | Comp(op, g, d) ->
        print_string "["; printExpr g;
        print_string (Misc.string_of_relop op); printExpr d; print_string "]"
-  (*
-     print_string " CLASS "; printExpr sinon;
-     print_string " THIS "; printExpr sinon;
-     print_string " SUPER "; printExpr sinon;
-     print_string " ELSE "; printExpr sinon;
-     print_string " ELSE "; printExpr sinon;
-     print_endline "]"
-*)
+    | Selection () ->
+    | Instanciation () -> 
+    | Envoi () -> 
+    | Cast () ->
 
+(* PRINT CLASS *) (* A VERIFIER *)
 let printClass c =
-  print_string c.name;
-  print_string "( ";
-  List.iter printDecl d.attribut;
+  print_string " CLASS"; print_string c.name; print_string "( "; List.iter printDecl c.attribut;
   print_string " )";
   match c.superClasse with 
-      None -> ""
-      | Some s -> print_string s;
-  
+      | None -> ""
+      | Some s -> print_string "EXTENDS"; print_string s;
+  print_string "IS";
+  print_string " { ";
+  printbloc c.method;
+  print_string " } ";
 
+(* PRINT METHOD *) (* A VERIFIER *)
+let printmethod m =
+  print_string "DEF";
+  match m.static with 
+    | false -> print_string " " 
+    | true -> print_string "STATIC";
+   match m.override with 
+    | false -> print_string " " 
+    | true -> print_string "OVERRIDE";
+   print_string m.nom;
+   List.iter printDecl m.param;
+   match c._____ with 
+    |true -> print_string ":" ; print_string  m.typretour ; print_string ":="; printInstr m.instruction (* A VOIR*)
+    |false -> print_string "IS" ; printBloc ______ (* JE SUIS PAS SUR *) 
 
+(* PRINT Instruction *) (* A VERIFIER *)
+let printInstr ins =
+  match ins with 
+  |Exp() ->
+  |Ite(,,) ->
+  |Return ->
+  |Affectation(,) ->
 
+(* PRINT Bloc *) (* A VERIFIER *)
+let printBloc b = 
+   List.iter printDecl b.declarations;
+   List.iter printInstr b.instructions
+
+(* PRINT Déclaration *) (* A VERIFIER *)
 let printDecl d =
-  print_string d.nom; print_string " : "; printExpr d.typ;
+  print_string "VAR"; print_string "STATIC"; print_string d.nom; print_string " : "; printExpr d.typ;
   print_newline ()
 
 let printAll ld e =
@@ -54,10 +79,3 @@ let printAll ld e =
   printExpr e;
   print_newline ()
 
-type classType = {
-  name : string; 
-  superClasse : string option; 
-  attribut : decl list; (* param + attribut *)
-  meth : methode list;
-  constructeur : methode;
-  }
