@@ -7,10 +7,10 @@ projet: Parse.mli $(SOURCES)
 	ocamlc $(INTERFACES)
 	ocamlc -o tp $(SOURCES)
 
-testLex : tpParse.mli tpLex.ml testLex.ml misc.ml
+testLex : Parse.mli Lex.ml testLex.ml misc.ml
 	ocamlc -c ast.ml
 	ocamlc $(INTERFACES)
-	ocamlc -o testLex ast.ml misc.ml print.ml eval.ml compil.ml Parse.ml  Lex.ml testLex.ml
+	ocamlc -o testLex ast.ml misc.ml Parse.ml Lex.ml testLex.ml
 
 
 Lex.ml: Lex.mll Parse.mli ast.ml

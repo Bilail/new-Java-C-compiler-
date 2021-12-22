@@ -26,7 +26,6 @@ and methode = {
   retour : string option (* le type est un string ex : int est INTEGER *)
 }
 
-
 type opComp =
   Eq | Neq | Lt | Le | Gt | Ge
 
