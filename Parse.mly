@@ -7,8 +7,9 @@
 (** TOKENS **)
 
 (* Complex tokens *)
-%token <string> ID
-%token <int> CSTE
+%token <string> ID (* myIdentifier *)
+%token <string> CLASSNAME (* MyClass *)
+%token <int> CSTE (* 42 *)
 
 (* Symbols *)
 %token <Ast.opComp> RELOP (* = <> > < >= <= *)
@@ -28,8 +29,11 @@
 %token NEW
 %token THIS SUPER RESULT
 %token CLASS
-%token IS 
+%token IS
+%token DEF
+%token STATIC
 %token OVERRIDE
+%token RETURN
 
 (* Opérateur *)
 (*
@@ -72,50 +76,183 @@
 
 
 
-(** GRAMMAR : GENERAL INFO **)
+(**
+  ____________________________________________
+/                    ------------°°°°------------                      \
+|              GRAMMAIRE - GENERALITES
+\ ___________________________________________ /
+**)
 
 (* Non-terminaux et leur type équivalent OCaml (voir Ast.ml) *)
+(* 
+Ajouter = Règles de grammaire à définir
+Typer = Doit être associé à un type OCaml avec <string>, <Ast.classType>, etc... (je sais pas si c'est obligatoire)
+Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre { }
+*)
 
-%type <Ast.classType> class
-%type <Ast.instrType> instruction (* A faire *)
-%type varableParam (* A faire *)
-%type <string> extends (* A faire *)
-%type anyClassDecl (* A faire *)
+
+%type <Ast.classType> class (* Coder *)
+%type <string> extends (* Coder *)
+%type classBody (* Typer *)
+%type anyClassDecl (* Typer *)
+%type factoredAttributes (* Typer *)
+%type method (* Typer *)
+%type constructor (* Typer *)
+%type superclassCall (* Typer *)
+
+%type factoredVarParamList (* Typer *)
+%type factoredVarParam (* Typer *)
+%type argumentsList (* Typer *)
+%type returnedType (* Typer *)
+
+%type block (* Typer *)
+%type <Ast.instrType> instruction (* Ajouter *)
+
+%type expression (* Ajouter *)
 
 
-(* Axiom *)
+
+
+(* Axiome *)
 %start <Ast.progType> prog (* Do we have progType ? *)
 %%
 
 
-(** GRAMMAR : RULES **)
+(**
+  ____________________________________________
+/                    ------------°°°°------------                      \
+|               GRAMMAIRE - ARBITRAGES
+\ ___________________________________________ /
+**)
 
-(* 1 programme = Des classes + un programme principal à la fin *)
-prog: cl=list(class) il=list(instruction)
+(*
+
+  [1] "var" et non-"var" assimilés
+  Je pense que distinguer des non-terminaux factoredVarParam (arguments de constructeurs)
+  pouvant optionnellement avoir le mot-clé "var" et nonfactoredVarParam (arguments de méthdes)
+  ne pouvant avoir "var" amènerait des ambiguités. Le problème serait qu'une liste d'arguments
+  sans "var" peut à la fois être un factoredVarParam et et nonfactoredVarParam. -Gaël
+
+  [2] CLASSNAME et ID distingués
+  Dans les spécifications du langage, il est indiqué que les noms de classe commencent par une
+  majuscule et les autres identificateurs par une minuscule. Cela signifie qu'un nom de classe
+  CLASSNAME peut être identifié dès l'analyse lexicale. Je choisis donc de le faire, ce qui simplifie
+  grandement le travail des analyses lexicale et contextuelle.
+
+
+
+*)
+
+
+
+
+(**
+  ____________________________________________
+/                    ------------°°°°------------                      \
+|         GRAMMAIRE - REGLES : CLASSES
+\ ___________________________________________ /
+**)
+
+(* 1 programme = Des classes + un bloc de programme principal à la fin *)
+prog: cl=list(class) il=block
 
 
 (* Classe *)
 (* Ex : class Point(var xc, yc : Integer, name:String) IS { **CorpsClasse** } *)
-class: CLASS ID LPAREN separated_list(COMMA, varableParam) RPAREN option(extends) IS LBRACKET list(anyClassDecl) RBRACKET
+class: CLASS CLASSNAME factoredVarParamList option(extends) IS delimited(LBRACKET, classBody, RBRACKET)
 
 
-(* Paramètres optionnellement VAR *)
-(* Ex : var x1, x2, x3 : Integer *)
-varableParam: option(VAR) separated_list(COMMA, ID) COLON ID
+(* Extends d'une classe, optionnel *)
+extends : EXTENDS CLASSNAME
+
+(* Corps de la classe *)
+(* Ex : attributs, méthode, méthode, constructeur, méthode, attribut ... *)
+(* Puisqu'on sait qu'il doit y avoir un constructeur par classe, on le cherche directement à l'analyse syntaxique *)
+classBody : list(anyClassDecl) constructor list(anyClassDecl)
+
+
+(* Une déclaration quelconque dans une classe : méthode ou attributs *)
+(* On sépare les méthodes en constructeur, méthode, et méthodeOuConstructeur, car il y a ambiguité lors de l'analyse syntaxique *)
+anyClassDecl: factoredAttributes | method
+
+
+(* Attributs de classe *)
+(* Ex : var static x1, x2 : Integer *)
+factoredAttributes: VAR boption(STATIC) list(ID) returnedType
+
+
+(* Méthode de classe *)
+method:
+  (* cas finissant par un bloc *)
+  DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block
+
+  (* cas finissant par "nomClasse := expression" *)
+| DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression
 
 
 
-(* Une déclaration quelconque dans une classe : méthodes, attributs, constructeur *)
-anyClassDecl:
+(* Constructeur de classe *)
+constructor:
+  DEF CLASSNAME factoredVarParamList option(superclassCall) IS block
+
+
+
+superclassCall: COLON CLASSNAME argumentsList
+
+
+
+
+(**
+  ____________________________________________
+/                    ------------°°°°------------                      \
+|  GRAMMAIRE - REGLES : PARAMETRES & ARGS
+\ ___________________________________________ /
+**)
+
+
+
+
+(* Liste de paramètres optionnellement VAR entouré de parenthèses ( ) *)
+factoredVarParamList: delimited(LPAREN, separated_list(COMMA, factoredVarParam), RPAREN)
+
+
+(* Paramètre ou paramètres groupés optionnellement VAR *)
+(* Ex: var x1, x2, x3 : Integer *)
+factoredVarParam: boption(VAR) separated_list(COMMA, ID) returnedType
+
+
+(* Liste d'arguments, c'est-à-dire les expressions qu'on met comme paramètres lorsqu'on fait un appel (à une méthode par exemple) *)
+(* Ex:    ( 3, z, Point3D.getHeight() )     *)
+argumentsList: delimited(LPAREN, separated_list(COMMA, expression), RPAREN)
+
+
+(* Ex:   : Point3D *)
+returnedType: COLON CLASSNAME
+
+
+
+
+(**
+  ____________________________________________
+/                    ------------°°°°------------                      \
+|      GRAMMAIRE - REGLES : INSTRUCTIONS
+\ ___________________________________________ /
+**)
+
+
+
+block: delimited(LBRACKET, list(instruction), RBRACKET)
 
 
 
 
 
-
-
-
-
+(**
+  ____________________________________________
+/                    ------------°°°°------------                      \
+|      GRAMMAIRE - REGLES : EXPRESSIONS
+\ ___________________________________________ /
+**)
 
 
 
