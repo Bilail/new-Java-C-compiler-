@@ -106,9 +106,17 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type returnedType (* Typer *)
 
 %type block (* Typer *)
-%type <Ast.instrType> instruction (* Ajouter *)
+%type <Ast.instrType> instruction (* Coder *)
+%type container (* Typer *)
+%type containerA (* Typer *)
+%type methodCall (* Typer *)
 
 %type expression (* Ajouter *)
+%type expr1 (* Typer *)
+%type expr2 (* Typer *)
+%type expr3 (* Typer *)
+%type instanciation  (* Typer *)
+%type castedExpr (* Typer *)
 
 
 
@@ -240,8 +248,41 @@ returnedType: COLON CLASSNAME
 **)
 
 
-
+(* Bloc d'instructions entouré d'accolades *)
 block: delimited(LBRACKET, list(instruction), RBRACKET)
+
+
+
+(* N'importe quelle instruction du programme principal (sauf RETURN) ou des méthodes *)
+instruction:
+  expression SEMICOLON
+| block
+| RETURN SEMICOLON
+| IF expression THEN instruction ELSE instruction
+| container ASSIGN expression SEMICOLON
+
+
+
+(* Variable ou attribut, n'importe quoi pouvant contenir une valeur *)
+(* Ex:     x   ou    Point2D.multiply(3*y).length    *)
+container:
+  CLASSNAME SELECTION containerA
+| containerA
+
+containerA:
+  ID
+| ID SELECTION containerA
+| ID argumentsList SELECTION containerA
+
+
+(* Appel de méthode *)
+(* A peu près comme un container, mais avec des arguments à la fin et au moins 1 sélection "." *)
+(* Ex:   text.getSize()     ou    Point2D.multiply(3*y).substract(myPoint)    *)
+methodCall:
+  CLASSNAME SELECTION containerA argumentsList
+| ID SELECTION containerA argumentsList
+
+
 
 
 
@@ -255,9 +296,39 @@ block: delimited(LBRACKET, list(instruction), RBRACKET)
 **)
 
 
+expression:
+  expr1 RELOP expr1
+| expr1
+
+expr1:
+  expr1 PLUS expr2
+| expr1 MINUS expr2
+| expr2
+
+expr2:
+  expr2 TIMES expr3
+| expr2 DIV expr3
+| expr3
+
+expr3:
+  MINUS e=expr3 %prec UMINUS   { UMinus e }
+| methodCall
+| instanciation
+| delimited(LPAREN, expression, RPAREN)
+| castedExpr
+
+
+instanciation: NEW CLASSNAME argumentsList
+
+
+castedExpr: delimited(LPAREN, CLASSNAME expression, RPAREN) 
 
 
 
+
+(** Ajouter super et this **)
+(** Ajouter commentaires **)
+(** Distinguer les appels "this" des autres ? **)
 
 
 
