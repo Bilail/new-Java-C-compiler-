@@ -36,6 +36,42 @@
 
 
 
+(* Non-terminaux et leur type équivalent OCaml (voir Ast.ml) *)
+(* 
+Ajouter = Règles de grammaire à définir
+Typer = Doit être associé à un type OCaml avec <string>, <Ast.classeType>, etc... (je sais pas si c'est obligatoire)
+Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre { }
+*)
+
+
+%type <Ast.classeType> classe (* Coder *)
+%type <string> extends (* Coder *)
+%type classeBody (* Typer *)
+%type anyclasseDecl (* Typer *)
+%type factoredAttributes (* Typer *)
+%type method (* Typer *)
+%type constructor (* Typer *)
+%type superclasseCall (* Typer *)
+
+%type factoredVarParamList (* Typer *)
+%type factoredVarParam (* Typer *)
+%type argumentsList (* Typer *)
+%type returnedType (* Typer *)
+
+%type block (* Typer *)
+%type <Ast.instrType> instruction (* Coder *)
+%type container (* Typer *)
+%type containerA (* Typer *)
+%type methodCall (* Typer *)
+
+%type expression (* Typer *)
+%type expr1 (* Typer *)
+%type expr2 (* Typer *)
+%type expr3 (* Typer *)
+%type instanciation  (* Typer *)
+%type castedExpr (* Typer *)
+
+
 
 (**
   ____________________________________________
