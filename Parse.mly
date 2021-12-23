@@ -145,7 +145,15 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
   Dans les spécifications du langage, il est indiqué que les noms de classe commencent par une
   majuscule et les autres identificateurs par une minuscule. Cela signifie qu'un nom de classe
   CLASSNAME peut être identifié dès l'analyse lexicale. Je choisis donc de le faire, ce qui simplifie
-  grandement le travail des analyses lexicale et contextuelle.
+  grandement le travail des analyses lexicale et contextuelle. -Gaël
+
+
+  [3] super et this peuvent être hors d'une méthode
+  Il est simple dans cette grammaire de faire en sorte que this et super ne soient utilisables que
+  au début d'un appel de méthode ou attribut. Il est cependant plus difficile de savoir s'ils sont
+  dans une classe. Je choisis donc de reconnaître les mauvaises utilisations lorsque super et this
+  ne sont pas au tout début d'une suite de sélections lors de l'analyse syntaxique, mais de laisser
+  les mauvaises utilisations à l'extérieur d'une méthode à l'analyse contextuelle. 
 
 
 
@@ -267,6 +275,8 @@ instruction:
 (* Ex:     x   ou    Point2D.multiply(3*y).length    *)
 container:
   CLASSNAME SELECTION containerA
+| THIS SELECTION containerA
+| SUPER SELECTION containerA
 | containerA
 
 containerA:
@@ -281,6 +291,8 @@ containerA:
 methodCall:
   CLASSNAME SELECTION containerA argumentsList
 | ID SELECTION containerA argumentsList
+| SUPER SELECTION containerA argumentsList
+| THIS SELECTION containerA argumentsList
 
 
 
@@ -311,7 +323,10 @@ expr2:
 | expr3
 
 expr3:
-  MINUS e=expr3 %prec UMINUS   { UMinus e }
+  CSTE
+| PLUS e=expr3  { e }
+| MINUS e=expr3 %prec UMINUS   { UMinus e }
+| container
 | methodCall
 | instanciation
 | delimited(LPAREN, expression, RPAREN)
@@ -326,9 +341,7 @@ castedExpr: delimited(LPAREN, CLASSNAME expression, RPAREN)
 
 
 
-(** Ajouter super et this **)
-(** Ajouter commentaires **)
-(** Distinguer les appels "this" des autres ? **)
+(** Ajouter commentaires : Fait dans l'analyse lexicale ? **)
 
 
 
