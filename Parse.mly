@@ -7,7 +7,7 @@
 
 (* Complex tokens *)
 %token <string> ID (* myIdentifier *)
-%token <string> CLASSNAME (* MyClass *)
+%token <string> CLASSENAME (* Myclasse *)
 %token <int> CSTE (* 42 *)
 
 (* Symbols *)
@@ -27,7 +27,7 @@
 %token VAR
 %token NEW
 %token THIS SUPER RESULT
-%token CLASS
+%token CLASSE
 %token IS
 %token DEF
 %token STATIC
@@ -44,46 +44,10 @@
 \ ___________________________________________ /
 **)
 
-(* Non-terminaux et leur type équivalent OCaml (voir Ast.ml) *)
-(* 
-Ajouter = Règles de grammaire à définir
-Typer = Doit être associé à un type OCaml avec <string>, <Ast.classType>, etc... (je sais pas si c'est obligatoire)
-Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre { }
-*)
-
-
-%type <Ast.classType> class (* Coder *)
-%type <string> extends (* Coder *)
-%type classBody (* Typer *)
-%type anyClassDecl (* Typer *)
-%type factoredAttributes (* Typer *)
-%type method (* Typer *)
-%type constructor (* Typer *)
-%type superclassCall (* Typer *)
-
-%type factoredVarParamList (* Typer *)
-%type factoredVarParam (* Typer *)
-%type argumentsList (* Typer *)
-%type returnedType (* Typer *)
-
-%type block (* Typer *)
-%type <Ast.instrType> instruction (* Coder *)
-%type container (* Typer *)
-%type containerA (* Typer *)
-%type methodCall (* Typer *)
-
-%type expression (* Typer *)
-%type expr1 (* Typer *)
-%type expr2 (* Typer *)
-%type expr3 (* Typer *)
-%type instanciation  (* Typer *)
-%type castedExpr (* Typer *)
-
-
 
 
 (* Axiome *)
-%start <Ast.progType> prog (* Do we have progType ? *)
+%start <Ast.prog_type> prog (* Do we have progType ? *)
 %%
 
 
@@ -102,17 +66,17 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
   ne pouvant avoir "var" amènerait des ambiguités. Le problème serait qu'une liste d'arguments
   sans "var" peut à la fois être un factoredVarParam et et nonfactoredVarParam. -Gaël
 
-  [2] CLASSNAME et ID distingués
-  Dans les spécifications du langage, il est indiqué que les noms de classe commencent par une
-  majuscule et les autres identificateurs par une minuscule. Cela signifie qu'un nom de classe
-  CLASSNAME peut être identifié dès l'analyse lexicale. Je choisis donc de le faire, ce qui simplifie
+  [2] classeNAME et ID distingués
+  Dans les spécifications du langage, il est indiqué que les noms de classee commencent par une
+  majuscule et les autres identificateurs par une minuscule. Cela signifie qu'un nom de classee
+  classeNAME peut être identifié dès l'analyse lexicale. Je choisis donc de le faire, ce qui simplifie
   grandement le travail des analyses lexicale et contextuelle. -Gaël
 
 
   [3] super et this peuvent être hors d'une méthode
   Il est simple dans cette grammaire de faire en sorte que this et super ne soient utilisables que
   au début d'un appel de méthode ou attribut. Il est cependant plus difficile de savoir s'ils sont
-  dans une classe. Je choisis donc de reconnaître les mauvaises utilisations lorsque super et this
+  dans une classee. Je choisis donc de reconnaître les mauvaises utilisations lorsque super et this
   ne sont pas au tout début d'une suite de sélections lors de l'analyse syntaxique, mais de laisser
   les mauvaises utilisations à l'extérieur d'une méthode à l'analyse contextuelle. 
 
@@ -126,55 +90,64 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 (**
   ____________________________________________
 /                    ------------°°°°------------                      \
-|         GRAMMAIRE - REGLES : CLASSES
+|         GRAMMAIRE - REGLES : classeES
 \ ___________________________________________ /
 **)
 
-(* 1 programme = Des classes + un bloc de programme principal à la fin *)
-prog: cl=list(class) il=block
+(* 1 programme = Des classees + un bloc de programme principal à la fin *)
+prog: cl=list(classe) il=block { }
 
 
-(* Classe *)
-(* Ex : class Point(var xc, yc : Integer, name:String) IS { **CorpsClasse** } *)
-class: CLASS CLASSNAME factoredVarParamList option(extends) IS delimited(LBRACKET, classBody, RBRACKET)
+(* classee *)
+(* Ex : classe Point(var xc, yc : Integer, name:String) IS { **Corpsclassee** } *)
+classe: classe n = classeNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classeBody, RBRACKET)
+{(*
+  n,
+  s,
+  p,
+  b,*)
+}
 
 
-(* Extends d'une classe, optionnel *)
-extends : EXTENDS CLASSNAME
+(* Extends d'une classee, optionnel *)
+extends : EXTENDS classeNAME {}
 
-(* Corps de la classe *)
+
+(* Corps de la classee *)
 (* Ex : attributs, méthode, méthode, constructeur, méthode, attribut ... *)
-(* Puisqu'on sait qu'il doit y avoir un constructeur par classe, on le cherche directement à l'analyse syntaxique *)
-classBody : list(anyClassDecl) constructor list(anyClassDecl)
+(* Puisqu'on sait qu'il doit y avoir un constructeur par classee, on le cherche directement à l'analyse syntaxique *)
+classeBody : list(anyclasseDecl) constructor list(anyclasseDecl) {}
 
 
-(* Une déclaration quelconque dans une classe : méthode ou attributs *)
+(* Une déclaration quelconque dans une classee : méthode ou attributs *)
 (* On sépare les méthodes en constructeur, méthode, et méthodeOuConstructeur, car il y a ambiguité lors de l'analyse syntaxique *)
-anyClassDecl: factoredAttributes | method
+anyclasseDecl: 
+| factoredAttributes {}
+| methode {}
 
 
-(* Attributs de classe *)
+(* Attributs de classee *)
 (* Ex : var static x1, x2 : Integer *)
 factoredAttributes: VAR boption(STATIC) list(ID) returnedType
 
 
-(* Méthode de classe *)
-method:
+(* Méthode de classee *)
+methode:
   (* cas finissant par un bloc *)
   DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block
 
-  (* cas finissant par "nomClasse := expression" *)
+  (* cas finissant par "nomclassee := expression" *)
 | DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression
 
 
 
-(* Constructeur de classe *)
+(* Constructeur de classee *)
 constructor:
-  DEF CLASSNAME factoredVarParamList option(superclassCall) IS block
+  DEF classeNAME factoredVarParamList option(superclasseCall) IS block
 
 
 
-superclassCall: COLON CLASSNAME argumentsList
+superclasseCall: COLON classeNAME argumentsList
 
 
 
@@ -204,7 +177,7 @@ argumentsList: delimited(LPAREN, separated_list(COMMA, expression), RPAREN)
 
 
 (* Ex:   : Point3D *)
-returnedType: COLON CLASSNAME
+returnedType: COLON classeNAME
 
 
 
@@ -235,7 +208,7 @@ instruction:
 (* Variable ou attribut, n'importe quoi pouvant contenir une valeur *)
 (* Ex:     x   ou    Point2D.multiply(3*y).length    *)
 container:
-  CLASSNAME SELECTION containerA
+  classeNAME SELECTION containerA
 | THIS SELECTION containerA
 | SUPER SELECTION containerA
 | containerA
@@ -249,8 +222,8 @@ containerA:
 (* Appel de méthode *)
 (* A peu près comme un container, mais avec des arguments à la fin et au moins 1 sélection "." *)
 (* Ex:   text.getSize()     ou    Point2D.multiply(3*y).substract(myPoint)    *)
-methodCall:
-  CLASSNAME SELECTION containerA argumentsList
+methodeCall:
+  classeNAME SELECTION containerA argumentsList
 | ID SELECTION containerA argumentsList
 | SUPER SELECTION containerA argumentsList
 | THIS SELECTION containerA argumentsList
@@ -288,16 +261,16 @@ expr3:
 | PLUS e=expr3  { e }
 | MINUS e=expr3 %prec UMINUS   { UMinus e }
 | container
-| methodCall
+| methodeCall
 | instanciation
 | delimited(LPAREN, expression, RPAREN)
 | castedExpr
 
 
-instanciation: NEW CLASSNAME argumentsList
+instanciation: NEW classeNAME argumentsList
 
 
-castedExpr: delimited(LPAREN, CLASSNAME expression, RPAREN) 
+castedExpr: delimited(LPAREN, classeNAME expression, RPAREN) 
 
 
 
