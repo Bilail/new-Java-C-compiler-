@@ -72,7 +72,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type containerA (* Typer *)
 %type methodCall (* Typer *)
 
-%type expression (* Ajouter *)
+%type expression (* Typer *)
 %type expr1 (* Typer *)
 %type expr2 (* Typer *)
 %type expr3 (* Typer *)
