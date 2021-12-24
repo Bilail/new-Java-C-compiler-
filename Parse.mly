@@ -148,6 +148,8 @@ extends : EXTENDS CLASSNAME
 classBody : anyClDeclAndConstructor list(anyClassDecl)
 
 
+(* Auxiliaire de la règle précédente pour éviter un conflit shift-reduce si on écrivait : *)
+(* classBody : list(anyClassDecl) constructor list(anyClassDecl)  *)
 anyClDeclAndConstructor :
   anyClassDecl anyClDeclAndConstructor
 | constructor
