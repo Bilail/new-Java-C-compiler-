@@ -7,16 +7,17 @@
 
 (* Complex tokens *)
 %token <string> ID (* myIdentifier *)
-%token <string> CLASSENAME (* Myclasse *)
+%token <string> CLASSNAME (* Myclasse *)
 %token <int> CSTE (* 42 *)
 
 (* Symbols *)
 %token <Ast.opComp> RELOP (* = <> > < >= <= *)
-%token PLUS MINUS TIMES DIV (*  + - * /  *)
+%token PLUS MINUS TIMES DIV UMINUS(*  + - * /  *)
 %token LPAREN RPAREN (* ( ) *)
 %token LBRACKET RBRACKET    (* { } *)
 %token COMMA (* , *)
 %token SEMICOLON (* ; *)
+%token COLON  (* , *)
 %token ASSIGN (* := *)
 %token SELECTION (* . *)
 %token EOF (* End of file symbol *)
@@ -33,6 +34,7 @@
 %token STATIC
 %token OVERRIDE
 %token RETURN
+%token EXTENDS
 
 
 
@@ -43,7 +45,7 @@ Typer = Doit être associé à un type OCaml avec <string>, <Ast.classeType>, et
 Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre { }
 *)
 
-
+(*
 %type <Ast.classeType> classe (* Coder *)
 %type <string> extends (* Coder *)
 %type <Ast.classBody> classeBody (* Typer *)
@@ -70,8 +72,16 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type expr3 (* Typer *)
 %type instanciation  (* Typer *)
 %type castedExpr (* Typer *)
+*)
 
 
+(* Priorities  *)
+%right COLON SEMICOLON  
+%right IF THEN ELSE 
+%left PLUS MINUS        /* lowest precedence */
+%left TIMES DIV         /* medium precedence */
+%left UMINUS
+%left DEF
 
 (**
   ____________________________________________
@@ -101,10 +111,10 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
   ne pouvant avoir "var" amènerait des ambiguités. Le problème serait qu'une liste d'arguments
   sans "var" peut à la fois être un factoredVarParam et et nonfactoredVarParam. -Gaël
 
-  [2] classeNAME et ID distingués
+  [2] CLASSNAME et ID distingués
   Dans les spécifications du langage, il est indiqué que les noms de classee commencent par une
   majuscule et les autres identificateurs par une minuscule. Cela signifie qu'un nom de classee
-  classeNAME peut être identifié dès l'analyse lexicale. Je choisis donc de le faire, ce qui simplifie
+  CLASSNAME peut être identifié dès l'analyse lexicale. Je choisis donc de le faire, ce qui simplifie
   grandement le travail des analyses lexicale et contextuelle. -Gaël
 
 
@@ -130,12 +140,13 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 **)
 
 (* 1 programme = Des classees + un bloc de programme principal à la fin *)
-prog: cl=list(classe) il=block { }
+prog: cl=list(classe) il=block EOF { }
+
 
 
 (* classee *)
 (* Ex : classe Point(var xc, yc : Integer, name:String) IS { **Corpsclassee** } *)
-classe: CLASSE n = classeNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classeBody, RBRACKET)
+classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classeBody, RBRACKET)
 {(*
   n,
   s,
@@ -145,7 +156,7 @@ classe: CLASSE n = classeNAME p = factoredVarParamList s = option(extends) IS b 
 
 
 (* Extends d'une classee, optionnel *)
-extends : EXTENDS classeNAME {}
+extends : EXTENDS CLASSNAME {}
 
 
 (* Corps de la classee *)
@@ -163,26 +174,27 @@ anyclasseDecl:
 
 (* Attributs de classee *)
 (* Ex : var static x1, x2 : Integer *)
-factoredAttributes: VAR boption(STATIC) list(ID) returnedType
+factoredAttributes: VAR boption(STATIC) list(ID) returnedType {}
 
 
 (* Méthode de classee *)
 methode:
   (* cas finissant par un bloc *)
-  DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block
+  DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block 
+  {}
 
   (* cas finissant par "nomclassee := expression" *)
 | DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression
-
+{}
 
 
 (* Constructeur de classee *)
 constructor:
-  DEF classeNAME factoredVarParamList option(superclasseCall) IS block
+  DEF CLASSNAME factoredVarParamList option(superclasseCall) IS block {}
 
 
 
-superclasseCall: COLON classeNAME argumentsList
+superclasseCall: COLON CLASSNAME argumentsList {}
 
 
 
@@ -198,21 +210,21 @@ superclasseCall: COLON classeNAME argumentsList
 
 
 (* Liste de paramètres optionnellement VAR entouré de parenthèses ( ) *)
-factoredVarParamList: delimited(LPAREN, separated_list(COMMA, factoredVarParam), RPAREN)
+factoredVarParamList: delimited(LPAREN, separated_list(COMMA, factoredVarParam), RPAREN) {}
 
 
 (* Paramètre ou paramètres groupés optionnellement VAR *)
 (* Ex: var x1, x2, x3 : Integer *)
-factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON returnedType
+factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON returnedType {}
 
 
 (* Liste d'arguments, c'est-à-dire les expressions qu'on met comme paramètres lorsqu'on fait un appel (à une méthode par exemple) *)
 (* Ex:    ( 3, z, Point3D.getHeight() )     *)
-argumentsList: delimited(LPAREN, separated_list(COMMA, expression), RPAREN)
+argumentsList: delimited(LPAREN, separated_list(COMMA, expression), RPAREN) {}
 
 
 (* Ex:   : Point3D *)
-returnedType: COLON classeNAME
+returnedType: COLON CLASSNAME {}
 
 
 
@@ -226,42 +238,42 @@ returnedType: COLON classeNAME
 
 
 (* Bloc d'instructions entouré d'accolades *)
-block: delimited(LBRACKET, list(instruction), RBRACKET)
+block: delimited(LBRACKET, list(instruction), RBRACKET) {}
 
 
 
 (* N'importe quelle instruction du programme principal (sauf RETURN) ou des méthodes *)
 instruction:
-  expression SEMICOLON
-| block
-| RETURN SEMICOLON
-| IF si = expression THEN alors = instruction ELSE sinon = instruction
-| container ASSIGN expression SEMICOLON
+  expression SEMICOLON {}
+| block {}
+| RETURN SEMICOLON {}
+| IF si = expression THEN alors = instruction ELSE sinon = instruction {}
+| container ASSIGN expression SEMICOLON {}
 
 
 
 (* Variable ou attribut, n'importe quoi pouvant contenir une valeur *)
 (* Ex:     x   ou    Point2D.multiply(3*y).length    *)
 container:
-  classeNAME SELECTION containerA
-| THIS SELECTION containerA
-| SUPER SELECTION containerA
-| containerA
+  CLASSNAME SELECTION containerA {}
+| THIS SELECTION containerA {}
+| SUPER SELECTION containerA {}
+| containerA {}
 
 containerA:
-  ID
-| ID SELECTION containerA
-| ID argumentsList SELECTION containerA
+  ID {}
+| ID SELECTION containerA {}
+| ID argumentsList SELECTION containerA {}
 
 
 (* Appel de méthode *)
 (* A peu près comme un container, mais avec des arguments à la fin et au moins 1 sélection "." *)
 (* Ex:   text.getSize()     ou    Point2D.multiply(3*y).substract(myPoint)    *)
 methodeCall:
-  classeNAME SELECTION containerA argumentsList
-| ID SELECTION containerA argumentsList
-| SUPER SELECTION containerA argumentsList
-| THIS SELECTION containerA argumentsList
+  CLASSNAME SELECTION containerA argumentsList {}
+| ID SELECTION containerA argumentsList {}
+| SUPER SELECTION containerA argumentsList {}
+| THIS SELECTION containerA argumentsList {}
 
 
 (**
@@ -273,35 +285,35 @@ methodeCall:
 
 
 expression:
-  expr1 RELOP expr1
-| expr1
+  expr1 RELOP expr1 {}
+| expr1 {}
 
 expr1:
-  expr1 PLUS expr2
-| expr1 MINUS expr2
-| expr2
+  expr1 PLUS expr2 {}
+| expr1 MINUS expr2 {}
+| expr2 {}
 
 expr2:
-  expr2 TIMES expr3
-| expr2 DIV expr3
-| expr3
+  expr2 TIMES expr3 {}
+| expr2 DIV expr3 {}
+| expr3 {}
 
 expr3:
-  CSTE
+  CSTE {}
 | PLUS e=expr3  { e }
 | MINUS e=expr3 %prec UMINUS   { UMinus e }
-| container
-| methodeCall
-| instanciation
-| delimited(LPAREN, expression, RPAREN)
-| castedExpr
+| container {}
+| methodeCall {}
+| instanciation {}
+| delimited(LPAREN, expression, RPAREN) {}
+| castedExpr {}
 
 
-instanciation: NEW classeNAME argumentsList
+instanciation: NEW CLASSNAME argumentsList {}
 
 
-castedExpr: delimited(LPAREN, classeNAME expression, RPAREN) 
-
+castedExpr: delimited(LPAREN, expression , RPAREN) {}
+(*  CLASSNAME expression *)
 
 
 
