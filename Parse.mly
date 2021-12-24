@@ -305,7 +305,10 @@ expr3:
 instanciation: NEW CLASSNAME argumentsList
 
 
-castedExpr: delimited(LPAREN, CLASSNAME expression, RPAREN) 
+(* Cast d'une expression *)
+(* Ex :        (Point p)
+(* avec p un PointColoré. Le résultat de cette expression est un Point normal avec les mêmes attributs que p *)
+castedExpr: LPAREN CLASSNAME expression RPAREN 
 
 
 
