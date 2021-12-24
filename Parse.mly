@@ -145,7 +145,13 @@ extends : EXTENDS CLASSNAME
 (* Corps de la classe *)
 (* Ex : attributs, méthode, méthode, constructeur, méthode, attribut ... *)
 (* Puisqu'on sait qu'il doit y avoir un constructeur par classe, on le cherche directement à l'analyse syntaxique *)
-classBody : list(anyClassDecl) constructor list(anyClassDecl)
+classBody : anyClDeclAndConstructor list(anyClassDecl)
+
+
+anyClDeclAndConstructor :
+  anyClassDecl anyClDeclAndConstructor
+| constructor
+
 
 
 (* Une déclaration quelconque dans une classe : méthode ou attributs *)
@@ -155,7 +161,7 @@ anyClassDecl: factoredAttributes | method
 
 (* Attributs de classe *)
 (* Ex : var static x1, x2 : Integer *)
-factoredAttributes: VAR boption(STATIC) list(ID) returnedType
+factoredAttributes: VAR boption(STATIC) list(ID) COLON returnedType
 
 
 (* Méthode de classe *)
