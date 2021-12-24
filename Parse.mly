@@ -47,7 +47,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <Ast.classeType> classe (* Coder *)
 %type <string> extends (* Coder *)
 %type classeBody (* Typer *)
-%type anyclasseDecl (* Typer *)
+%type anyclasseDecl (* Typer ?? Méthode ou atttribut *)
 %type factoredAttributes (* Typer *)
 %type method (* Typer *)
 %type constructor (* Typer *)
@@ -85,7 +85,6 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 (* Axiome *)
 %start <Ast.prog_type> prog (* Do we have progType ? *)
 %%
-
 
 (**
   ____________________________________________
@@ -136,7 +135,7 @@ prog: cl=list(classe) il=block { }
 
 (* classee *)
 (* Ex : classe Point(var xc, yc : Integer, name:String) IS { **Corpsclassee** } *)
-classe: classe n = classeNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classeBody, RBRACKET)
+classe: CLASSE n = classeNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classeBody, RBRACKET)
 {(*
   n,
   s,
@@ -204,7 +203,7 @@ factoredVarParamList: delimited(LPAREN, separated_list(COMMA, factoredVarParam),
 
 (* Paramètre ou paramètres groupés optionnellement VAR *)
 (* Ex: var x1, x2, x3 : Integer *)
-factoredVarParam: boption(VAR) separated_list(COMMA, ID) returnedType
+factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON returnedType
 
 
 (* Liste d'arguments, c'est-à-dire les expressions qu'on met comme paramètres lorsqu'on fait un appel (à une méthode par exemple) *)
@@ -236,7 +235,7 @@ instruction:
   expression SEMICOLON
 | block
 | RETURN SEMICOLON
-| IF expression THEN instruction ELSE instruction
+| IF si = expression THEN alors = instruction ELSE sinon = instruction
 | container ASSIGN expression SEMICOLON
 
 
@@ -263,11 +262,6 @@ methodeCall:
 | ID SELECTION containerA argumentsList
 | SUPER SELECTION containerA argumentsList
 | THIS SELECTION containerA argumentsList
-
-
-
-
-
 
 
 (**

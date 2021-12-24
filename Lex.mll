@@ -33,6 +33,7 @@ let _ =
 }
 
 let lettre = ['A'-'Z' 'a'-'z']
+let l_MAJ = ['A'-'Z']
 let chiffre = ['0'-'9']
 let LC = ( chiffre | lettre )
 
@@ -63,7 +64,8 @@ rule
                    }
 and
  token = parse
-      lettre LC * as id
+    l_MAJ LC* as classe_name { CLASSENAME classe_name }
+    | lettre LC * as id
       { (* id contient le texte reconnu. On verifie s'il s'agit d'un mot-clef
          * auquel cas on renvoie le token associe. Sinon on renvoie Id avec le
          * texte reconnu en valeur 
@@ -72,6 +74,7 @@ and
           Hashtbl.find keyword_table id
         with Not_found -> ID id
       }
+
   | [' ''\t''\r']+  { (* consommer les delimiteurs, ne pas les transmettre
                        * et renvoyer ce que renverra un nouvel appel a
                        *  l'analyseur lexical
