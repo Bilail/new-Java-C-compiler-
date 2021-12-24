@@ -46,7 +46,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 
 %type <Ast.classeType> classe (* Coder *)
 %type <string> extends (* Coder *)
-%type classeBody (* Typer *)
+%type <Ast.classBody> classeBody (* Typer *)
 %type anyclasseDecl (* Typer ?? Méthode ou atttribut *)
 %type factoredAttributes (* Typer *)
 %type method (* Typer *)
