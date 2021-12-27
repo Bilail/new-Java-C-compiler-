@@ -45,10 +45,10 @@ Typer = Doit être associé à un type OCaml avec <string>, <Ast.classeType>, et
 Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre { }
 *)
 
-(*
-%type <Ast.classeType> classe (* Coder *)
+
+%type <Ast.classType> classe (* Coder *)
 %type <string> extends (* Coder *)
-%type <Ast.classBody> classeBody (* Typer *)
+(*%type <Ast.classBody> classeBody (* Typer *)
 %type anyclasseDecl (* Typer ?? Méthode ou atttribut *)
 %type factoredAttributes (* Typer *)
 %type method (* Typer *)
@@ -94,9 +94,8 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 
 
 (* Axiome *)
-(*%start <Ast.prog_type> prog (* Do we have progType ? *)
+%start <Ast.prog_type> prog (* Do we have progType ? *)
 %%
-*)
 (**
   ____________________________________________
 /                    ------------°°°°------------                      \
