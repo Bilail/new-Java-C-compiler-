@@ -5,9 +5,9 @@ State 0:
 prog' -> . prog [ # ]
 ## Transitions:
 -- On CLASSE shift to state 1
--- On prog shift to state 144
--- On list(classe) shift to state 145
--- On classe shift to state 148
+-- On prog shift to state 150
+-- On list(classe) shift to state 151
+-- On classe shift to state 154
 ## Reductions:
 -- On LBRACKET
 --   reduce production list(classe) ->
@@ -16,7 +16,7 @@ State 1:
 ## Known stack suffix:
 ## CLASSE
 ## LR(1) items:
-classe -> CLASSE . CLASSNAME factoredVarParamList option(extends) IS LBRACKET classeBody RBRACKET [ LBRACKET CLASSE ]
+classe -> CLASSE . CLASSNAME factoredVarParamList option(extends) IS LBRACKET classBody RBRACKET [ LBRACKET CLASSE ]
 ## Transitions:
 -- On CLASSNAME shift to state 2
 ## Reductions:
@@ -25,7 +25,7 @@ State 2:
 ## Known stack suffix:
 ## CLASSE CLASSNAME
 ## LR(1) items:
-classe -> CLASSE CLASSNAME . factoredVarParamList option(extends) IS LBRACKET classeBody RBRACKET [ LBRACKET CLASSE ]
+classe -> CLASSE CLASSNAME . factoredVarParamList option(extends) IS LBRACKET classBody RBRACKET [ LBRACKET CLASSE ]
 ## Transitions:
 -- On LPAREN shift to state 3
 -- On factoredVarParamList shift to state 21
@@ -230,11 +230,11 @@ State 21:
 ## Known stack suffix:
 ## CLASSE CLASSNAME factoredVarParamList
 ## LR(1) items:
-classe -> CLASSE CLASSNAME factoredVarParamList . option(extends) IS LBRACKET classeBody RBRACKET [ LBRACKET CLASSE ]
+classe -> CLASSE CLASSNAME factoredVarParamList . option(extends) IS LBRACKET classBody RBRACKET [ LBRACKET CLASSE ]
 ## Transitions:
 -- On EXTENDS shift to state 22
 -- On option(extends) shift to state 24
--- On extends shift to state 143
+-- On extends shift to state 149
 ## Reductions:
 -- On IS
 --   reduce production option(extends) ->
@@ -262,7 +262,7 @@ State 24:
 ## Known stack suffix:
 ## CLASSE CLASSNAME factoredVarParamList option(extends)
 ## LR(1) items:
-classe -> CLASSE CLASSNAME factoredVarParamList option(extends) . IS LBRACKET classeBody RBRACKET [ LBRACKET CLASSE ]
+classe -> CLASSE CLASSNAME factoredVarParamList option(extends) . IS LBRACKET classBody RBRACKET [ LBRACKET CLASSE ]
 ## Transitions:
 -- On IS shift to state 25
 ## Reductions:
@@ -271,7 +271,7 @@ State 25:
 ## Known stack suffix:
 ## CLASSE CLASSNAME factoredVarParamList option(extends) IS
 ## LR(1) items:
-classe -> CLASSE CLASSNAME factoredVarParamList option(extends) IS . LBRACKET classeBody RBRACKET [ LBRACKET CLASSE ]
+classe -> CLASSE CLASSNAME factoredVarParamList option(extends) IS . LBRACKET classBody RBRACKET [ LBRACKET CLASSE ]
 ## Transitions:
 -- On LBRACKET shift to state 26
 ## Reductions:
@@ -280,25 +280,23 @@ State 26:
 ## Known stack suffix:
 ## CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET
 ## LR(1) items:
-classe -> CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET . classeBody RBRACKET [ LBRACKET CLASSE ]
+classe -> CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET . classBody RBRACKET [ LBRACKET CLASSE ]
 ## Transitions:
 -- On VAR shift to state 27
--- On DEF shift to state 34
--- On methode shift to state 124
--- On list(anyclasseDecl) shift to state 125
+-- On DEF shift to state 35
+-- On methode shift to state 137
 -- On factoredAttributes shift to state 138
--- On classeBody shift to state 141
--- On anyclasseDecl shift to state 139
+-- On constructor shift to state 139
+-- On classBody shift to state 140
+-- On anyClassDecl shift to state 142
+-- On anyClDeclAndConstructor shift to state 144
 ## Reductions:
--- On DEF
---   reduce production list(anyclasseDecl) ->
-** Conflict on DEF
 
 State 27:
 ## Known stack suffix:
 ## VAR
 ## LR(1) items:
-factoredAttributes -> VAR . boption(STATIC) list(ID) returnedType [ VAR RBRACKET DEF ]
+factoredAttributes -> VAR . boption(STATIC) list(ID) COLON returnedType [ VAR RBRACKET DEF ]
 ## Transitions:
 -- On STATIC shift to state 28
 -- On boption(STATIC) shift to state 29
@@ -320,7 +318,7 @@ State 29:
 ## Known stack suffix:
 ## VAR boption(STATIC)
 ## LR(1) items:
-factoredAttributes -> VAR boption(STATIC) . list(ID) returnedType [ VAR RBRACKET DEF ]
+factoredAttributes -> VAR boption(STATIC) . list(ID) COLON returnedType [ VAR RBRACKET DEF ]
 ## Transitions:
 -- On ID shift to state 30
 -- On list(ID) shift to state 32
@@ -354,153 +352,140 @@ State 32:
 ## Known stack suffix:
 ## VAR boption(STATIC) list(ID)
 ## LR(1) items:
-factoredAttributes -> VAR boption(STATIC) list(ID) . returnedType [ VAR RBRACKET DEF ]
+factoredAttributes -> VAR boption(STATIC) list(ID) . COLON returnedType [ VAR RBRACKET DEF ]
 ## Transitions:
--- On COLON shift to state 18
--- On returnedType shift to state 33
+-- On COLON shift to state 33
 ## Reductions:
 
 State 33:
 ## Known stack suffix:
-## VAR boption(STATIC) list(ID) returnedType
+## VAR boption(STATIC) list(ID) COLON
 ## LR(1) items:
-factoredAttributes -> VAR boption(STATIC) list(ID) returnedType . [ VAR RBRACKET DEF ]
+factoredAttributes -> VAR boption(STATIC) list(ID) COLON . returnedType [ VAR RBRACKET DEF ]
 ## Transitions:
+-- On COLON shift to state 18
+-- On returnedType shift to state 34
 ## Reductions:
--- On VAR RBRACKET DEF
---   reduce production factoredAttributes -> VAR boption(STATIC) list(ID) returnedType
 
 State 34:
 ## Known stack suffix:
+## VAR boption(STATIC) list(ID) COLON returnedType
+## LR(1) items:
+factoredAttributes -> VAR boption(STATIC) list(ID) COLON returnedType . [ VAR RBRACKET DEF ]
+## Transitions:
+## Reductions:
+-- On VAR RBRACKET DEF
+--   reduce production factoredAttributes -> VAR boption(STATIC) list(ID) COLON returnedType
+
+State 35:
+## Known stack suffix:
 ## DEF
 ## LR(1) items:
-methode -> DEF . boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block [ VAR RBRACKET DEF ]
-methode -> DEF . boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression [ VAR RBRACKET DEF ]
+constructor -> DEF . CLASSNAME factoredVarParamList option(superclasseCall) IS block [ VAR RBRACKET DEF ]
+methode -> DEF . boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block [ VAR DEF ]
+methode -> DEF . boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression [ VAR DEF ]
 ## Transitions:
 -- On STATIC shift to state 28
--- On boption(STATIC) shift to state 35
+-- On CLASSNAME shift to state 36
+-- On boption(STATIC) shift to state 126
 ## Reductions:
 -- On OVERRIDE ID
 --   reduce production boption(STATIC) ->
 
-State 35:
-## Known stack suffix:
-## DEF boption(STATIC)
-## LR(1) items:
-methode -> DEF boption(STATIC) . boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block [ VAR RBRACKET DEF ]
-methode -> DEF boption(STATIC) . boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression [ VAR RBRACKET DEF ]
-## Transitions:
--- On OVERRIDE shift to state 36
--- On boption(OVERRIDE) shift to state 37
-## Reductions:
--- On ID
---   reduce production boption(OVERRIDE) ->
-
 State 36:
 ## Known stack suffix:
-## OVERRIDE
+## DEF CLASSNAME
 ## LR(1) items:
-boption(OVERRIDE) -> OVERRIDE . [ ID ]
+constructor -> DEF CLASSNAME . factoredVarParamList option(superclasseCall) IS block [ VAR RBRACKET DEF ]
 ## Transitions:
+-- On LPAREN shift to state 3
+-- On factoredVarParamList shift to state 37
 ## Reductions:
--- On ID
---   reduce production boption(OVERRIDE) -> OVERRIDE
 
 State 37:
 ## Known stack suffix:
-## DEF boption(STATIC) boption(OVERRIDE)
+## DEF CLASSNAME factoredVarParamList
 ## LR(1) items:
-methode -> DEF boption(STATIC) boption(OVERRIDE) . ID factoredVarParamList option(returnedType) IS block [ VAR RBRACKET DEF ]
-methode -> DEF boption(STATIC) boption(OVERRIDE) . ID factoredVarParamList returnedType ASSIGN expression [ VAR RBRACKET DEF ]
+constructor -> DEF CLASSNAME factoredVarParamList . option(superclasseCall) IS block [ VAR RBRACKET DEF ]
 ## Transitions:
--- On ID shift to state 38
+-- On COLON shift to state 38
+-- On superclasseCall shift to state 102
+-- On option(superclasseCall) shift to state 103
 ## Reductions:
+-- On IS
+--   reduce production option(superclasseCall) ->
 
 State 38:
 ## Known stack suffix:
-## DEF boption(STATIC) boption(OVERRIDE) ID
+## COLON
 ## LR(1) items:
-methode -> DEF boption(STATIC) boption(OVERRIDE) ID . factoredVarParamList option(returnedType) IS block [ VAR RBRACKET DEF ]
-methode -> DEF boption(STATIC) boption(OVERRIDE) ID . factoredVarParamList returnedType ASSIGN expression [ VAR RBRACKET DEF ]
+superclasseCall -> COLON . CLASSNAME argumentsList [ IS ]
 ## Transitions:
--- On LPAREN shift to state 3
--- On factoredVarParamList shift to state 39
+-- On CLASSNAME shift to state 39
 ## Reductions:
 
 State 39:
 ## Known stack suffix:
-## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList
+## COLON CLASSNAME
 ## LR(1) items:
-methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList . option(returnedType) IS block [ VAR RBRACKET DEF ]
-methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList . returnedType ASSIGN expression [ VAR RBRACKET DEF ]
+superclasseCall -> COLON CLASSNAME . argumentsList [ IS ]
 ## Transitions:
--- On COLON shift to state 18
--- On returnedType shift to state 40
--- On option(returnedType) shift to state 101
+-- On LPAREN shift to state 40
+-- On argumentsList shift to state 101
 ## Reductions:
--- On IS
---   reduce production option(returnedType) ->
 
 State 40:
 ## Known stack suffix:
-## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType
+## LPAREN
 ## LR(1) items:
-methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType . ASSIGN expression [ VAR RBRACKET DEF ]
-option(returnedType) -> returnedType . [ IS ]
+argumentsList -> LPAREN . loption(separated_nonempty_list(COMMA,expression)) RPAREN [ VAR TIMES THEN SEMICOLON SELECTION RPAREN RELOP RBRACKET PLUS MINUS IS DIV DEF COMMA ]
 ## Transitions:
--- On ASSIGN shift to state 41
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
+-- On CSTE shift to state 65
+-- On CLASSNAME shift to state 70
+-- On separated_nonempty_list(COMMA,expression) shift to state 95
+-- On methodeCall shift to state 71
+-- On loption(separated_nonempty_list(COMMA,expression)) shift to state 96
+-- On instanciation shift to state 72
+-- On expression shift to state 98
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
--- On IS
---   reduce production option(returnedType) -> returnedType
+-- On RPAREN
+--   reduce production loption(separated_nonempty_list(COMMA,expression)) ->
 
 State 41:
-## Known stack suffix:
-## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN
-## LR(1) items:
-methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN . expression [ VAR RBRACKET DEF ]
-## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
--- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expression shift to state 100
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 83
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
-## Reductions:
-
-State 42:
 ## Known stack suffix:
 ## THIS
 ## LR(1) items:
 container -> THIS . SELECTION containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
 methodeCall -> THIS . SELECTION containerA argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On SELECTION shift to state 43
+-- On SELECTION shift to state 42
 ## Reductions:
 
-State 43:
+State 42:
 ## Known stack suffix:
 ## THIS SELECTION
 ## LR(1) items:
 container -> THIS SELECTION . containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
 methodeCall -> THIS SELECTION . containerA argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On ID shift to state 44
--- On containerA shift to state 98
+-- On ID shift to state 43
+-- On containerA shift to state 49
 ## Reductions:
 
-State 44:
+State 43:
 ## Known stack suffix:
 ## ID
 ## LR(1) items:
@@ -508,25 +493,25 @@ containerA -> ID . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS L
 containerA -> ID . SELECTION containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN ]
 containerA -> ID . argumentsList SELECTION containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN ]
 ## Transitions:
--- On SELECTION shift to state 45
--- On LPAREN shift to state 47
--- On argumentsList shift to state 62
+-- On SELECTION shift to state 44
+-- On LPAREN shift to state 40
+-- On argumentsList shift to state 46
 ## Reductions:
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN
 --   reduce production containerA -> ID
 ** Conflict on LPAREN
 
-State 45:
+State 44:
 ## Known stack suffix:
 ## ID SELECTION
 ## LR(1) items:
 containerA -> ID SELECTION . containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN ]
 ## Transitions:
--- On ID shift to state 44
--- On containerA shift to state 46
+-- On ID shift to state 43
+-- On containerA shift to state 45
 ## Reductions:
 
-State 46:
+State 45:
 ## Known stack suffix:
 ## ID SELECTION containerA
 ## LR(1) items:
@@ -536,71 +521,93 @@ containerA -> ID SELECTION containerA . [ VAR TIMES THEN SEMICOLON RPAREN RELOP 
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN
 --   reduce production containerA -> ID SELECTION containerA
 
+State 46:
+## Known stack suffix:
+## ID argumentsList
+## LR(1) items:
+containerA -> ID argumentsList . SELECTION containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN ]
+## Transitions:
+-- On SELECTION shift to state 47
+## Reductions:
+
 State 47:
 ## Known stack suffix:
-## LPAREN
+## ID argumentsList SELECTION
 ## LR(1) items:
-argumentsList -> LPAREN . loption(separated_nonempty_list(COMMA,expression)) RPAREN [ VAR TIMES THEN SEMICOLON SELECTION RPAREN RELOP RBRACKET PLUS MINUS IS DIV DEF COMMA ]
+containerA -> ID argumentsList SELECTION . containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN ]
 ## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
--- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On separated_nonempty_list(COMMA,expression) shift to state 92
--- On methodeCall shift to state 70
--- On loption(separated_nonempty_list(COMMA,expression)) shift to state 93
--- On instanciation shift to state 71
--- On expression shift to state 95
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 83
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
+-- On ID shift to state 43
+-- On containerA shift to state 48
 ## Reductions:
--- On RPAREN
---   reduce production loption(separated_nonempty_list(COMMA,expression)) ->
 
 State 48:
+## Known stack suffix:
+## ID argumentsList SELECTION containerA
+## LR(1) items:
+containerA -> ID argumentsList SELECTION containerA . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN ]
+## Transitions:
+## Reductions:
+-- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN
+--   reduce production containerA -> ID argumentsList SELECTION containerA
+
+State 49:
+## Known stack suffix:
+## THIS SELECTION containerA
+## LR(1) items:
+container -> THIS SELECTION containerA . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
+methodeCall -> THIS SELECTION containerA . argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
+## Transitions:
+-- On LPAREN shift to state 40
+-- On argumentsList shift to state 50
+## Reductions:
+-- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN
+--   reduce production container -> THIS SELECTION containerA
+
+State 50:
+## Known stack suffix:
+## THIS SELECTION containerA argumentsList
+## LR(1) items:
+methodeCall -> THIS SELECTION containerA argumentsList . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
+## Transitions:
+## Reductions:
+-- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
+--   reduce production methodeCall -> THIS SELECTION containerA argumentsList
+
+State 51:
 ## Known stack suffix:
 ## SUPER
 ## LR(1) items:
 container -> SUPER . SELECTION containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
 methodeCall -> SUPER . SELECTION containerA argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On SELECTION shift to state 49
+-- On SELECTION shift to state 52
 ## Reductions:
 
-State 49:
+State 52:
 ## Known stack suffix:
 ## SUPER SELECTION
 ## LR(1) items:
 container -> SUPER SELECTION . containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
 methodeCall -> SUPER SELECTION . containerA argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On ID shift to state 44
--- On containerA shift to state 50
+-- On ID shift to state 43
+-- On containerA shift to state 53
 ## Reductions:
 
-State 50:
+State 53:
 ## Known stack suffix:
 ## SUPER SELECTION containerA
 ## LR(1) items:
 container -> SUPER SELECTION containerA . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
 methodeCall -> SUPER SELECTION containerA . argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On LPAREN shift to state 47
--- On argumentsList shift to state 51
+-- On LPAREN shift to state 40
+-- On argumentsList shift to state 54
 ## Reductions:
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN
 --   reduce production container -> SUPER SELECTION containerA
 
-State 51:
+State 54:
 ## Known stack suffix:
 ## SUPER SELECTION containerA argumentsList
 ## LR(1) items:
@@ -610,49 +617,49 @@ methodeCall -> SUPER SELECTION containerA argumentsList . [ VAR TIMES THEN SEMIC
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production methodeCall -> SUPER SELECTION containerA argumentsList
 
-State 52:
+State 55:
 ## Known stack suffix:
 ## PLUS
 ## LR(1) items:
 expr3 -> PLUS . expr3 [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
 -- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expr3 shift to state 91
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expr3 shift to state 94
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
 
-State 53:
+State 56:
 ## Known stack suffix:
 ## NEW
 ## LR(1) items:
 instanciation -> NEW . CLASSNAME argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On CLASSNAME shift to state 54
+-- On CLASSNAME shift to state 57
 ## Reductions:
 
-State 54:
+State 57:
 ## Known stack suffix:
 ## NEW CLASSNAME
 ## LR(1) items:
 instanciation -> NEW CLASSNAME . argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On LPAREN shift to state 47
--- On argumentsList shift to state 55
+-- On LPAREN shift to state 40
+-- On argumentsList shift to state 58
 ## Reductions:
 
-State 55:
+State 58:
 ## Known stack suffix:
 ## NEW CLASSNAME argumentsList
 ## LR(1) items:
@@ -662,57 +669,57 @@ instanciation -> NEW CLASSNAME argumentsList . [ VAR TIMES THEN SEMICOLON RPAREN
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production instanciation -> NEW CLASSNAME argumentsList
 
-State 56:
+State 59:
 ## Known stack suffix:
 ## MINUS
 ## LR(1) items:
 expr3 -> MINUS . expr3 [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
 -- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expr3 shift to state 90
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expr3 shift to state 93
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
 
-State 57:
+State 60:
 ## Known stack suffix:
 ## LPAREN
 ## LR(1) items:
-castedExpr -> LPAREN . expression RPAREN [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
+castedExpr -> LPAREN . CLASSNAME expression RPAREN [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 expr3 -> LPAREN . expression RPAREN [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
 -- On CSTE shift to state 65
 -- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expression shift to state 72
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 83
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expression shift to state 91
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
 
-State 58:
+State 61:
 ## Known stack suffix:
 ## ID
 ## LR(1) items:
@@ -721,38 +728,38 @@ containerA -> ID . SELECTION containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP 
 containerA -> ID . argumentsList SELECTION containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
 methodeCall -> ID . SELECTION containerA argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On SELECTION shift to state 59
--- On LPAREN shift to state 47
--- On argumentsList shift to state 62
+-- On SELECTION shift to state 62
+-- On LPAREN shift to state 40
+-- On argumentsList shift to state 46
 ## Reductions:
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN
 --   reduce production containerA -> ID
 
-State 59:
+State 62:
 ## Known stack suffix:
 ## ID SELECTION
 ## LR(1) items:
 containerA -> ID SELECTION . containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
 methodeCall -> ID SELECTION . containerA argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On ID shift to state 44
--- On containerA shift to state 60
+-- On ID shift to state 43
+-- On containerA shift to state 63
 ## Reductions:
 
-State 60:
+State 63:
 ## Known stack suffix:
 ## ID SELECTION containerA
 ## LR(1) items:
 containerA -> ID SELECTION containerA . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
 methodeCall -> ID SELECTION containerA . argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On LPAREN shift to state 47
--- On argumentsList shift to state 61
+-- On LPAREN shift to state 40
+-- On argumentsList shift to state 64
 ## Reductions:
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN
 --   reduce production containerA -> ID SELECTION containerA
 
-State 61:
+State 64:
 ## Known stack suffix:
 ## ID SELECTION containerA argumentsList
 ## LR(1) items:
@@ -761,35 +768,6 @@ methodeCall -> ID SELECTION containerA argumentsList . [ VAR TIMES THEN SEMICOLO
 ## Reductions:
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production methodeCall -> ID SELECTION containerA argumentsList
-
-State 62:
-## Known stack suffix:
-## ID argumentsList
-## LR(1) items:
-containerA -> ID argumentsList . SELECTION containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN ]
-## Transitions:
--- On SELECTION shift to state 63
-## Reductions:
-
-State 63:
-## Known stack suffix:
-## ID argumentsList SELECTION
-## LR(1) items:
-containerA -> ID argumentsList SELECTION . containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN ]
-## Transitions:
--- On ID shift to state 44
--- On containerA shift to state 64
-## Reductions:
-
-State 64:
-## Known stack suffix:
-## ID argumentsList SELECTION containerA
-## LR(1) items:
-containerA -> ID argumentsList SELECTION containerA . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN ]
-## Transitions:
-## Reductions:
--- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS LPAREN DIV DEF COMMA ASSIGN
---   reduce production containerA -> ID argumentsList SELECTION containerA
 
 State 65:
 ## Known stack suffix:
@@ -803,12 +781,31 @@ expr3 -> CSTE . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV 
 
 State 66:
 ## Known stack suffix:
-## CLASSNAME
+## LPAREN CLASSNAME
 ## LR(1) items:
-container -> CLASSNAME . SELECTION containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
-methodeCall -> CLASSNAME . SELECTION containerA argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
+castedExpr -> LPAREN CLASSNAME . expression RPAREN [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
+container -> CLASSNAME . SELECTION containerA [ TIMES RPAREN RELOP PLUS MINUS DIV ]
+methodeCall -> CLASSNAME . SELECTION containerA argumentsList [ TIMES RPAREN RELOP PLUS MINUS DIV ]
 ## Transitions:
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
 -- On SELECTION shift to state 67
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
+-- On CSTE shift to state 65
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expression shift to state 73
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
 
 State 67:
@@ -818,7 +815,7 @@ State 67:
 container -> CLASSNAME SELECTION . containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
 methodeCall -> CLASSNAME SELECTION . containerA argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On ID shift to state 44
+-- On ID shift to state 43
 -- On containerA shift to state 68
 ## Reductions:
 
@@ -829,7 +826,7 @@ State 68:
 container -> CLASSNAME SELECTION containerA . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
 methodeCall -> CLASSNAME SELECTION containerA . argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On LPAREN shift to state 47
+-- On LPAREN shift to state 40
 -- On argumentsList shift to state 69
 ## Reductions:
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN
@@ -847,6 +844,16 @@ methodeCall -> CLASSNAME SELECTION containerA argumentsList . [ VAR TIMES THEN S
 
 State 70:
 ## Known stack suffix:
+## CLASSNAME
+## LR(1) items:
+container -> CLASSNAME . SELECTION containerA [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
+methodeCall -> CLASSNAME . SELECTION containerA argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
+## Transitions:
+-- On SELECTION shift to state 67
+## Reductions:
+
+State 71:
+## Known stack suffix:
 ## methodeCall
 ## LR(1) items:
 expr3 -> methodeCall . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
@@ -855,7 +862,7 @@ expr3 -> methodeCall . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MIN
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production expr3 -> methodeCall
 
-State 71:
+State 72:
 ## Known stack suffix:
 ## instanciation
 ## LR(1) items:
@@ -865,31 +872,26 @@ expr3 -> instanciation . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS M
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production expr3 -> instanciation
 
-State 72:
-## Known stack suffix:
-## LPAREN expression
-## LR(1) items:
-castedExpr -> LPAREN expression . RPAREN [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
-expr3 -> LPAREN expression . RPAREN [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
-## Transitions:
--- On RPAREN shift to state 73
-## Reductions:
-
 State 73:
 ## Known stack suffix:
-## LPAREN expression RPAREN
+## LPAREN CLASSNAME expression
 ## LR(1) items:
-castedExpr -> LPAREN expression RPAREN . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
-expr3 -> LPAREN expression RPAREN . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
+castedExpr -> LPAREN CLASSNAME expression . RPAREN [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
+## Transitions:
+-- On RPAREN shift to state 74
+## Reductions:
+
+State 74:
+## Known stack suffix:
+## LPAREN CLASSNAME expression RPAREN
+## LR(1) items:
+castedExpr -> LPAREN CLASSNAME expression RPAREN . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
 ## Reductions:
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
---   reduce production castedExpr -> LPAREN expression RPAREN
--- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
---   reduce production expr3 -> LPAREN expression RPAREN
-** Conflict on VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
+--   reduce production castedExpr -> LPAREN CLASSNAME expression RPAREN
 
-State 74:
+State 75:
 ## Known stack suffix:
 ## expr3
 ## LR(1) items:
@@ -899,7 +901,7 @@ expr2 -> expr3 . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production expr2 -> expr3
 
-State 75:
+State 76:
 ## Known stack suffix:
 ## expr2
 ## LR(1) items:
@@ -907,36 +909,36 @@ expr1 -> expr2 . [ VAR THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DEF COMMA
 expr2 -> expr2 . TIMES expr3 [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 expr2 -> expr2 . DIV expr3 [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On TIMES shift to state 76
--- On DIV shift to state 81
+-- On TIMES shift to state 77
+-- On DIV shift to state 82
 ## Reductions:
 -- On VAR THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DEF COMMA
 --   reduce production expr1 -> expr2
 
-State 76:
+State 77:
 ## Known stack suffix:
 ## expr2 TIMES
 ## LR(1) items:
 expr2 -> expr2 TIMES . expr3 [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
 -- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expr3 shift to state 77
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expr3 shift to state 78
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
 
-State 77:
+State 78:
 ## Known stack suffix:
 ## expr2 TIMES expr3
 ## LR(1) items:
@@ -946,7 +948,7 @@ expr2 -> expr2 TIMES expr3 . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PL
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production expr2 -> expr2 TIMES expr3
 
-State 78:
+State 79:
 ## Known stack suffix:
 ## containerA
 ## LR(1) items:
@@ -956,7 +958,7 @@ container -> containerA . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS 
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN
 --   reduce production container -> containerA
 
-State 79:
+State 80:
 ## Known stack suffix:
 ## container
 ## LR(1) items:
@@ -966,7 +968,7 @@ expr3 -> container . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production expr3 -> container
 
-State 80:
+State 81:
 ## Known stack suffix:
 ## castedExpr
 ## LR(1) items:
@@ -976,30 +978,30 @@ expr3 -> castedExpr . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINU
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production expr3 -> castedExpr
 
-State 81:
+State 82:
 ## Known stack suffix:
 ## expr2 DIV
 ## LR(1) items:
 expr2 -> expr2 DIV . expr3 [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
 -- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expr3 shift to state 82
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expr3 shift to state 83
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
 
-State 82:
+State 83:
 ## Known stack suffix:
 ## expr2 DIV expr3
 ## LR(1) items:
@@ -1009,7 +1011,7 @@ expr2 -> expr2 DIV expr3 . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production expr2 -> expr2 DIV expr3
 
-State 83:
+State 84:
 ## Known stack suffix:
 ## expr1
 ## LR(1) items:
@@ -1018,39 +1020,39 @@ expr1 -> expr1 . MINUS expr2 [ VAR THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MIN
 expression -> expr1 . RELOP expr1 [ VAR THEN SEMICOLON RPAREN RBRACKET DEF COMMA ]
 expression -> expr1 . [ VAR THEN SEMICOLON RPAREN RBRACKET DEF COMMA ]
 ## Transitions:
--- On RELOP shift to state 84
--- On PLUS shift to state 86
--- On MINUS shift to state 88
+-- On RELOP shift to state 85
+-- On PLUS shift to state 87
+-- On MINUS shift to state 89
 ## Reductions:
 -- On VAR THEN SEMICOLON RPAREN RBRACKET DEF COMMA
 --   reduce production expression -> expr1
 
-State 84:
+State 85:
 ## Known stack suffix:
 ## expr1 RELOP
 ## LR(1) items:
 expression -> expr1 RELOP . expr1 [ VAR THEN SEMICOLON RPAREN RBRACKET DEF COMMA ]
 ## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
 -- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 85
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 86
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
 
-State 85:
+State 86:
 ## Known stack suffix:
 ## expr1 RELOP expr1
 ## LR(1) items:
@@ -1058,37 +1060,37 @@ expr1 -> expr1 . PLUS expr2 [ VAR THEN SEMICOLON RPAREN RBRACKET PLUS MINUS DEF 
 expr1 -> expr1 . MINUS expr2 [ VAR THEN SEMICOLON RPAREN RBRACKET PLUS MINUS DEF COMMA ]
 expression -> expr1 RELOP expr1 . [ VAR THEN SEMICOLON RPAREN RBRACKET DEF COMMA ]
 ## Transitions:
--- On PLUS shift to state 86
--- On MINUS shift to state 88
+-- On PLUS shift to state 87
+-- On MINUS shift to state 89
 ## Reductions:
 -- On VAR THEN SEMICOLON RPAREN RBRACKET DEF COMMA
 --   reduce production expression -> expr1 RELOP expr1
 
-State 86:
+State 87:
 ## Known stack suffix:
 ## expr1 PLUS
 ## LR(1) items:
 expr1 -> expr1 PLUS . expr2 [ VAR THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DEF COMMA ]
 ## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
 -- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expr3 shift to state 74
--- On expr2 shift to state 87
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expr3 shift to state 75
+-- On expr2 shift to state 88
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
 
-State 87:
+State 88:
 ## Known stack suffix:
 ## expr1 PLUS expr2
 ## LR(1) items:
@@ -1096,37 +1098,37 @@ expr1 -> expr1 PLUS expr2 . [ VAR THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINU
 expr2 -> expr2 . TIMES expr3 [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 expr2 -> expr2 . DIV expr3 [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On TIMES shift to state 76
--- On DIV shift to state 81
+-- On TIMES shift to state 77
+-- On DIV shift to state 82
 ## Reductions:
 -- On VAR THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DEF COMMA
 --   reduce production expr1 -> expr1 PLUS expr2
 
-State 88:
+State 89:
 ## Known stack suffix:
 ## expr1 MINUS
 ## LR(1) items:
 expr1 -> expr1 MINUS . expr2 [ VAR THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DEF COMMA ]
 ## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
 -- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expr3 shift to state 74
--- On expr2 shift to state 89
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expr3 shift to state 75
+-- On expr2 shift to state 90
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
 
-State 89:
+State 90:
 ## Known stack suffix:
 ## expr1 MINUS expr2
 ## LR(1) items:
@@ -1134,13 +1136,32 @@ expr1 -> expr1 MINUS expr2 . [ VAR THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MIN
 expr2 -> expr2 . TIMES expr3 [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 expr2 -> expr2 . DIV expr3 [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
 ## Transitions:
--- On TIMES shift to state 76
--- On DIV shift to state 81
+-- On TIMES shift to state 77
+-- On DIV shift to state 82
 ## Reductions:
 -- On VAR THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DEF COMMA
 --   reduce production expr1 -> expr1 MINUS expr2
 
-State 90:
+State 91:
+## Known stack suffix:
+## LPAREN expression
+## LR(1) items:
+expr3 -> LPAREN expression . RPAREN [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
+## Transitions:
+-- On RPAREN shift to state 92
+## Reductions:
+
+State 92:
+## Known stack suffix:
+## LPAREN expression RPAREN
+## LR(1) items:
+expr3 -> LPAREN expression RPAREN . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
+## Transitions:
+## Reductions:
+-- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
+--   reduce production expr3 -> LPAREN expression RPAREN
+
+State 93:
 ## Known stack suffix:
 ## MINUS expr3
 ## LR(1) items:
@@ -1150,7 +1171,7 @@ expr3 -> MINUS expr3 . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MIN
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production expr3 -> MINUS expr3
 
-State 91:
+State 94:
 ## Known stack suffix:
 ## PLUS expr3
 ## LR(1) items:
@@ -1160,7 +1181,7 @@ expr3 -> PLUS expr3 . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINU
 -- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
 --   reduce production expr3 -> PLUS expr3
 
-State 92:
+State 95:
 ## Known stack suffix:
 ## separated_nonempty_list(COMMA,expression)
 ## LR(1) items:
@@ -1170,16 +1191,16 @@ loption(separated_nonempty_list(COMMA,expression)) -> separated_nonempty_list(CO
 -- On RPAREN
 --   reduce production loption(separated_nonempty_list(COMMA,expression)) -> separated_nonempty_list(COMMA,expression)
 
-State 93:
+State 96:
 ## Known stack suffix:
 ## LPAREN loption(separated_nonempty_list(COMMA,expression))
 ## LR(1) items:
 argumentsList -> LPAREN loption(separated_nonempty_list(COMMA,expression)) . RPAREN [ VAR TIMES THEN SEMICOLON SELECTION RPAREN RELOP RBRACKET PLUS MINUS IS DIV DEF COMMA ]
 ## Transitions:
--- On RPAREN shift to state 94
+-- On RPAREN shift to state 97
 ## Reductions:
 
-State 94:
+State 97:
 ## Known stack suffix:
 ## LPAREN loption(separated_nonempty_list(COMMA,expression)) RPAREN
 ## LR(1) items:
@@ -1189,46 +1210,46 @@ argumentsList -> LPAREN loption(separated_nonempty_list(COMMA,expression)) RPARE
 -- On VAR TIMES THEN SEMICOLON SELECTION RPAREN RELOP RBRACKET PLUS MINUS IS DIV DEF COMMA
 --   reduce production argumentsList -> LPAREN loption(separated_nonempty_list(COMMA,expression)) RPAREN
 
-State 95:
+State 98:
 ## Known stack suffix:
 ## expression
 ## LR(1) items:
 separated_nonempty_list(COMMA,expression) -> expression . [ RPAREN ]
 separated_nonempty_list(COMMA,expression) -> expression . COMMA separated_nonempty_list(COMMA,expression) [ RPAREN ]
 ## Transitions:
--- On COMMA shift to state 96
+-- On COMMA shift to state 99
 ## Reductions:
 -- On RPAREN
 --   reduce production separated_nonempty_list(COMMA,expression) -> expression
 
-State 96:
+State 99:
 ## Known stack suffix:
 ## expression COMMA
 ## LR(1) items:
 separated_nonempty_list(COMMA,expression) -> expression COMMA . separated_nonempty_list(COMMA,expression) [ RPAREN ]
 ## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
 -- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On separated_nonempty_list(COMMA,expression) shift to state 97
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expression shift to state 95
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 83
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
+-- On CLASSNAME shift to state 70
+-- On separated_nonempty_list(COMMA,expression) shift to state 100
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expression shift to state 98
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
 ## Reductions:
 
-State 97:
+State 100:
 ## Known stack suffix:
 ## expression COMMA separated_nonempty_list(COMMA,expression)
 ## LR(1) items:
@@ -1238,458 +1259,7 @@ separated_nonempty_list(COMMA,expression) -> expression COMMA separated_nonempty
 -- On RPAREN
 --   reduce production separated_nonempty_list(COMMA,expression) -> expression COMMA separated_nonempty_list(COMMA,expression)
 
-State 98:
-## Known stack suffix:
-## THIS SELECTION containerA
-## LR(1) items:
-container -> THIS SELECTION containerA . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN ]
-methodeCall -> THIS SELECTION containerA . argumentsList [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
-## Transitions:
--- On LPAREN shift to state 47
--- On argumentsList shift to state 99
-## Reductions:
--- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ASSIGN
---   reduce production container -> THIS SELECTION containerA
-
-State 99:
-## Known stack suffix:
-## THIS SELECTION containerA argumentsList
-## LR(1) items:
-methodeCall -> THIS SELECTION containerA argumentsList . [ VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA ]
-## Transitions:
-## Reductions:
--- On VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
---   reduce production methodeCall -> THIS SELECTION containerA argumentsList
-
-State 100:
-## Known stack suffix:
-## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression
-## LR(1) items:
-methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression . [ VAR RBRACKET DEF ]
-## Transitions:
-## Reductions:
--- On VAR RBRACKET DEF
---   reduce production methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression
-
 State 101:
-## Known stack suffix:
-## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType)
-## LR(1) items:
-methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) . IS block [ VAR RBRACKET DEF ]
-## Transitions:
--- On IS shift to state 102
-## Reductions:
-
-State 102:
-## Known stack suffix:
-## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS
-## LR(1) items:
-methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS . block [ VAR RBRACKET DEF ]
-## Transitions:
--- On LBRACKET shift to state 103
--- On block shift to state 123
-## Reductions:
-
-State 103:
-## Known stack suffix:
-## LBRACKET
-## LR(1) items:
-block -> LBRACKET . list(instruction) RBRACKET [ VAR THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID EOF ELSE DEF CSTE CLASSNAME ]
-## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On RETURN shift to state 104
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On LBRACKET shift to state 103
--- On IF shift to state 106
--- On ID shift to state 58
--- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On list(instruction) shift to state 119
--- On instruction shift to state 121
--- On instanciation shift to state 71
--- On expression shift to state 112
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 83
--- On containerA shift to state 78
--- On container shift to state 114
--- On castedExpr shift to state 80
--- On block shift to state 118
-## Reductions:
--- On RBRACKET
---   reduce production list(instruction) ->
-
-State 104:
-## Known stack suffix:
-## RETURN
-## LR(1) items:
-instruction -> RETURN . SEMICOLON [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
--- On SEMICOLON shift to state 105
-## Reductions:
-
-State 105:
-## Known stack suffix:
-## RETURN SEMICOLON
-## LR(1) items:
-instruction -> RETURN SEMICOLON . [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
-## Reductions:
--- On THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME
---   reduce production instruction -> RETURN SEMICOLON
-
-State 106:
-## Known stack suffix:
-## IF
-## LR(1) items:
-instruction -> IF . expression THEN instruction ELSE instruction [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
--- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expression shift to state 107
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 83
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
-## Reductions:
-
-State 107:
-## Known stack suffix:
-## IF expression
-## LR(1) items:
-instruction -> IF expression . THEN instruction ELSE instruction [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
--- On THEN shift to state 108
-## Reductions:
-
-State 108:
-## Known stack suffix:
-## IF expression THEN
-## LR(1) items:
-instruction -> IF expression THEN . instruction ELSE instruction [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On RETURN shift to state 104
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On LBRACKET shift to state 103
--- On IF shift to state 106
--- On ID shift to state 58
--- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instruction shift to state 109
--- On instanciation shift to state 71
--- On expression shift to state 112
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 83
--- On containerA shift to state 78
--- On container shift to state 114
--- On castedExpr shift to state 80
--- On block shift to state 118
-## Reductions:
-
-State 109:
-## Known stack suffix:
-## IF expression THEN instruction
-## LR(1) items:
-instruction -> IF expression THEN instruction . ELSE instruction [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
--- On ELSE shift to state 110
-## Reductions:
-
-State 110:
-## Known stack suffix:
-## IF expression THEN instruction ELSE
-## LR(1) items:
-instruction -> IF expression THEN instruction ELSE . instruction [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On RETURN shift to state 104
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On LBRACKET shift to state 103
--- On IF shift to state 106
--- On ID shift to state 58
--- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instruction shift to state 111
--- On instanciation shift to state 71
--- On expression shift to state 112
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 83
--- On containerA shift to state 78
--- On container shift to state 114
--- On castedExpr shift to state 80
--- On block shift to state 118
-## Reductions:
-
-State 111:
-## Known stack suffix:
-## IF expression THEN instruction ELSE instruction
-## LR(1) items:
-instruction -> IF expression THEN instruction ELSE instruction . [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
-## Reductions:
--- On THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME
---   reduce production instruction -> IF expression THEN instruction ELSE instruction
-
-State 112:
-## Known stack suffix:
-## expression
-## LR(1) items:
-instruction -> expression . SEMICOLON [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
--- On SEMICOLON shift to state 113
-## Reductions:
-
-State 113:
-## Known stack suffix:
-## expression SEMICOLON
-## LR(1) items:
-instruction -> expression SEMICOLON . [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
-## Reductions:
--- On THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME
---   reduce production instruction -> expression SEMICOLON
-
-State 114:
-## Known stack suffix:
-## container
-## LR(1) items:
-expr3 -> container . [ TIMES SEMICOLON RELOP PLUS MINUS DIV ]
-instruction -> container . ASSIGN expression SEMICOLON [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
--- On ASSIGN shift to state 115
-## Reductions:
--- On TIMES SEMICOLON RELOP PLUS MINUS DIV
---   reduce production expr3 -> container
-
-State 115:
-## Known stack suffix:
-## container ASSIGN
-## LR(1) items:
-instruction -> container ASSIGN . expression SEMICOLON [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On ID shift to state 58
--- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On instanciation shift to state 71
--- On expression shift to state 116
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 83
--- On containerA shift to state 78
--- On container shift to state 79
--- On castedExpr shift to state 80
-## Reductions:
-
-State 116:
-## Known stack suffix:
-## container ASSIGN expression
-## LR(1) items:
-instruction -> container ASSIGN expression . SEMICOLON [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
--- On SEMICOLON shift to state 117
-## Reductions:
-
-State 117:
-## Known stack suffix:
-## container ASSIGN expression SEMICOLON
-## LR(1) items:
-instruction -> container ASSIGN expression SEMICOLON . [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
-## Reductions:
--- On THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME
---   reduce production instruction -> container ASSIGN expression SEMICOLON
-
-State 118:
-## Known stack suffix:
-## block
-## LR(1) items:
-instruction -> block . [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
-## Transitions:
-## Reductions:
--- On THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME
---   reduce production instruction -> block
-
-State 119:
-## Known stack suffix:
-## LBRACKET list(instruction)
-## LR(1) items:
-block -> LBRACKET list(instruction) . RBRACKET [ VAR THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID EOF ELSE DEF CSTE CLASSNAME ]
-## Transitions:
--- On RBRACKET shift to state 120
-## Reductions:
-
-State 120:
-## Known stack suffix:
-## LBRACKET list(instruction) RBRACKET
-## LR(1) items:
-block -> LBRACKET list(instruction) RBRACKET . [ VAR THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID EOF ELSE DEF CSTE CLASSNAME ]
-## Transitions:
-## Reductions:
--- On VAR THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID EOF ELSE DEF CSTE CLASSNAME
---   reduce production block -> LBRACKET list(instruction) RBRACKET
-
-State 121:
-## Known stack suffix:
-## instruction
-## LR(1) items:
-list(instruction) -> instruction . list(instruction) [ RBRACKET ]
-## Transitions:
--- On THIS shift to state 42
--- On SUPER shift to state 48
--- On RETURN shift to state 104
--- On PLUS shift to state 52
--- On NEW shift to state 53
--- On MINUS shift to state 56
--- On LPAREN shift to state 57
--- On LBRACKET shift to state 103
--- On IF shift to state 106
--- On ID shift to state 58
--- On CSTE shift to state 65
--- On CLASSNAME shift to state 66
--- On methodeCall shift to state 70
--- On list(instruction) shift to state 122
--- On instruction shift to state 121
--- On instanciation shift to state 71
--- On expression shift to state 112
--- On expr3 shift to state 74
--- On expr2 shift to state 75
--- On expr1 shift to state 83
--- On containerA shift to state 78
--- On container shift to state 114
--- On castedExpr shift to state 80
--- On block shift to state 118
-## Reductions:
--- On RBRACKET
---   reduce production list(instruction) ->
-
-State 122:
-## Known stack suffix:
-## instruction list(instruction)
-## LR(1) items:
-list(instruction) -> instruction list(instruction) . [ RBRACKET ]
-## Transitions:
-## Reductions:
--- On RBRACKET
---   reduce production list(instruction) -> instruction list(instruction)
-
-State 123:
-## Known stack suffix:
-## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block
-## LR(1) items:
-methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block . [ VAR RBRACKET DEF ]
-## Transitions:
-## Reductions:
--- On VAR RBRACKET DEF
---   reduce production methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block
-
-State 124:
-## Known stack suffix:
-## methode
-## LR(1) items:
-anyclasseDecl -> methode . [ VAR RBRACKET DEF ]
-## Transitions:
-## Reductions:
--- On VAR RBRACKET DEF
---   reduce production anyclasseDecl -> methode
-
-State 125:
-## Known stack suffix:
-## list(anyclasseDecl)
-## LR(1) items:
-classeBody -> list(anyclasseDecl) . constructor list(anyclasseDecl) [ RBRACKET ]
-## Transitions:
--- On DEF shift to state 126
--- On constructor shift to state 136
-## Reductions:
-
-State 126:
-## Known stack suffix:
-## DEF
-## LR(1) items:
-constructor -> DEF . CLASSNAME factoredVarParamList option(superclasseCall) IS block [ VAR RBRACKET DEF ]
-## Transitions:
--- On CLASSNAME shift to state 127
-## Reductions:
-
-State 127:
-## Known stack suffix:
-## DEF CLASSNAME
-## LR(1) items:
-constructor -> DEF CLASSNAME . factoredVarParamList option(superclasseCall) IS block [ VAR RBRACKET DEF ]
-## Transitions:
--- On LPAREN shift to state 3
--- On factoredVarParamList shift to state 128
-## Reductions:
-
-State 128:
-## Known stack suffix:
-## DEF CLASSNAME factoredVarParamList
-## LR(1) items:
-constructor -> DEF CLASSNAME factoredVarParamList . option(superclasseCall) IS block [ VAR RBRACKET DEF ]
-## Transitions:
--- On COLON shift to state 129
--- On superclasseCall shift to state 132
--- On option(superclasseCall) shift to state 133
-## Reductions:
--- On IS
---   reduce production option(superclasseCall) ->
-
-State 129:
-## Known stack suffix:
-## COLON
-## LR(1) items:
-superclasseCall -> COLON . CLASSNAME argumentsList [ IS ]
-## Transitions:
--- On CLASSNAME shift to state 130
-## Reductions:
-
-State 130:
-## Known stack suffix:
-## COLON CLASSNAME
-## LR(1) items:
-superclasseCall -> COLON CLASSNAME . argumentsList [ IS ]
-## Transitions:
--- On LPAREN shift to state 47
--- On argumentsList shift to state 131
-## Reductions:
-
-State 131:
 ## Known stack suffix:
 ## COLON CLASSNAME argumentsList
 ## LR(1) items:
@@ -1699,7 +1269,7 @@ superclasseCall -> COLON CLASSNAME argumentsList . [ IS ]
 -- On IS
 --   reduce production superclasseCall -> COLON CLASSNAME argumentsList
 
-State 132:
+State 102:
 ## Known stack suffix:
 ## superclasseCall
 ## LR(1) items:
@@ -1709,26 +1279,344 @@ option(superclasseCall) -> superclasseCall . [ IS ]
 -- On IS
 --   reduce production option(superclasseCall) -> superclasseCall
 
-State 133:
+State 103:
 ## Known stack suffix:
 ## DEF CLASSNAME factoredVarParamList option(superclasseCall)
 ## LR(1) items:
 constructor -> DEF CLASSNAME factoredVarParamList option(superclasseCall) . IS block [ VAR RBRACKET DEF ]
 ## Transitions:
--- On IS shift to state 134
+-- On IS shift to state 104
 ## Reductions:
 
-State 134:
+State 104:
 ## Known stack suffix:
 ## DEF CLASSNAME factoredVarParamList option(superclasseCall) IS
 ## LR(1) items:
 constructor -> DEF CLASSNAME factoredVarParamList option(superclasseCall) IS . block [ VAR RBRACKET DEF ]
 ## Transitions:
--- On LBRACKET shift to state 103
--- On block shift to state 135
+-- On LBRACKET shift to state 105
+-- On block shift to state 125
 ## Reductions:
 
-State 135:
+State 105:
+## Known stack suffix:
+## LBRACKET
+## LR(1) items:
+block -> LBRACKET . list(instruction) RBRACKET [ VAR THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID EOF ELSE DEF CSTE CLASSNAME ]
+## Transitions:
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On RETURN shift to state 106
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On LBRACKET shift to state 105
+-- On IF shift to state 108
+-- On ID shift to state 61
+-- On CSTE shift to state 65
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On list(instruction) shift to state 121
+-- On instruction shift to state 123
+-- On instanciation shift to state 72
+-- On expression shift to state 114
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 116
+-- On castedExpr shift to state 81
+-- On block shift to state 120
+## Reductions:
+-- On RBRACKET
+--   reduce production list(instruction) ->
+
+State 106:
+## Known stack suffix:
+## RETURN
+## LR(1) items:
+instruction -> RETURN . SEMICOLON [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+-- On SEMICOLON shift to state 107
+## Reductions:
+
+State 107:
+## Known stack suffix:
+## RETURN SEMICOLON
+## LR(1) items:
+instruction -> RETURN SEMICOLON . [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+## Reductions:
+-- On THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME
+--   reduce production instruction -> RETURN SEMICOLON
+
+State 108:
+## Known stack suffix:
+## IF
+## LR(1) items:
+instruction -> IF . expression THEN instruction ELSE instruction [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
+-- On CSTE shift to state 65
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expression shift to state 109
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
+## Reductions:
+
+State 109:
+## Known stack suffix:
+## IF expression
+## LR(1) items:
+instruction -> IF expression . THEN instruction ELSE instruction [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+-- On THEN shift to state 110
+## Reductions:
+
+State 110:
+## Known stack suffix:
+## IF expression THEN
+## LR(1) items:
+instruction -> IF expression THEN . instruction ELSE instruction [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On RETURN shift to state 106
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On LBRACKET shift to state 105
+-- On IF shift to state 108
+-- On ID shift to state 61
+-- On CSTE shift to state 65
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instruction shift to state 111
+-- On instanciation shift to state 72
+-- On expression shift to state 114
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 116
+-- On castedExpr shift to state 81
+-- On block shift to state 120
+## Reductions:
+
+State 111:
+## Known stack suffix:
+## IF expression THEN instruction
+## LR(1) items:
+instruction -> IF expression THEN instruction . ELSE instruction [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+-- On ELSE shift to state 112
+## Reductions:
+
+State 112:
+## Known stack suffix:
+## IF expression THEN instruction ELSE
+## LR(1) items:
+instruction -> IF expression THEN instruction ELSE . instruction [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On RETURN shift to state 106
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On LBRACKET shift to state 105
+-- On IF shift to state 108
+-- On ID shift to state 61
+-- On CSTE shift to state 65
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instruction shift to state 113
+-- On instanciation shift to state 72
+-- On expression shift to state 114
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 116
+-- On castedExpr shift to state 81
+-- On block shift to state 120
+## Reductions:
+
+State 113:
+## Known stack suffix:
+## IF expression THEN instruction ELSE instruction
+## LR(1) items:
+instruction -> IF expression THEN instruction ELSE instruction . [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+## Reductions:
+-- On THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME
+--   reduce production instruction -> IF expression THEN instruction ELSE instruction
+
+State 114:
+## Known stack suffix:
+## expression
+## LR(1) items:
+instruction -> expression . SEMICOLON [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+-- On SEMICOLON shift to state 115
+## Reductions:
+
+State 115:
+## Known stack suffix:
+## expression SEMICOLON
+## LR(1) items:
+instruction -> expression SEMICOLON . [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+## Reductions:
+-- On THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME
+--   reduce production instruction -> expression SEMICOLON
+
+State 116:
+## Known stack suffix:
+## container
+## LR(1) items:
+expr3 -> container . [ TIMES SEMICOLON RELOP PLUS MINUS DIV ]
+instruction -> container . ASSIGN expression SEMICOLON [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+-- On ASSIGN shift to state 117
+## Reductions:
+-- On TIMES SEMICOLON RELOP PLUS MINUS DIV
+--   reduce production expr3 -> container
+
+State 117:
+## Known stack suffix:
+## container ASSIGN
+## LR(1) items:
+instruction -> container ASSIGN . expression SEMICOLON [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
+-- On CSTE shift to state 65
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expression shift to state 118
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
+## Reductions:
+
+State 118:
+## Known stack suffix:
+## container ASSIGN expression
+## LR(1) items:
+instruction -> container ASSIGN expression . SEMICOLON [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+-- On SEMICOLON shift to state 119
+## Reductions:
+
+State 119:
+## Known stack suffix:
+## container ASSIGN expression SEMICOLON
+## LR(1) items:
+instruction -> container ASSIGN expression SEMICOLON . [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+## Reductions:
+-- On THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME
+--   reduce production instruction -> container ASSIGN expression SEMICOLON
+
+State 120:
+## Known stack suffix:
+## block
+## LR(1) items:
+instruction -> block . [ THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME ]
+## Transitions:
+## Reductions:
+-- On THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID ELSE CSTE CLASSNAME
+--   reduce production instruction -> block
+
+State 121:
+## Known stack suffix:
+## LBRACKET list(instruction)
+## LR(1) items:
+block -> LBRACKET list(instruction) . RBRACKET [ VAR THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID EOF ELSE DEF CSTE CLASSNAME ]
+## Transitions:
+-- On RBRACKET shift to state 122
+## Reductions:
+
+State 122:
+## Known stack suffix:
+## LBRACKET list(instruction) RBRACKET
+## LR(1) items:
+block -> LBRACKET list(instruction) RBRACKET . [ VAR THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID EOF ELSE DEF CSTE CLASSNAME ]
+## Transitions:
+## Reductions:
+-- On VAR THIS SUPER RETURN RBRACKET PLUS NEW MINUS LPAREN LBRACKET IF ID EOF ELSE DEF CSTE CLASSNAME
+--   reduce production block -> LBRACKET list(instruction) RBRACKET
+
+State 123:
+## Known stack suffix:
+## instruction
+## LR(1) items:
+list(instruction) -> instruction . list(instruction) [ RBRACKET ]
+## Transitions:
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On RETURN shift to state 106
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On LBRACKET shift to state 105
+-- On IF shift to state 108
+-- On ID shift to state 61
+-- On CSTE shift to state 65
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On list(instruction) shift to state 124
+-- On instruction shift to state 123
+-- On instanciation shift to state 72
+-- On expression shift to state 114
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 116
+-- On castedExpr shift to state 81
+-- On block shift to state 120
+## Reductions:
+-- On RBRACKET
+--   reduce production list(instruction) ->
+
+State 124:
+## Known stack suffix:
+## instruction list(instruction)
+## LR(1) items:
+list(instruction) -> instruction list(instruction) . [ RBRACKET ]
+## Transitions:
+## Reductions:
+-- On RBRACKET
+--   reduce production list(instruction) -> instruction list(instruction)
+
+State 125:
 ## Known stack suffix:
 ## DEF CLASSNAME factoredVarParamList option(superclasseCall) IS block
 ## LR(1) items:
@@ -1738,89 +1626,281 @@ constructor -> DEF CLASSNAME factoredVarParamList option(superclasseCall) IS blo
 -- On VAR RBRACKET DEF
 --   reduce production constructor -> DEF CLASSNAME factoredVarParamList option(superclasseCall) IS block
 
+State 126:
+## Known stack suffix:
+## DEF boption(STATIC)
+## LR(1) items:
+methode -> DEF boption(STATIC) . boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block [ VAR RBRACKET DEF ]
+methode -> DEF boption(STATIC) . boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression [ VAR RBRACKET DEF ]
+## Transitions:
+-- On OVERRIDE shift to state 127
+-- On boption(OVERRIDE) shift to state 128
+## Reductions:
+-- On ID
+--   reduce production boption(OVERRIDE) ->
+
+State 127:
+## Known stack suffix:
+## OVERRIDE
+## LR(1) items:
+boption(OVERRIDE) -> OVERRIDE . [ ID ]
+## Transitions:
+## Reductions:
+-- On ID
+--   reduce production boption(OVERRIDE) -> OVERRIDE
+
+State 128:
+## Known stack suffix:
+## DEF boption(STATIC) boption(OVERRIDE)
+## LR(1) items:
+methode -> DEF boption(STATIC) boption(OVERRIDE) . ID factoredVarParamList option(returnedType) IS block [ VAR RBRACKET DEF ]
+methode -> DEF boption(STATIC) boption(OVERRIDE) . ID factoredVarParamList returnedType ASSIGN expression [ VAR RBRACKET DEF ]
+## Transitions:
+-- On ID shift to state 129
+## Reductions:
+
+State 129:
+## Known stack suffix:
+## DEF boption(STATIC) boption(OVERRIDE) ID
+## LR(1) items:
+methode -> DEF boption(STATIC) boption(OVERRIDE) ID . factoredVarParamList option(returnedType) IS block [ VAR RBRACKET DEF ]
+methode -> DEF boption(STATIC) boption(OVERRIDE) ID . factoredVarParamList returnedType ASSIGN expression [ VAR RBRACKET DEF ]
+## Transitions:
+-- On LPAREN shift to state 3
+-- On factoredVarParamList shift to state 130
+## Reductions:
+
+State 130:
+## Known stack suffix:
+## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList
+## LR(1) items:
+methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList . option(returnedType) IS block [ VAR RBRACKET DEF ]
+methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList . returnedType ASSIGN expression [ VAR RBRACKET DEF ]
+## Transitions:
+-- On COLON shift to state 18
+-- On returnedType shift to state 131
+-- On option(returnedType) shift to state 134
+## Reductions:
+-- On IS
+--   reduce production option(returnedType) ->
+
+State 131:
+## Known stack suffix:
+## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType
+## LR(1) items:
+methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType . ASSIGN expression [ VAR RBRACKET DEF ]
+option(returnedType) -> returnedType . [ IS ]
+## Transitions:
+-- On ASSIGN shift to state 132
+## Reductions:
+-- On IS
+--   reduce production option(returnedType) -> returnedType
+
+State 132:
+## Known stack suffix:
+## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN
+## LR(1) items:
+methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN . expression [ VAR RBRACKET DEF ]
+## Transitions:
+-- On THIS shift to state 41
+-- On SUPER shift to state 51
+-- On PLUS shift to state 55
+-- On NEW shift to state 56
+-- On MINUS shift to state 59
+-- On LPAREN shift to state 60
+-- On ID shift to state 61
+-- On CSTE shift to state 65
+-- On CLASSNAME shift to state 70
+-- On methodeCall shift to state 71
+-- On instanciation shift to state 72
+-- On expression shift to state 133
+-- On expr3 shift to state 75
+-- On expr2 shift to state 76
+-- On expr1 shift to state 84
+-- On containerA shift to state 79
+-- On container shift to state 80
+-- On castedExpr shift to state 81
+## Reductions:
+
+State 133:
+## Known stack suffix:
+## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression
+## LR(1) items:
+methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression . [ VAR RBRACKET DEF ]
+## Transitions:
+## Reductions:
+-- On VAR RBRACKET DEF
+--   reduce production methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression
+
+State 134:
+## Known stack suffix:
+## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType)
+## LR(1) items:
+methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) . IS block [ VAR RBRACKET DEF ]
+## Transitions:
+-- On IS shift to state 135
+## Reductions:
+
+State 135:
+## Known stack suffix:
+## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS
+## LR(1) items:
+methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS . block [ VAR RBRACKET DEF ]
+## Transitions:
+-- On LBRACKET shift to state 105
+-- On block shift to state 136
+## Reductions:
+
 State 136:
 ## Known stack suffix:
-## list(anyclasseDecl) constructor
+## DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block
 ## LR(1) items:
-classeBody -> list(anyclasseDecl) constructor . list(anyclasseDecl) [ RBRACKET ]
+methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block . [ VAR RBRACKET DEF ]
 ## Transitions:
--- On VAR shift to state 27
--- On DEF shift to state 34
--- On methode shift to state 124
--- On list(anyclasseDecl) shift to state 137
--- On factoredAttributes shift to state 138
--- On anyclasseDecl shift to state 139
 ## Reductions:
--- On RBRACKET
---   reduce production list(anyclasseDecl) ->
+-- On VAR RBRACKET DEF
+--   reduce production methode -> DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block
 
 State 137:
 ## Known stack suffix:
-## list(anyclasseDecl) constructor list(anyclasseDecl)
+## methode
 ## LR(1) items:
-classeBody -> list(anyclasseDecl) constructor list(anyclasseDecl) . [ RBRACKET ]
+anyClassDecl -> methode . [ VAR RBRACKET DEF ]
 ## Transitions:
 ## Reductions:
--- On RBRACKET
---   reduce production classeBody -> list(anyclasseDecl) constructor list(anyclasseDecl)
+-- On VAR RBRACKET DEF
+--   reduce production anyClassDecl -> methode
 
 State 138:
 ## Known stack suffix:
 ## factoredAttributes
 ## LR(1) items:
-anyclasseDecl -> factoredAttributes . [ VAR RBRACKET DEF ]
+anyClassDecl -> factoredAttributes . [ VAR RBRACKET DEF ]
 ## Transitions:
 ## Reductions:
 -- On VAR RBRACKET DEF
---   reduce production anyclasseDecl -> factoredAttributes
+--   reduce production anyClassDecl -> factoredAttributes
 
 State 139:
 ## Known stack suffix:
-## anyclasseDecl
+## constructor
 ## LR(1) items:
-list(anyclasseDecl) -> anyclasseDecl . list(anyclasseDecl) [ RBRACKET DEF ]
+anyClDeclAndConstructor -> constructor . [ VAR RBRACKET DEF ]
 ## Transitions:
--- On VAR shift to state 27
--- On DEF shift to state 34
--- On methode shift to state 124
--- On list(anyclasseDecl) shift to state 140
--- On factoredAttributes shift to state 138
--- On anyclasseDecl shift to state 139
 ## Reductions:
--- On RBRACKET DEF
---   reduce production list(anyclasseDecl) ->
-** Conflict on DEF
+-- On VAR RBRACKET DEF
+--   reduce production anyClDeclAndConstructor -> constructor
 
 State 140:
 ## Known stack suffix:
-## anyclasseDecl list(anyclasseDecl)
+## CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classBody
 ## LR(1) items:
-list(anyclasseDecl) -> anyclasseDecl list(anyclasseDecl) . [ RBRACKET DEF ]
+classe -> CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classBody . RBRACKET [ LBRACKET CLASSE ]
 ## Transitions:
+-- On RBRACKET shift to state 141
 ## Reductions:
--- On RBRACKET DEF
---   reduce production list(anyclasseDecl) -> anyclasseDecl list(anyclasseDecl)
 
 State 141:
 ## Known stack suffix:
-## CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classeBody
+## CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classBody RBRACKET
 ## LR(1) items:
-classe -> CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classeBody . RBRACKET [ LBRACKET CLASSE ]
-## Transitions:
--- On RBRACKET shift to state 142
-## Reductions:
-
-State 142:
-## Known stack suffix:
-## CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classeBody RBRACKET
-## LR(1) items:
-classe -> CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classeBody RBRACKET . [ LBRACKET CLASSE ]
+classe -> CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classBody RBRACKET . [ LBRACKET CLASSE ]
 ## Transitions:
 ## Reductions:
 -- On LBRACKET CLASSE
---   reduce production classe -> CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classeBody RBRACKET
+--   reduce production classe -> CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classBody RBRACKET
+
+State 142:
+## Known stack suffix:
+## anyClassDecl
+## LR(1) items:
+anyClDeclAndConstructor -> anyClassDecl . anyClDeclAndConstructor [ VAR RBRACKET DEF ]
+## Transitions:
+-- On VAR shift to state 27
+-- On DEF shift to state 35
+-- On methode shift to state 137
+-- On factoredAttributes shift to state 138
+-- On constructor shift to state 139
+-- On anyClassDecl shift to state 142
+-- On anyClDeclAndConstructor shift to state 143
+## Reductions:
 
 State 143:
+## Known stack suffix:
+## anyClassDecl anyClDeclAndConstructor
+## LR(1) items:
+anyClDeclAndConstructor -> anyClassDecl anyClDeclAndConstructor . [ VAR RBRACKET DEF ]
+## Transitions:
+## Reductions:
+-- On VAR RBRACKET DEF
+--   reduce production anyClDeclAndConstructor -> anyClassDecl anyClDeclAndConstructor
+
+State 144:
+## Known stack suffix:
+## anyClDeclAndConstructor
+## LR(1) items:
+classBody -> anyClDeclAndConstructor . list(anyClassDecl) [ RBRACKET ]
+## Transitions:
+-- On VAR shift to state 27
+-- On DEF shift to state 145
+-- On methode shift to state 137
+-- On list(anyClassDecl) shift to state 146
+-- On factoredAttributes shift to state 138
+-- On anyClassDecl shift to state 147
+## Reductions:
+-- On RBRACKET
+--   reduce production list(anyClassDecl) ->
+
+State 145:
+## Known stack suffix:
+## DEF
+## LR(1) items:
+methode -> DEF . boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block [ VAR RBRACKET DEF ]
+methode -> DEF . boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression [ VAR RBRACKET DEF ]
+## Transitions:
+-- On STATIC shift to state 28
+-- On boption(STATIC) shift to state 126
+## Reductions:
+-- On OVERRIDE ID
+--   reduce production boption(STATIC) ->
+
+State 146:
+## Known stack suffix:
+## anyClDeclAndConstructor list(anyClassDecl)
+## LR(1) items:
+classBody -> anyClDeclAndConstructor list(anyClassDecl) . [ RBRACKET ]
+## Transitions:
+## Reductions:
+-- On RBRACKET
+--   reduce production classBody -> anyClDeclAndConstructor list(anyClassDecl)
+
+State 147:
+## Known stack suffix:
+## anyClassDecl
+## LR(1) items:
+list(anyClassDecl) -> anyClassDecl . list(anyClassDecl) [ RBRACKET ]
+## Transitions:
+-- On VAR shift to state 27
+-- On DEF shift to state 145
+-- On methode shift to state 137
+-- On list(anyClassDecl) shift to state 148
+-- On factoredAttributes shift to state 138
+-- On anyClassDecl shift to state 147
+## Reductions:
+-- On RBRACKET
+--   reduce production list(anyClassDecl) ->
+
+State 148:
+## Known stack suffix:
+## anyClassDecl list(anyClassDecl)
+## LR(1) items:
+list(anyClassDecl) -> anyClassDecl list(anyClassDecl) . [ RBRACKET ]
+## Transitions:
+## Reductions:
+-- On RBRACKET
+--   reduce production list(anyClassDecl) -> anyClassDecl list(anyClassDecl)
+
+State 149:
 ## Known stack suffix:
 ## extends
 ## LR(1) items:
@@ -1830,7 +1910,7 @@ option(extends) -> extends . [ IS ]
 -- On IS
 --   reduce production option(extends) -> extends
 
-State 144:
+State 150:
 ## Known stack suffix:
 ## prog
 ## LR(1) items:
@@ -1840,26 +1920,26 @@ prog' -> prog . [ # ]
 -- On #
 --   accept prog
 
-State 145:
+State 151:
 ## Known stack suffix:
 ## list(classe)
 ## LR(1) items:
 prog -> list(classe) . block EOF [ # ]
 ## Transitions:
--- On LBRACKET shift to state 103
--- On block shift to state 146
+-- On LBRACKET shift to state 105
+-- On block shift to state 152
 ## Reductions:
 
-State 146:
+State 152:
 ## Known stack suffix:
 ## list(classe) block
 ## LR(1) items:
 prog -> list(classe) block . EOF [ # ]
 ## Transitions:
--- On EOF shift to state 147
+-- On EOF shift to state 153
 ## Reductions:
 
-State 147:
+State 153:
 ## Known stack suffix:
 ## list(classe) block EOF
 ## LR(1) items:
@@ -1869,20 +1949,20 @@ prog -> list(classe) block EOF . [ # ]
 -- On #
 --   reduce production prog -> list(classe) block EOF
 
-State 148:
+State 154:
 ## Known stack suffix:
 ## classe
 ## LR(1) items:
 list(classe) -> classe . list(classe) [ LBRACKET ]
 ## Transitions:
 -- On CLASSE shift to state 1
--- On list(classe) shift to state 149
--- On classe shift to state 148
+-- On list(classe) shift to state 155
+-- On classe shift to state 154
 ## Reductions:
 -- On LBRACKET
 --   reduce production list(classe) ->
 
-State 149:
+State 155:
 ## Known stack suffix:
 ## classe list(classe)
 ## LR(1) items:

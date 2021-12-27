@@ -146,7 +146,7 @@ prog: cl=list(classe) il=block EOF { }
 
 (* classee *)
 (* Ex : classe Point(var xc, yc : Integer, name:String) IS { **Corpsclassee** } *)
-classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classeBody, RBRACKET)
+classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classBody, RBRACKET)
 {(*
   n,
   s,
@@ -162,19 +162,25 @@ extends : EXTENDS CLASSNAME {}
 (* Corps de la classee *)
 (* Ex : attributs, méthode, méthode, constructeur, méthode, attribut ... *)
 (* Puisqu'on sait qu'il doit y avoir un constructeur par classee, on le cherche directement à l'analyse syntaxique *)
-classeBody : list(anyclasseDecl) constructor list(anyclasseDecl) {}
+classBody : anyClDeclAndConstructor list(anyClassDecl) {}
+
+(* Auxiliaire de la règle précédente pour éviter un conflit shift-reduce si on écrivait : *)
+(* classBody : list(anyClassDecl) constructor list(anyClassDecl)  *)
+anyClDeclAndConstructor :
+  anyClassDecl anyClDeclAndConstructor {}
+| constructor {}
 
 
 (* Une déclaration quelconque dans une classee : méthode ou attributs *)
 (* On sépare les méthodes en constructeur, méthode, et méthodeOuConstructeur, car il y a ambiguité lors de l'analyse syntaxique *)
-anyclasseDecl: 
+anyClassDecl: 
 | factoredAttributes {}
 | methode {}
 
 
 (* Attributs de classee *)
 (* Ex : var static x1, x2 : Integer *)
-factoredAttributes: VAR boption(STATIC) list(ID) returnedType {}
+factoredAttributes: VAR boption(STATIC) list(ID) COLON returnedType {}
 
 
 (* Méthode de classee *)
@@ -311,8 +317,11 @@ expr3:
 
 instanciation: NEW CLASSNAME argumentsList {}
 
+(* Cast d'une expression *)
+(* Ex :        (Point p) *)
+(* avec p un PointColoré. Le résultat de cette expression est un Point normal avec les mêmes attributs que p *)
+castedExpr: LPAREN CLASSNAME expression RPAREN {}
 
-castedExpr: delimited(LPAREN, expression , RPAREN) {}
 (*  CLASSNAME expression *)
 
 

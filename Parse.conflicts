@@ -1,71 +1,5 @@
 
-** Conflict (shift/reduce) in state 139.
-** Token involved: DEF
-** This state is reached from prog after reading:
-
-CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET anyclasseDecl
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-prog 
-list(classe) block EOF 
-classe list(classe) 
-CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classeBody RBRACKET 
-                                                                  (?)
-
-** In state 139, looking ahead at DEF, reducing production
-** list(anyclasseDecl) ->
-** is permitted because of the following sub-derivation:
-
-list(anyclasseDecl) constructor list(anyclasseDecl) // lookahead token appears because constructor can begin with DEF
-anyclasseDecl list(anyclasseDecl) // lookahead token is inherited
-              . 
-
-** In state 139, looking ahead at DEF, shifting is permitted
-** because of the following sub-derivation:
-
-list(anyclasseDecl) constructor list(anyclasseDecl) 
-anyclasseDecl list(anyclasseDecl) 
-              anyclasseDecl list(anyclasseDecl) 
-              methode 
-              . DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block 
-
-** Conflict (reduce/reduce) in state 73.
-** Tokens involved: VAR TIMES THEN SEMICOLON RPAREN RELOP RBRACKET PLUS MINUS DIV DEF COMMA
-** The following explanations concentrate on token TIMES.
-** This state is reached from prog after reading:
-
-list(classe) LBRACKET LPAREN expression RPAREN
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-prog 
-list(classe) block EOF 
-             LBRACKET list(instruction) RBRACKET 
-                      instruction list(instruction) 
-                      expression SEMICOLON 
-                      expr1 RELOP expr1 
-                      expr2 
-                      expr2 TIMES expr3 // lookahead token appears
-                      expr3 // lookahead token is inherited
-                      (?)
-
-** In state 73, looking ahead at TIMES, reducing production
-** castedExpr -> LPAREN expression RPAREN
-** is permitted because of the following sub-derivation:
-
-castedExpr // lookahead token is inherited
-LPAREN expression RPAREN . 
-
-** In state 73, looking ahead at TIMES, reducing production
-** expr3 -> LPAREN expression RPAREN
-** is permitted because of the following sub-derivation:
-
-LPAREN expression RPAREN . 
-
-** Conflict (shift/reduce) in state 44.
+** Conflict (shift/reduce) in state 43.
 ** Token involved: LPAREN
 ** This state is reached from prog after reading:
 
@@ -80,7 +14,7 @@ list(classe) block EOF
                       instruction list(instruction) 
                       (?)
 
-** In state 44, looking ahead at LPAREN, shifting is permitted
+** In state 43, looking ahead at LPAREN, shifting is permitted
 ** because of the following sub-derivation:
 
 container ASSIGN expression SEMICOLON 
@@ -88,7 +22,7 @@ THIS SELECTION containerA
                ID argumentsList SELECTION containerA 
                   . LPAREN loption(separated_nonempty_list(COMMA,expression)) RPAREN 
 
-** In state 44, looking ahead at LPAREN, reducing production
+** In state 43, looking ahead at LPAREN, reducing production
 ** containerA -> ID
 ** is permitted because of the following sub-derivation:
 
@@ -99,33 +33,3 @@ expr3
 methodeCall 
 THIS SELECTION containerA argumentsList // lookahead token appears because argumentsList can begin with LPAREN
                ID . 
-
-** Conflict (shift/reduce) in state 26.
-** Token involved: DEF
-** This state is reached from prog after reading:
-
-CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-prog 
-list(classe) block EOF 
-classe list(classe) 
-CLASSE CLASSNAME factoredVarParamList option(extends) IS LBRACKET classeBody RBRACKET 
-                                                                  (?)
-
-** In state 26, looking ahead at DEF, reducing production
-** list(anyclasseDecl) ->
-** is permitted because of the following sub-derivation:
-
-list(anyclasseDecl) constructor list(anyclasseDecl) // lookahead token appears because constructor can begin with DEF
-. 
-
-** In state 26, looking ahead at DEF, shifting is permitted
-** because of the following sub-derivation:
-
-list(anyclasseDecl) constructor list(anyclasseDecl) 
-anyclasseDecl list(anyclasseDecl) 
-methode 
-. DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block 
