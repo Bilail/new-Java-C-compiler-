@@ -64,7 +64,8 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <Ast.instrType> instruction (* Coder *)
 %type container (* Typer *)
 %type containerA (* Typer *)
-%type methodCall (* Typer *)
+%type methodeCall (* Typer *)
+%type methodeCallA (* Typer *)
 
 %type expression (* Typer *)
 %type expr1 (* Typer *)
@@ -269,18 +270,23 @@ container:
 containerA:
   ID {}
 | ID SELECTION containerA {}
-| ID argumentsList SELECTION containerA {}
+| methodeCallA SELECTION ID {}
 
 
 (* Appel de méthode *)
 (* A peu près comme un container, mais avec des arguments à la fin et au moins 1 sélection "." *)
 (* Ex:   text.getSize()     ou    Point2D.multiply(3*y).substract(myPoint)    *)
 methodeCall:
-  CLASSNAME SELECTION containerA argumentsList {}
-| ID SELECTION containerA argumentsList {}
-| SUPER SELECTION containerA argumentsList {}
-| THIS SELECTION containerA argumentsList {}
+  CLASSNAME SELECTION methodeCallA {}
+| ID SELECTION methodeCallA {}
+| SUPER SELECTION methodeCallA {}
+| THIS SELECTION methodeCallA {}
 
+
+methodeCallA:
+  ID argumentsList {}
+| ID argumentsList SELECTION methodeCallA {}
+| containerA SELECTION ID argumentsList {}
 
 (**
   ____________________________________________
