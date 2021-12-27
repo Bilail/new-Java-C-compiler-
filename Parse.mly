@@ -83,6 +83,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %left TIMES DIV         /* medium precedence */
 %left UMINUS
 %left DEF
+%left SELECTION
 
 (**
   ____________________________________________
