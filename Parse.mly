@@ -12,7 +12,7 @@
 
 (* Symbols *)
 %token <Ast.opComp> RELOP (* = <> > < >= <= *)
-%token PLUS MINUS TIMES DIV UMINUS(*  + - * /  *)
+%token PLUS MINUS TIMES DIV (*  + - * /  *)
 %token LPAREN RPAREN (* ( ) *)
 %token LBRACKET RBRACKET    (* { } *)
 %token COMMA (* , *)
@@ -63,9 +63,12 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type block (* Typer *)
 %type <Ast.instrType> instruction (* Coder *)
 %type container (* Typer *)
-%type containerA (* Typer *)
+%type classeCallBeginning (* Typer *)
+%type classeCallMiddle (* Typer *)
+%type methodeCallEnd (* Typer *)
+%type attributeCallEnd (* Typer *)
 %type methodeCall (* Typer *)
-%type methodeCallA (* Typer *)
+%type attributeCall (* Typer *)
 
 %type expression (* Typer *)
 %type expr1 (* Typer *)
@@ -76,14 +79,10 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 *)
 
 
-(* Priorities  *)
-%right COLON SEMICOLON  
-%right IF THEN ELSE 
-%left PLUS MINUS        /* lowest precedence */
-%left TIMES DIV         /* medium precedence */
-%left UMINUS
-%left DEF
-%left SELECTION
+(* Priorités *)
+(* AUCUNE POUR L'INSTANT *)
+
+
 
 (**
   ____________________________________________
@@ -263,31 +262,51 @@ instruction:
 (* Variable ou attribut, n'importe quoi pouvant contenir une valeur *)
 (* Ex:     x   ou    Point2D.multiply(3*y).length    *)
 container:
-  CLASSNAME SELECTION containerA {}
-| THIS SELECTION containerA {}
-| SUPER SELECTION containerA {}
-| containerA {}
-
-containerA:
   ID {}
-| ID SELECTION containerA {}
-| methodeCallA SELECTION ID {}
+| RESULT {}
+| attributeCall {}
 
 
-(* Appel de méthode *)
-(* A peu près comme un container, mais avec des arguments à la fin et au moins 1 sélection "." *)
-(* Ex:   text.getSize()     ou    Point2D.multiply(3*y).substract(myPoint)    *)
+(* Premier token du début de n'importe quel appel de méthode ou attribut *)
+(* Ex :    this       ou      myVariable      ou     MaClasse     *)
+classeCallBeginning:
+  ID {}
+| CLASSNAME {}
+| THIS {}
+| SUPER {}
+
+
+(* Tout les appels de méthodes et attributs entre le premier et le dernier appel dans un appel de méthode ou attribut *)
+(* Ex :    [...].name.clone()[...] *)
+classeCallMiddle:
+  SELECTION ID {}
+| SELECTION ID classeCallBeginning {}
+| SELECTION ID argumentsList {}
+| SELECTION ID argumentsList classeCallBeginning {}
+
+
+(* Dernier élément d'un appel de méthode en cascade *)
+(* Ex : .getZ() *)
+methodeCallEnd: SELECTION ID argumentsList {}
+
+(* Appel de méthode et tous ses constituants *)
+(* Ex : myVariable.name.clone().getZ() *)
 methodeCall:
-  CLASSNAME SELECTION methodeCallA {}
-| ID SELECTION methodeCallA {}
-| SUPER SELECTION methodeCallA {}
-| THIS SELECTION methodeCallA {}
+  classeCallBeginning methodeCallEnd {}
+| classeCallBeginning classeCallMiddle methodeCallEnd {}
 
 
-methodeCallA:
-  ID argumentsList {}
-| ID argumentsList SELECTION methodeCallA {}
-| containerA SELECTION ID argumentsList {}
+(* Dernier élément d'un appel d'attributs en cascade *)
+(* Ex : .length *)
+attributeCallEnd: SELECTION ID {}
+
+(* Appel d'un attribut d'une classe ou instance de classe, et tous les constituants de l'appel en cascade *)
+(* Ex : MaClasse.name.clone().length  *)
+attributeCall:
+  classeCallBeginning attributeCallEnd {}
+| classeCallBeginning classeCallMiddle attributeCallEnd {}
+
+
 
 (**
   ____________________________________________
@@ -314,7 +333,7 @@ expr2:
 expr3:
   CSTE {}
 | PLUS e=expr3  { e }
-| MINUS e=expr3 %prec UMINUS   { UMinus e }
+| MINUS e=expr3  { UMinus e }
 | container {}
 | methodeCall {}
 | instanciation {}

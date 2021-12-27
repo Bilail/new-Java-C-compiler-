@@ -1,5 +1,9 @@
 .vscode
+builds/
 
+Parse.ml
+Parse.mli
+Parse.automaton
 
 
 *.annot
