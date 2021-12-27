@@ -1,6 +1,6 @@
 (* Dependencies *)
 %{
-  Ast
+  open Ast
 %}
 
 (** TOKENS **)
@@ -11,7 +11,7 @@
 %token <int> CSTE (* 42 *)
 
 (* Symbols *)
-%token <Ast.opComp> RELOP (* = <> > < >= <= *)
+%token <Ast.opComp> RELOP (* = <> > < >= <= *)   
 %token PLUS MINUS TIMES DIV (*  + - * /  *)
 %token LPAREN RPAREN (* ( ) *)
 %token LBRACKET RBRACKET    (* { } *)
@@ -94,9 +94,9 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 
 
 (* Axiome *)
-%start <Ast.prog_type> prog (* Do we have progType ? *)
+(*%start <Ast.prog_type> prog (* Do we have progType ? *)
 %%
-
+*)
 (**
   ____________________________________________
 /                    ------------°°°°------------                      \

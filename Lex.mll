@@ -103,8 +103,7 @@ and
   | ">="           { RELOP (Ast.Ge) }
   | "="            { RELOP (Ast.Eq) }
   | "<>"           { RELOP (Ast.Neq) }
-  | eof            { EOF }
-  | 
+  | eof            { EOF } 
   | _ as lxm       { (* action par défaut: filtre un unique caractere, different
                       * de ceux qui precedent. Il s'agit d'un caratere errone:
                       * on le signale et on poursuit quand meme l'analyse.

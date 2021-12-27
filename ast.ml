@@ -1,8 +1,8 @@
 (* Pour les type string et integer *)
-type var_type = {
+type var_type = 
   | String of string 
   | Integer of int 
-  }
+  
 
 type classType = {
   name : string; 
@@ -34,17 +34,17 @@ and methode = {
 
 
 
-type instrType = 
+and instrType = 
     Exp of exp_type
   | Bloc of bloc
-  | Ite of exp_type*instr*instr
+  | Ite of exp_type*instrType*instrType
   | Return 
   | Affectation of exp_type * exp_type
   
 
-type bloc = {
+and bloc = {
   declarations : decl list;
-  instructions : instr list;
+  instructions : instrType list;
 }
  (*
 type exp_type =
@@ -62,12 +62,12 @@ type exp_type =
 | Envoi of (* envoie de message*)
 *) 
 
-exp_type =
-  | Assignment of assignment
-  | Conditional of expr_e * (expr_e * expr_e)
-  | Binary of binary_op * expr_e * expr_e
-  | Unary of unary_op * expr_e
-  | Variable of name
+and exp_type =
+  (*| Assignment of assignment
+  | Conditional of expr_e * (expr_e * expr_e) *)
+  | Binary of binary_op * exp_type * exp_type
+  | Unary of unary_op * exp_type
+  (*| Variable of *)
   | Integer_constant of Int64.t
   | Float_constant of float
   | Bool_constant of bool
@@ -75,13 +75,11 @@ exp_type =
   | Char_constant of string
   | String_constant of string
   | This
-  | New of instance_creation
-  | Field_access of  field_obj * string
-  | Method_call of method_name * (expr_e list)
-  | New_array of array_creation
-  | Instanceof of expr_e * var_type
+  (*| New of instance_creation
+  | Field_access of  field_obj * string *)
+  | Method_call of methode * (exp_type list)
 
-  type unary_op =
+  and unary_op =
     | Not
     | Cast of var_type
     | Complement
@@ -91,17 +89,19 @@ exp_type =
     | Post_incr
     | Minus
 
-type binary_op =
+and binary_op =
   (* Logic *)
   | Or | And | Nor
   (* Comparaison *)
-  | Eq | Neq | Lt | Le | Gt | Ge
+  | OpComp
   (* Arithmetic *)
   | PLUS | MINUS | TIMES | DIVE 
 
+  and opComp = 
+  | Eq | Neq | Lt | Le | Gt | Ge
 
-
+(*
 and type_decl =
-  | Class_declaration of class_decl
+  | Class_declaration of class_decl *)
 
 type prog_type = classType list
