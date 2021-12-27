@@ -12,7 +12,7 @@
 
 (* Symbols *)
 %token <Ast.opComp> RELOP (* = <> > < >= <= *)
-%token PLUS MINUS TIMES DIV UMINUS(*  + - * /  *)
+%token PLUS MINUS TIMES DIV (*  + - * /  *)
 %token LPAREN RPAREN (* ( ) *)
 %token LBRACKET RBRACKET    (* { } *)
 %token COMMA (* , *)
@@ -79,16 +79,11 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 *)
 
 
-(* Priorities  *)
-%right COLON SEMICOLON  
-%right IF THEN ELSE 
-%left PLUS MINUS        /* lowest precedence */
-%left TIMES DIV         /* medium precedence */
-%left UMINUS
-%left DEF
-(**
-%left SELECTION
-**)
+(* Priorités *)
+(* AUCUNE POUR L'INSTANT *)
+
+
+
 (**
   ____________________________________________
 /                    ------------°°°°------------                      \
@@ -267,34 +262,39 @@ instruction:
 (* Variable ou attribut, n'importe quoi pouvant contenir une valeur *)
 (* Ex:     x   ou    Point2D.multiply(3*y).length    *)
 container:
-  ID
-| attributeCall
+  ID {}
+| RESULT {}
+| attributeCall {}
 
 
 classeCallBeginning:
-  ID
-| CLASSNAME
-| THIS
-| SUPER
+  ID {}
+| CLASSNAME {}
+| THIS {}
+| SUPER {}
 
 
 classeCallMiddle:
-  SELECTION ID
-| SELECTION ID classeCallBeginning
-| SELECTION ID argumentsList
-| SELECTION ID argumentsList classeCallBeginning
+  SELECTION ID {}
+| SELECTION ID classeCallBeginning {}
+| SELECTION ID argumentsList {}
+| SELECTION ID argumentsList classeCallBeginning {}
 
 
 
-methodeCallEnd: SELECTION ID argumentsList
+methodeCallEnd: SELECTION ID argumentsList {}
 
-methodeCall: classeCallBeginning option(classeCallMiddle) methodeCallEnd
+methodeCall:
+  classeCallBeginning methodeCallEnd {}
+| classeCallBeginning classeCallMiddle methodeCallEnd {}
 
 
 
-attributeCallEnd: SELECTION ID
+attributeCallEnd: SELECTION ID {}
 
-attributeCall: classeCallBeginning option(classeCallMiddle) attributeCallEnd
+attributeCall:
+  classeCallBeginning attributeCallEnd {}
+| classeCallBeginning classeCallMiddle attributeCallEnd {}
 
 
 
@@ -323,7 +323,7 @@ expr2:
 expr3:
   CSTE {}
 | PLUS e=expr3  { e }
-| MINUS e=expr3 %prec UMINUS   { UMinus e }
+| MINUS e=expr3  { UMinus e }
 | container {}
 | methodeCall {}
 | instanciation {}
