@@ -264,20 +264,33 @@ instruction:
 (* Ex:     x   ou    Point2D.multiply(3*y).length    *)
 container:
   ID
-| ID attributeCall
-| ID methodeCall
+| attributeCall
 
 
-attributeCall:
+classeCallBeginning:
+  ID
+| CLASSNAME
+| THIS
+| SUPER
+
+
+classeCallMiddle:
   SELECTION ID
-| SELECTION ID attributeCall
-| SELECTION ID methodeCall attributeCall
+| SELECTION ID classeCallBeginning
+| SELECTION ID argumentsList
+| SELECTION ID argumentsList classeCallBeginning
 
 
-methodeCall:
-  SELECTION ID argumentsList
-| SELECTION ID argumentsList methodeCall
-| SELECTION ID argumentsList attributeCall methodeCall
+
+methodeCallEnd: SELECTION ID argumentsList
+
+methodeCall: classeCallBeginning option(classeCallMiddle) methodeCallEnd
+
+
+
+attributeCallEnd: SELECTION ID
+
+attributeCall: classeCallBeginning option(classeCallMiddle) attributeCallEnd
 
 
 
