@@ -267,6 +267,8 @@ container:
 | attributeCall {}
 
 
+(* Premier token du début de n'importe quel appel de méthode ou attribut *)
+(* Ex :    this       ou      myVariable      ou     MaClasse     *)
 classeCallBeginning:
   ID {}
 | CLASSNAME {}
@@ -274,6 +276,8 @@ classeCallBeginning:
 | SUPER {}
 
 
+(* Tout les appels de méthodes et attributs entre le premier et le dernier appel dans un appel de méthode ou attribut *)
+(* Ex :    [...].name.clone()[...] *)
 classeCallMiddle:
   SELECTION ID {}
 | SELECTION ID classeCallBeginning {}
@@ -281,17 +285,23 @@ classeCallMiddle:
 | SELECTION ID argumentsList classeCallBeginning {}
 
 
-
+(* Dernier élément d'un appel de méthode en cascade *)
+(* Ex : .getZ() *)
 methodeCallEnd: SELECTION ID argumentsList {}
 
+(* Appel de méthode et tous ses constituants *)
+(* Ex : myVariable.name.clone().getZ() *)
 methodeCall:
   classeCallBeginning methodeCallEnd {}
 | classeCallBeginning classeCallMiddle methodeCallEnd {}
 
 
-
+(* Dernier élément d'un appel d'attributs en cascade *)
+(* Ex : .length *)
 attributeCallEnd: SELECTION ID {}
 
+(* Appel d'un attribut d'une classe ou instance de classe, et tous les constituants de l'appel en cascade *)
+(* Ex : MaClasse.name.clone().length  *)
 attributeCall:
   classeCallBeginning attributeCallEnd {}
 | classeCallBeginning classeCallMiddle attributeCallEnd {}
