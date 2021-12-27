@@ -263,31 +263,23 @@ instruction:
 (* Variable ou attribut, n'importe quoi pouvant contenir une valeur *)
 (* Ex:     x   ou    Point2D.multiply(3*y).length    *)
 container:
-  CLASSNAME SELECTION containerA {}
-| THIS SELECTION containerA {}
-| SUPER SELECTION containerA {}
-| containerA {}
-
-containerA:
-  ID {}
-| ID SELECTION containerA {}
-| methodeCallA SELECTION ID {}
+  ID
+| ID attributeCall
+| ID methodeCall
 
 
-(* Appel de méthode *)
-(* A peu près comme un container, mais avec des arguments à la fin et au moins 1 sélection "." *)
-(* Ex:   text.getSize()     ou    Point2D.multiply(3*y).substract(myPoint)    *)
+attributeCall:
+  SELECTION ID
+| SELECTION ID attributeCall
+| SELECTION ID methodeCall attributeCall
+
+
 methodeCall:
-  CLASSNAME SELECTION methodeCallA {}
-| ID SELECTION methodeCallA {}
-| SUPER SELECTION methodeCallA {}
-| THIS SELECTION methodeCallA {}
+  SELECTION ID argumentsList
+| SELECTION ID argumentsList methodeCall
+| SELECTION ID argumentsList attributeCall methodeCall
 
 
-methodeCallA:
-  ID argumentsList {}
-| ID argumentsList SELECTION methodeCallA {}
-| containerA SELECTION ID argumentsList {}
 
 (**
   ____________________________________________
