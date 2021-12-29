@@ -16,6 +16,7 @@ and constructor = {
   name : string;
   param : decl list; 
   body : instrType;
+  (* superCall : *)
   } 
 
 and decl = {
@@ -68,13 +69,14 @@ and exp_type =
   | Binary of binary_op * exp_type * exp_type
   | Unary of unary_op * exp_type
   (*| Variable of *)
-  | Integer_constant of Int64.t
+  (*| Integer_constant of Int64.t
   | Float_constant of float
   | Bool_constant of bool
   | Null
   | Char_constant of string
-  | String_constant of string
+  | String_constant of string *)
   | This
+  | Cste of int 
   (*| New of instance_creation
   | Field_access of  field_obj * string *)
   | Method_call of methode * (exp_type list)
@@ -93,9 +95,9 @@ and binary_op =
   (* Logic *)
   | Or | And | Nor
   (* Comparaison *)
-  | OpComp
+  | OpComp 
   (* Arithmetic *)
-  | PLUS | MINUS | TIMES | DIVE 
+  | PLUS | MINUS | TIMES | DIV 
 
   and opComp = 
   | Eq | Neq | Lt | Le | Gt | Ge
