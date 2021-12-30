@@ -50,19 +50,19 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <string> extends (* Coder *)
 (*%type <Ast.classBody> classeBody (* Typer *)
 %type anyclasseDecl (* Typer ?? Méthode ou atttribut *)
-%type factoredAttributes (* Typer *)
-%type method (* Typer *)
-%type constructor (* Typer *)
+%type <list(Ast.decl)> factoredAttributes (* Typer *) (* A verif *)
+%type <Ast.methode> method (* Typer *) (* A verif *)
+%type <Ast.constructor> constructor (* Typer *) (* A verif *) 
 %type superclasseCall (* Typer *)
 
-%type factoredVarParamList (* Typer *)
-%type factoredVarParam (* Typer *)
-%type argumentsList (* Typer *)
+%type <list(factoredVarParam)> factoredVarParamList (* Typer *) (* A verif *)
+%type <list(Ast.decl)> factoredVarParam (* Typer *) (* A verif *)
+%type <list(exp_type)> argumentsList (* Typer *) (* A verif *)
 %type returnedType (* Typer *)
 
 %type block (* Typer *)
-%type <Ast.instrType> instruction (* Coder *)
-%type container (* Typer *)
+%type <Ast.instrType> instruction (* Coder *) 
+%type <Ast.exp_type>container (* Typer *)
 %type classeCallBeginning (* Typer *)
 %type classeCallMiddle (* Typer *)
 %type methodeCallEnd (* Typer *)
@@ -146,17 +146,17 @@ prog: cl=list(classe) il=block EOF { }
 
 (* classee *)
 (* Ex : classe Point(var xc, yc : Integer, name:String) IS { **Corpsclassee** } *)
-classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classBody, RBRACKET)
-{(*
-  n,
-  s,
-  p,
-  b,*)
+classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classBody, RBRACKET) 
+{
+  name = n,
+  superClasse = s, 
+  attribut = p, 
+  meth = b
 }
 
 
 (* Extends d'une classee, optionnel *)
-extends : EXTENDS CLASSNAME {}
+extends : EXTENDS s = CLASSNAME {s} // Renvoie le string de la superclasse
 
 
 (* Corps de la classee *)
@@ -180,29 +180,45 @@ anyClassDecl:
 
 (* Attributs de classee *)
 (* Ex : var static x1, x2 : Integer *)
-factoredAttributes: VAR boption(STATIC) list(ID) COLON returnedType {}
+factoredAttributes: VAR s = boption(STATIC) v = list(ID) COLON r = returnedType { nom = v, typ = r } (* Dans Decl*)
 
 
 (* Méthode de classee *)
 methode:
   (* cas finissant par un bloc *)
-  DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block 
-  {}
+  DEF s = boption(STATIC) o = boption(OVERRIDE) n = ID p = factoredVarParamList r = option(returnedType) IS b = block 
+  {
+   name = n,
+   param = p,
+   body = b,
+   static = s,
+   override = o,
+   retour = r
+   }
 
   (* cas finissant par "nomclassee := expression" *)
-| DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression
-{}
-
+| DEF s = boption(STATIC) o = boption(OVERRIDE) n = ID p = factoredVarParamList r =returnedType ASSIGN e = expression  
+{
+   name = n,
+   param = p,
+   body = e,
+   static = s,
+   override = o,
+   retour = r
+   }
 
 (* Constructeur de classee *)
 constructor:
-  DEF CLASSNAME factoredVarParamList option(superclasseCall) IS block {}
+  DEF n = CLASSNAME p = factoredVarParamList option(superclasseCall) IS b = block 
+  { (* Ajouter dans l'AST UN ARGUMENT DASN CONSTRUCTOR POUR PRENDRE EN COMPLE LE SuperClasseCall ?? *)
+    name = n, 
+    param = p, 
+    body = b 
+  }
 
 
-
-superclasseCall: COLON CLASSNAME argumentsList {}
-
-
+(* Comment prendre en compte "argumentsLust ?" *)
+superclasseCall: COLON n = CLASSNAME argumentsList {n}
 
 
 (**
@@ -212,27 +228,23 @@ superclasseCall: COLON CLASSNAME argumentsList {}
 \ ___________________________________________ /
 **)
 
-
-
-
 (* Liste de paramètres optionnellement VAR entouré de parenthèses ( ) *)
-factoredVarParamList: delimited(LPAREN, separated_list(COMMA, factoredVarParam), RPAREN) {}
+factoredVarParamList: delimited(LPAREN, separated_list(COMMA, f = factoredVarParam), RPAREN) { f }
 
 
 (* Paramètre ou paramètres groupés optionnellement VAR *)
 (* Ex: var x1, x2, x3 : Integer *)
-factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON returnedType {}
+factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON r = returnedType {nom = i, typ = r }
 
 
 (* Liste d'arguments, c'est-à-dire les expressions qu'on met comme paramètres lorsqu'on fait un appel (à une méthode par exemple) *)
 (* Ex:    ( 3, z, Point3D.getHeight() )     *)
-argumentsList: delimited(LPAREN, separated_list(COMMA, expression), RPAREN) {}
+argumentsList: delimited(LPAREN, separated_list(COMMA, e = expression), RPAREN) { Id e } (* A revoir *)
+// Comment gerer le fait que e peut etre un ID ou une CSTE ?
 
 
 (* Ex:   : Point3D *)
-returnedType: COLON CLASSNAME {}
-
-
+returnedType: COLON n = CLASSNAME { n }
 
 
 (**
@@ -244,17 +256,17 @@ returnedType: COLON CLASSNAME {}
 
 
 (* Bloc d'instructions entouré d'accolades *)
-block: delimited(LBRACKET, list(instruction), RBRACKET) {}
+block: delimited(LBRACKET, i = list(instruction), RBRACKET) {Bloc(i)}
 
 
 
 (* N'importe quelle instruction du programme principal (sauf RETURN) ou des méthodes *)
 instruction:
-  expression SEMICOLON {}
-| block {}
-| RETURN SEMICOLON {}
-| IF si = expression THEN alors = instruction ELSE sinon = instruction {}
-| container ASSIGN expression SEMICOLON {}
+  e = expression SEMICOLON {Exp(e)}
+| b = block {Bloc(b)}
+| RETURN SEMICOLON {Return}
+| IF si = expression THEN alors = instruction ELSE sinon = instruction {Ite(si,alors,sinon)}
+| g = container ASSIGN d = expression SEMICOLON {Affectation(g,d)}
 
 
 
@@ -316,21 +328,21 @@ attributeCall:
 
 
 expression:
-  expr1 RELOP expr1 {}
+  g = expr1 RELOP d = expr1 { Binary(Opcomp,g,d) }
 | expr1 {}
 
 expr1:
-  expr1 PLUS expr2 {}
-| expr1 MINUS expr2 {}
+  g = expr1 PLUS d = expr2 { Binary(PLUS,g,d)}
+| g = expr1 MINUS d = expr2 { Binary(MINUS,g,d)}
 | expr2 {}
 
 expr2:
-  expr2 TIMES expr3 {}
-| expr2 DIV expr3 {}
+  g = expr2 TIMES d = expr3 { Binary(TIMES,g,d)}
+| g = expr2 DIV d = expr3 { Binary(DIV,g,d)}
 | expr3 {}
 
 expr3:
-  CSTE {}
+  v = CSTE { Cste v}  (* A Voir comment faire comme ca peut etre float/int etc..*)
 | PLUS e=expr3  { e }
 | MINUS e=expr3  { UMinus e }
 | container {}

@@ -56,13 +56,20 @@ let printmethod m =
     |true -> print_string ":" ; print_string  m.typretour ; print_string ":="; printInstr m.instruction (* A VOIR*)
     |false -> print_string "IS" ; printBloc ______ (* JE SUIS PAS SUR *) 
 
-(* PRINT Instruction *) (* A VERIFIER *)
-let printInstr ins =
-  match ins with 
-  |Exp() ->
-  |Ite(,,) ->
-  |Return ->
-  |Affectation(,) ->
+(* PRINT Instruction *) (* A REVERIFIER *)
+let rec printInstr ins =
+   match ins with
+   Exp e -> printExpr e
+   | Bloc b -> printBloc b 
+   | Return -> print_string ";" (* On verra jsp *)
+   | Ite (si, alors, sinon) ->
+     print_string " IF "; printExpr si;
+     print_string " THEN "; printExpr alors;
+     print_string " ELSE "; printExpr sinon;
+     print_endline "]"
+   | Affectation (g, d) ->
+      print_string "["; print_string "["; printExpr g; print_string "]"; print_string ".";
+      print_string "["; printExpr d; print_string "]"; print_string "]"; print_string ";"
 
 (* PRINT Bloc *) (* A VERIFIER *)
 let printBloc b = 
