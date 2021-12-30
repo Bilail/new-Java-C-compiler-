@@ -13,9 +13,9 @@ type classType = {
   }
 
 and constructor = {
-  name : string;
-  param : decl list; 
-  body : instrType;
+  name_constuctor : string;
+  param_constuctor : decl list; 
+  body_constuctor : instrType;
   (* superCall : *)
   } 
 
@@ -25,12 +25,12 @@ and decl = {
   }
 
 and methode = {
-  nom : string;
-  param : decl list;
-  body : instrType;
-  static : bool;
+  nom_methode : string;
+  param_methode : decl list;
+  body_methode : instrType;
+  static_methode : bool;
   override : bool;
-  retour : string option (* le type est un string ex : int est INTEGER *)
+  retour_methode : string option (* le type est un string ex : int est INTEGER *)
 }
 
 

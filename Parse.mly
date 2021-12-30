@@ -48,22 +48,25 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 
 %type <Ast.classType> classe (* Coder *)
 %type <string> extends (* Coder *)
-(*%type <Ast.classBody> classeBody (* Typer *)
-%type anyclasseDecl (* Typer ?? Méthode ou atttribut *)
+
+%type <Ast.methode> methode (* Typer *) (* A verif *)
+(*
+(*%type <Ast.classType.classBody> classeBody  Typer *)
+(*%type anyclasseDecl  Typer ?? Méthode ou atttribut *)
 %type <list(Ast.decl)> factoredAttributes (* Typer *) (* A verif *)
-%type <Ast.methode> method (* Typer *) (* A verif *)
+
 %type <Ast.constructor> constructor (* Typer *) (* A verif *) 
-%type superclasseCall (* Typer *)
+(* %type superclasseCall Typer *)
 
-%type <list(factoredVarParam)> factoredVarParamList (* Typer *) (* A verif *)
-%type <list(Ast.decl)> factoredVarParam (* Typer *) (* A verif *)
-%type <list(exp_type)> argumentsList (* Typer *) (* A verif *)
-%type returnedType (* Typer *)
+(*%type <list(factoredVarParam)> factoredVarParamList  Typer *) (* A verif *)
+(*%type <list(Ast.decl)> factoredVarParam  Typer *) (* A verif *)
+(*%type <list(exp_type)> argumentsList  Typer *) (* A verif *)
+(*%type returnedType  Typer *)
 
-%type block (* Typer *)
+(*%type block  Typer *)
 %type <Ast.instrType> instruction (* Coder *) 
 %type <Ast.exp_type>container (* Typer *)
-%type classeCallBeginning (* Typer *)
+(*%type classeCallBeginning (* Typer *)
 %type classeCallMiddle (* Typer *)
 %type methodeCallEnd (* Typer *)
 %type attributeCallEnd (* Typer *)
@@ -77,7 +80,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type instanciation  (* Typer *)
 %type castedExpr (* Typer *)
 *)
-
+*)
 
 (* Priorités *)
 (* AUCUNE POUR L'INSTANT *)
@@ -147,11 +150,12 @@ prog: cl=list(classe) il=block EOF { }
 (* classee *)
 (* Ex : classe Point(var xc, yc : Integer, name:String) IS { **Corpsclassee** } *)
 classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classBody, RBRACKET) 
-{
-  name = n,
-  superClasse = s, 
-  attribut = p, 
-  meth = b
+{ classe {
+    name = n,
+    superClasse = s, 
+    attribut = p, 
+    meth = b
+  }
 }
 
 
@@ -187,33 +191,35 @@ factoredAttributes: VAR s = boption(STATIC) v = list(ID) COLON r = returnedType 
 methode:
   (* cas finissant par un bloc *)
   DEF s = boption(STATIC) o = boption(OVERRIDE) n = ID p = factoredVarParamList r = option(returnedType) IS b = block 
-  {
-   name = n,
-   param = p,
-   body = b,
-   static = s,
-   override = o,
-   retour = r
+  { methode {
+    name_methode = n,
+    param_methode = p,
+    body_methode = b,
+    static_methode = s,
+    override = o,
+    retour_methode = r
+    }
    }
 
   (* cas finissant par "nomclassee := expression" *)
-| DEF s = boption(STATIC) o = boption(OVERRIDE) n = ID p = factoredVarParamList r =returnedType ASSIGN e = expression  
-{
-   name = n,
-   param = p,
-   body = e,
-   static = s,
-   override = o,
-   retour = r
-   }
+(*| DEF s = boption(STATIC) o = boption(OVERRIDE) n = ID p = factoredVarParamList r =returnedType ASSIGN e = expression  
+{ methode {
+    name_methode = n,
+    param_methode = p,
+    body_methode = e,
+    static_methode = s,
+    override = o,
+    retour_methode = r
+    }
+   }*)
 
 (* Constructeur de classee *)
 constructor:
   DEF n = CLASSNAME p = factoredVarParamList option(superclasseCall) IS b = block 
   { (* Ajouter dans l'AST UN ARGUMENT DASN CONSTRUCTOR POUR PRENDRE EN COMPLE LE SuperClasseCall ?? *)
-    name = n, 
-    param = p, 
-    body = b 
+    name_constuctor = n, 
+    param_constuctor = p, 
+    body_constuctor = b 
   }
 
 
@@ -229,7 +235,8 @@ superclasseCall: COLON n = CLASSNAME argumentsList {n}
 **)
 
 (* Liste de paramètres optionnellement VAR entouré de parenthèses ( ) *)
-factoredVarParamList: delimited(LPAREN, separated_list(COMMA, f = factoredVarParam), RPAREN) { f }
+factoredVarParamList: f = delimited(LPAREN, separated_list(COMMA, factoredVarParam), RPAREN) { f }
+
 
 
 (* Paramètre ou paramètres groupés optionnellement VAR *)
@@ -239,7 +246,7 @@ factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON r = returnedType 
 
 (* Liste d'arguments, c'est-à-dire les expressions qu'on met comme paramètres lorsqu'on fait un appel (à une méthode par exemple) *)
 (* Ex:    ( 3, z, Point3D.getHeight() )     *)
-argumentsList: delimited(LPAREN, separated_list(COMMA, e = expression), RPAREN) { Id e } (* A revoir *)
+argumentsList: e = delimited(LPAREN, separated_list(COMMA, expression), RPAREN) { Id e } (* A revoir *)
 // Comment gerer le fait que e peut etre un ID ou une CSTE ?
 
 
@@ -256,7 +263,7 @@ returnedType: COLON n = CLASSNAME { n }
 
 
 (* Bloc d'instructions entouré d'accolades *)
-block: delimited(LBRACKET, i = list(instruction), RBRACKET) {Bloc(i)}
+block: i = delimited(LBRACKET, list(instruction), RBRACKET) {Bloc(i)}
 
 
 
@@ -328,7 +335,7 @@ attributeCall:
 
 
 expression:
-  g = expr1 RELOP d = expr1 { Binary(Opcomp,g,d) }
+  g = expr1 RELOP d = expr1 { Binary(RELOP,g,d) }
 | expr1 {}
 
 expr1:
