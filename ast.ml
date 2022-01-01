@@ -4,7 +4,7 @@ type var_type =
   | Integer of int 
   
 
-type classType = {
+type class_type = {
   name : string; 
   superClasse : string option; 
   attribut : decl list; (* param + attribut *)
@@ -20,6 +20,7 @@ and constructor = {
   } 
 
 and decl = {
+    var : bool option;
     typ : string;
     nom : string;
   }
@@ -80,6 +81,7 @@ and exp_type =
   (*| New of instance_creation
   | Field_access of  field_obj * string *)
   | Method_call of methode * (exp_type list)
+  | Comp of opComp*exp_type*exp_type
 
   and unary_op =
     | Not
@@ -106,4 +108,4 @@ and binary_op =
 and type_decl =
   | Class_declaration of class_decl *)
 
-type prog_type = classType list
+type prog_type = class_type list

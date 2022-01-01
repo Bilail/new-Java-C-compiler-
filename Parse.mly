@@ -46,14 +46,15 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 *)
 
 
-%type <Ast.classType> classe (* Coder *)
+%type <Ast.class_type> classe (* Coder *)
 %type <string> extends (* Coder *)
 
 %type <Ast.methode> methode (* Typer *) (* A verif *)
-(*
+%type <Ast.exp_type> expression (* Typer *)
+
 (*%type <Ast.classType.classBody> classeBody  Typer *)
 (*%type anyclasseDecl  Typer ?? Méthode ou atttribut *)
-%type <list(Ast.decl)> factoredAttributes (* Typer *) (* A verif *)
+(*%type <list(Ast.decl)> factoredAttributes  Typer *) (* A verif *)
 
 %type <Ast.constructor> constructor (* Typer *) (* A verif *) 
 (* %type superclasseCall Typer *)
@@ -73,14 +74,14 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type methodeCall (* Typer *)
 %type attributeCall (* Typer *)
 
-%type expression (* Typer *)
+%type <Ast.exp_type> expression (* Typer *)
 %type expr1 (* Typer *)
 %type expr2 (* Typer *)
 %type expr3 (* Typer *)
 %type instanciation  (* Typer *)
 %type castedExpr (* Typer *)
 *)
-*)
+
 
 (* Priorités *)
 (* AUCUNE POUR L'INSTANT *)
@@ -150,17 +151,19 @@ prog: cl=list(classe) il=block EOF { }
 (* classee *)
 (* Ex : classe Point(var xc, yc : Integer, name:String) IS { **Corpsclassee** } *)
 classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classBody, RBRACKET) 
-{ classe {
+{ class_type {
+    let e = match s with | None -> [] | Some m -> m in
     name = n,
-    superClasse = s, 
+    superClasse = e , 
     attribut = p, 
     meth = b
   }
+
 }
 
 
 (* Extends d'une classee, optionnel *)
-extends : EXTENDS s = CLASSNAME {s} // Renvoie le string de la superclasse
+extends : EXTENDS s = CLASSNAME { s } // Renvoie le string de la superclasse
 
 
 (* Corps de la classee *)
@@ -184,19 +187,24 @@ anyClassDecl:
 
 (* Attributs de classee *)
 (* Ex : var static x1, x2 : Integer *)
-factoredAttributes: VAR s = boption(STATIC) v = list(ID) COLON r = returnedType { nom = v, typ = r } (* Dans Decl*)
+factoredAttributes: VAR s = boption(STATIC) v = list(ID) COLON r = returnedType 
+{
+  let e = match s with | None -> [] | Some m -> m in
+  var = e, nom = v, typ = r } (* Dans Decl*)
 
 
 (* Méthode de classee *)
 methode:
   (* cas finissant par un bloc *)
   DEF s = boption(STATIC) o = boption(OVERRIDE) n = ID p = factoredVarParamList r = option(returnedType) IS b = block 
-  { methode {
+  { 
+    let ov = match o with | None -> [] | Some m -> m in
+    methode {
     name_methode = n,
     param_methode = p,
     body_methode = b,
     static_methode = s,
-    override = o,
+    override = ov,
     retour_methode = r
     }
    }
@@ -241,7 +249,9 @@ factoredVarParamList: f = delimited(LPAREN, separated_list(COMMA, factoredVarPar
 
 (* Paramètre ou paramètres groupés optionnellement VAR *)
 (* Ex: var x1, x2, x3 : Integer *)
-factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON r = returnedType {nom = i, typ = r }
+factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON r = returnedType {
+  let e = match b with | None -> [] | Some m -> m in
+  nom = i, typ = r }
 
 
 (* Liste d'arguments, c'est-à-dire les expressions qu'on met comme paramètres lorsqu'on fait un appel (à une méthode par exemple) *)
@@ -282,7 +292,7 @@ instruction:
 container:
   ID {}
 | RESULT {}
-| attributeCall {}
+(*| attributeCall {}*)
 
 
 (* Premier token du début de n'importe quel appel de méthode ou attribut *)
@@ -316,15 +326,15 @@ methodeCall:
 
 (* Dernier élément d'un appel d'attributs en cascade *)
 (* Ex : .length *)
-attributeCallEnd: SELECTION ID {}
+(*attributeCallEnd: SELECTION ID {}*)
 
 (* Appel d'un attribut d'une classe ou instance de classe, et tous les constituants de l'appel en cascade *)
 (* Ex : MaClasse.name.clone().length  *)
-attributeCall:
+(*attributeCall:
   classeCallBeginning attributeCallEnd {}
 | classeCallBeginning classeCallMiddle attributeCallEnd {}
 
-
+*)
 
 (**
   ____________________________________________
@@ -335,8 +345,8 @@ attributeCall:
 
 
 expression:
-  g = expr1 RELOP d = expr1 { Binary(RELOP,g,d) }
-| expr1 {}
+g = expr1 op = RELOP d = expr1 { Comp(op, g,d) (*Binary(op,g,d) *)}
+| e = expr1 { e }
 
 expr1:
   g = expr1 PLUS d = expr2 { Binary(PLUS,g,d)}
