@@ -52,9 +52,10 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <Ast.methode> methode (* Typer *) (* A verif *)
 %type <Ast.exp_type> expression (* Typer *)
 
-%type <methode list> classeBody  (* Typer *)
-(*%type anyclasseDecl  Typer ?? Méthode ou atttribut *)
-(*%type <list(Ast.decl)> factoredAttributes  Typer *) (* A verif *)
+%type <Ast.attrsMethsConstructor> classeBody  (* Typer *)
+%type <Ast.attrsMethsConstructor> anyClDeclAndConstructor
+%type <Ast.attrsMethsConstructor> anyClassDecl  (* Typer ?? Méthode ou atttribut *)
+%type <Ast.decl list> factoredAttributes (* Typer *) (* A verif *)
 
 %type <Ast.constructor> constructor (* Typer *) (* A verif *) 
 (* %type superclasseCall Typer *)
@@ -62,7 +63,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 (*%type <list(factoredVarParam)> factoredVarParamList  Typer *) (* A verif *)
 (*%type <list(Ast.decl)> factoredVarParam  Typer *) (* A verif *)
 (*%type <list(exp_type)> argumentsList  Typer *) (* A verif *)
-(*%type returnedType  Typer *)
+%type <string> returnedType (* Typer *)
 
 (*%type block  Typer *)
 %type <Ast.instrType> instruction (* Coder *) 
@@ -155,33 +156,50 @@ classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b =
   {
     name = n;
     superClasse = s; 
-    attribut = p;
-    meth = b
+    attributs = b.attrs;
+    meth = b.meths;
+    construct = nonOptionalConstr b.construct
   }
-
 }
 
 
+
 (* Extends d'une classee, optionnel *)
-extends : EXTENDS s = CLASSNAME { s } // Renvoie le string de la superclasse
+(* CSTR : Renvoie la string contenant le nom de la superclasse ou None *)
+extends : EXTENDS s = CLASSNAME { s }
+
+
 
 
 (* Corps de la classee *)
 (* Ex : attributs, méthode, méthode, constructeur, méthode, attribut ... *)
 (* Puisqu'on sait qu'il doit y avoir un constructeur par classee, on le cherche directement à l'analyse syntaxique *)
-classeBody : anyClDeclAndConstructor list(anyClassDecl) { [] } (* A compléter *)
+classeBody : beg=anyClDeclAndConstructor endl=list(anyClassDecl)
+{ 
+  {
+    attrs = (beg.attrs @ endl.attrs);
+    meths = (beg.meths @ endl.meths);
+    construct = beg.construct
+  }
+ }
 
 (* Auxiliaire de la règle précédente pour éviter un conflit shift-reduce si on écrivait : *)
 (* clasesBody : list(anyClassDecl) constructor list(anyClassDecl)  *)
 anyClDeclAndConstructor :
-  anyClassDecl anyClDeclAndConstructor {}
-| constructor {}
+  newAny=anyClassDecl next=anyClDeclAndConstructor {
+    {
+      attrs = (newAny.attrs @ next.attrs);
+      meths = (newAny.meth @ next.meth);
+      construct = None
+    }
+  }
+| c=constructor { c }
 
 
 (* Une déclaration quelconque dans une classee : méthode ou attributs *)
 (* On sépare les méthodes en constructeur, méthode, et méthodeOuConstructeur, car il y a ambiguité lors de l'analyse syntaxique *)
 anyClassDecl: 
-| factoredAttributes {}
+  factoredAttributes {}
 | methode {}
 
 
@@ -189,8 +207,13 @@ anyClassDecl:
 (* Ex : var static x1, x2 : Integer *)
 factoredAttributes: VAR s = boption(STATIC) v = list(ID) COLON r = returnedType 
 {
-  let e = match s with | None -> [] | Some m -> m in
-  var = e, nom = v, typ = r } (* Dans Decl*)
+  List.map (fun name -> {
+    var = true;
+    stati = s;
+    typ = r;
+    nom = name
+  })
+} (* Dans Decl*)
 
 
 (* Méthode de classee *)
