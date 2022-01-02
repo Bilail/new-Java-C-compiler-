@@ -223,26 +223,27 @@ methode:
   { 
     let ov = match o with | None -> [] | Some m -> m in
     methode {
-    name_methode = n,
-    param_methode = p,
-    body_methode = b,
-    static_methode = s,
-    override = ov,
+    name_methode = n;
+    param_methode = p;
+    body_methode = b;
+    static_methode = s;
+    override = ov;
     retour_methode = r
     }
    }
 
   (* cas finissant par "nomclassee := expression" *)
-(*| DEF s = boption(STATIC) o = boption(OVERRIDE) n = ID p = factoredVarParamList r =returnedType ASSIGN e = expression  
-{ methode {
-    name_methode = n,
-    param_methode = p,
-    body_methode = e,
-    static_methode = s,
-    override = o,
+| DEF s = boption(STATIC) o = boption(OVERRIDE) n = ID p = factoredVarParamList r =returnedType ASSIGN e = expression  
+{  (*let rt = match r with | None -> [] | Some m -> m in*)
+  {
+    name_methode = n;
+    param_methode = p;
+    body_methode = Exp(e);
+    static_methode = s;
+    override = o;
     retour_methode = r
     }
-   }*)
+   }
 
 (* Constructeur de classee *)
 constructor:

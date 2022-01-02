@@ -27,12 +27,12 @@ and decl = {
   }
 
 and methode = {
-  nom_methode : string;
+  name_methode : string;
   param_methode : decl list;
-  body_methode : instrType;
+  body_methode : instrType ;
   static_methode : bool;
   override : bool;
-  retour_methode : string option (* le type est un string ex : int est INTEGER *)
+  retour_methode : string  (* le type est un string ex : int est INTEGER *)
 }
 
 
