@@ -7,7 +7,7 @@ type var_type =
 type class_type = {
   name : string; 
   superClasse : string option; 
-  attribut : decl list; (* param + attribut *)
+  attributs : decl list; (* param + attribut *)
   meth : methode list;
   construct : constructor ;
   }
@@ -20,7 +20,8 @@ and constructor = {
   } 
 
 and decl = {
-    var : bool option;
+    var : bool;
+    stati : bool;
     typ : string;
     nom : string;
   }
@@ -109,3 +110,63 @@ and type_decl =
   | Class_declaration of class_decl *)
 
 type prog_type = class_type list
+
+
+
+
+
+
+
+
+
+
+
+
+(**
+  ____________________________________________
+/                    ------------°°°°------------                      \
+|                 TYPES INTERMEDIAIRES
+|            Utiles pour construire l'AST, et
+|               absents de la version finale
+\ ___________________________________________ /
+**)
+
+type attrsMethsConstructor = {attrs: decl list; meths: methode list; construct: constructor option}
+
+
+
+(**
+  ____________________________________________
+/                    ------------°°°°------------                      \
+|     FONCTIONS UTILES A LA CONSTRUCTION
+|    Utiles pour construire l'AST dans Parse.mly
+\ ___________________________________________ /
+**)
+
+
+let getAttrsFromAMCList (amcList:attrsMethsConstructor list) =
+  List.fold_left (fun (acc:decl list) (amc:attrsMethsConstructor) ->
+    (List.fold_left (fun (acc:decl list) (attrib:decl) -> attrib::acc) acc amc.attrs)
+  ) [] amcList
+;;
+
+let getMethsFromAMCList (amcList:attrsMethsConstructor list) =
+  List.fold_left (fun (acc:methode list) (amc:attrsMethsConstructor) ->
+    (List.fold_left (fun (acc:methode list) (meth:methode) -> meth::acc) acc amc.meths)
+  ) [] amcList
+;;
+
+let nonOptionalConstr constr =
+  match constr with
+  | Some c -> c
+  | None -> {name_constuctor="ERRORCONSTR";param_constuctor=[];body_constuctor=Return}
+;;
+
+
+(**
+let nonOptionalConstr constr =
+  match constr with
+  | Some constructor -> constr
+  | None -> {name_constuctor="ERRORCONSTR";param_constuctor=[];body_constuctor=Return}
+;;
+**)
