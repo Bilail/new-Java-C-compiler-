@@ -52,7 +52,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <Ast.methode> methode (* Typer *) (* A verif *)
 %type <Ast.exp_type> expression (* Typer *)
 
-(*%type <Ast.classType.classBody> classeBody  Typer *)
+%type <methode list> classeBody  (* Typer *)
 (*%type anyclasseDecl  Typer ?? Méthode ou atttribut *)
 (*%type <list(Ast.decl)> factoredAttributes  Typer *) (* A verif *)
 
@@ -150,12 +150,12 @@ prog: cl=list(classe) il=block EOF { }
 
 (* classee *)
 (* Ex : classe Point(var xc, yc : Integer, name:String) IS { **Corpsclassee** } *)
-classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classBody, RBRACKET) 
-{ class_type {
-    let e = match s with | None -> [] | Some m -> m in
-    name = n,
-    superClasse = e , 
-    attribut = p, 
+classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classeBody, RBRACKET) 
+{ 
+  {
+    name = n;
+    superClasse = s; 
+    attribut = p;
     meth = b
   }
 
@@ -169,10 +169,10 @@ extends : EXTENDS s = CLASSNAME { s } // Renvoie le string de la superclasse
 (* Corps de la classee *)
 (* Ex : attributs, méthode, méthode, constructeur, méthode, attribut ... *)
 (* Puisqu'on sait qu'il doit y avoir un constructeur par classee, on le cherche directement à l'analyse syntaxique *)
-classBody : anyClDeclAndConstructor list(anyClassDecl) {}
+classeBody : anyClDeclAndConstructor list(anyClassDecl) { [] } (* A compléter *)
 
 (* Auxiliaire de la règle précédente pour éviter un conflit shift-reduce si on écrivait : *)
-(* classBody : list(anyClassDecl) constructor list(anyClassDecl)  *)
+(* clasesBody : list(anyClassDecl) constructor list(anyClassDecl)  *)
 anyClDeclAndConstructor :
   anyClassDecl anyClDeclAndConstructor {}
 | constructor {}
