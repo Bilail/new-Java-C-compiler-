@@ -377,7 +377,7 @@ g = expr1 op = RELOP d = expr1 { Comp(op, g,d) (*Binary(op,g,d) *)}
 expr1:
   g = expr1 PLUS d = expr2 { Binary(PLUS,g,d)}
 | g = expr1 MINUS d = expr2 { Binary(MINUS,g,d)}
-| expr2 {}
+| e=expr2 { e }
 
 expr2:
   g = expr2 TIMES d = expr3 { Binary(TIMES,g,d)}

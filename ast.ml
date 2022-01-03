@@ -145,15 +145,17 @@ type attrsMethsConstructor = {attrs: decl list; meths: methode list; construct: 
 
 
 let getAttrsFromAMCList (amcList:attrsMethsConstructor list) =
-  List.fold_left (fun (acc:decl list) (amc:attrsMethsConstructor) ->
-    (List.fold_left (fun (acc:decl list) (attrib:decl) -> attrib::acc) acc amc.attrs)
-  ) [] amcList
+  List.fold_left (fun (acc:decl list) (attrib:decl) -> attrib::acc ) [] (* Inverse la liste à nouveau *)
+    (List.fold_left (fun (acc:decl list) (amc:attrsMethsConstructor) ->
+      (List.fold_left (fun (acc:decl list) (attrib:decl) -> attrib::acc) acc amc.attrs))
+    [] amcList)
 ;;
 
 let getMethsFromAMCList (amcList:attrsMethsConstructor list) =
-  List.fold_left (fun (acc:methode list) (amc:attrsMethsConstructor) ->
-    (List.fold_left (fun (acc:methode list) (meth:methode) -> meth::acc) acc amc.meths)
-  ) [] amcList
+  List.fold_left (fun (acc:methode list) (meth:methode) -> meth::acc ) [] (* Inverse la liste à nouveau *)
+    (List.fold_left (fun (acc:methode list) (amc:attrsMethsConstructor) ->
+      (List.fold_left (fun (acc:methode list) (meth:methode) -> meth::acc) acc amc.meths)
+    ) [] amcList)
 ;;
 
 let nonOptionalConstr constr =
