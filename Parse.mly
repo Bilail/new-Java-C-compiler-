@@ -151,7 +151,7 @@ prog: cl=list(classe) il=block EOF { }
 
 (* classee *)
 (* Ex : classe Point(var xc, yc : Integer, name:String) IS { **Corpsclassee** } *)
-classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classeBody, RBRACKET) 
+classe: CLASSE n = CLASSNAME p = factoredVarParamList s = option(extends) IS LBRACKET b=classeBody RBRACKET 
 { 
   {
     name = n;
@@ -177,8 +177,8 @@ extends : EXTENDS s = CLASSNAME { s }
 classeBody : beg=anyClDeclAndConstructor endl=list(anyClassDecl)
 { 
   {
-    attrs = (beg.attrs @ endl.attrs);
-    meths = (beg.meths @ endl.meths);
+    attrs = (beg.attrs @ getAttrsFromAMCList endl);
+    meths = (beg.meths @ getMethsFromAMCList endl);
     construct = beg.construct
   }
  }
@@ -189,18 +189,20 @@ anyClDeclAndConstructor :
   newAny=anyClassDecl next=anyClDeclAndConstructor {
     {
       attrs = (newAny.attrs @ next.attrs);
-      meths = (newAny.meth @ next.meth);
+      meths = (newAny.meths @ next.meths);
       construct = None
     }
   }
-| c=constructor { c }
+| c=constructor {
+   { attrs = []; meths = []; construct = c }
+  }
 
 
 (* Une déclaration quelconque dans une classee : méthode ou attributs *)
 (* On sépare les méthodes en constructeur, méthode, et méthodeOuConstructeur, car il y a ambiguité lors de l'analyse syntaxique *)
 anyClassDecl: 
-  factoredAttributes {}
-| methode {}
+  a=factoredAttributes{ { attrs=a; meths=[]; construct=None } }
+| m=methode { {attrs=[]; meths=[m]; construct=None } }
 
 
 (* Attributs de classee *)
@@ -212,7 +214,7 @@ factoredAttributes: VAR s = boption(STATIC) v = list(ID) COLON r = returnedType
     stati = s;
     typ = r;
     nom = name
-  })
+  }) v
 } (* Dans Decl*)
 
 
