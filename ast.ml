@@ -51,7 +51,7 @@ and bloc = {
 }
  (*
 type exp_type =
-| Id of string (* var_type *)
+ (* var_type *)
 | Cste of int (* var_type *)
 | Plus of exp_type*exp_type
 | Minus of exp_type*exp_type
@@ -66,6 +66,8 @@ type exp_type =
 *) 
 
 and exp_type =
+  | Id of string
+  | Selection of exp_type*exp_type
   (*| Assignment of assignment
   | Conditional of expr_e * (expr_e * expr_e) *)
   | Binary of binary_op * exp_type * exp_type
@@ -109,7 +111,10 @@ and binary_op =
 and type_decl =
   | Class_declaration of class_decl *)
 
-type prog_type = class_type list
+type prog_type = {
+  cl : class_type list;
+  b : bloc 
+} 
 
 
 

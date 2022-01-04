@@ -147,7 +147,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 **)
 
 (* 1 programme = Des classees + un bloc de programme principal à la fin *)
-prog: cl=list(classe) il=block EOF { }
+prog: cl=list(classe) il=block EOF { cl }
 
 
 
@@ -241,7 +241,7 @@ methode:
   {
     name_methode = n;
     param_methode = p;
-    body_methode = {declarations=[]; instructions=[Affectation(Exp)] }; (* En attente de pouvoir mettre en AST des instructions de type    result := expression;     *)
+    body_methode = {declarations=[]; instructions=[Affectation(Id("result"), e); Return] };
     static_methode = s;
     override = o;
     retour_methode = r
