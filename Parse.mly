@@ -66,8 +66,10 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <string> returnedType (* Typer *)
 
 (*%type block  Typer *)
+%type <Ast.decl list> blockFactoredVarsList (* Typer *)
+%type <Ast.decl list> blockFactoredVars (* Typer *)
 %type <Ast.instrType> instruction (* Coder *) 
-%type <Ast.exp_type>container (* Typer *)
+%type <Ast.exp_type> container (* Typer *)
 (*%type classeCallBeginning (* Typer *)
 %type classeCallMiddle (* Typer *)
 %type methodeCallEnd (* Typer *)
@@ -194,7 +196,7 @@ anyClDeclAndConstructor :
     }
   }
 | c=constructor {
-   { attrs = []; meths = []; construct = c }
+   { attrs = []; meths = []; construct = Some c }
   }
 
 
@@ -207,7 +209,7 @@ anyClassDecl:
 
 (* Attributs de classee *)
 (* Ex : var static x1, x2 : Integer *)
-factoredAttributes: VAR s = boption(STATIC) v = list(ID) COLON r = returnedType 
+factoredAttributes: VAR s = boption(STATIC) v=separated_nonempty_list(COMMA, ID) COLON r = returnedType 
 {
   List.map (fun name -> {
     var = true;
@@ -221,26 +223,25 @@ factoredAttributes: VAR s = boption(STATIC) v = list(ID) COLON r = returnedType
 (* Méthode de classee *)
 methode:
   (* cas finissant par un bloc *)
-  DEF s = boption(STATIC) o = boption(OVERRIDE) n = ID p = factoredVarParamList r = option(returnedType) IS b = block 
+  DEF s=boption(STATIC) o=boption(OVERRIDE) n=ID p=factoredVarParamList r=option(returnedType) IS b=block 
   { 
-    let ov = match o with | None -> [] | Some m -> m in
-    methode {
+    {
     name_methode = n;
     param_methode = p;
     body_methode = b;
     static_methode = s;
-    override = ov;
+    override = o;
     retour_methode = r
     }
    }
 
   (* cas finissant par "nomclassee := expression" *)
-| DEF s = boption(STATIC) o = boption(OVERRIDE) n = ID p = factoredVarParamList r =returnedType ASSIGN e = expression  
+| DEF s=boption(STATIC) o=boption(OVERRIDE) n=ID p=factoredVarParamList r=returnedType ASSIGN e=expression  
 {  (*let rt = match r with | None -> [] | Some m -> m in*)
   {
     name_methode = n;
     param_methode = p;
-    body_methode = Exp(e);
+    body_methode = {declarations=[]; instructions=[Affectation(Exp)] }; (* En attente de pouvoir mettre en AST des instructions de type    result := expression;     *)
     static_methode = s;
     override = o;
     retour_methode = r
@@ -251,9 +252,11 @@ methode:
 constructor:
   DEF n = CLASSNAME p = factoredVarParamList option(superclasseCall) IS b = block 
   { (* Ajouter dans l'AST UN ARGUMENT DASN CONSTRUCTOR POUR PRENDRE EN COMPLE LE SuperClasseCall ?? *)
-    name_constuctor = n, 
-    param_constuctor = p, 
-    body_constuctor = b 
+    {
+    name_constuctor = n;
+    param_constuctor = p; 
+    body_constuctor = b
+    } 
   }
 
 
@@ -275,7 +278,7 @@ factoredVarParamList: f = delimited(LPAREN, separated_list(COMMA, factoredVarPar
 
 (* Paramètre ou paramètres groupés optionnellement VAR *)
 (* Ex: var x1, x2, x3 : Integer *)
-factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON r = returnedType {
+factoredVarParam: boption(VAR) separated_nonempty_list(COMMA, ID) COLON r = returnedType {
   let e = match b with | None -> [] | Some m -> m in
   nom = i, typ = r }
 
@@ -283,7 +286,6 @@ factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON r = returnedType 
 (* Liste d'arguments, c'est-à-dire les expressions qu'on met comme paramètres lorsqu'on fait un appel (à une méthode par exemple) *)
 (* Ex:    ( 3, z, Point3D.getHeight() )     *)
 argumentsList: e = delimited(LPAREN, separated_list(COMMA, expression), RPAREN) { Id e } (* A revoir *)
-// Comment gerer le fait que e peut etre un ID ou une CSTE ?
 
 
 (* Ex:   : Point3D *)
@@ -299,11 +301,22 @@ returnedType: COLON n = CLASSNAME { n }
 
 
 (* Bloc d'instructions entouré d'accolades *)
-block: i = delimited(LBRACKET, list(instruction), RBRACKET) {Bloc(i)}
+block:
+  il=delimited(LBRACKET, list(instruction), RBRACKET) { Bloc( {declarations=[]; instructions=il} ) }
+| LBRACKET blockFactoredVarsList IS list(instruction) RBRACKET {  }
+
+
+(* Déclarations des variables locales au début d'un bloc *)
+(* Ex (début seulement): { x, y: Integer; p1: Point; is x := 0; p1 := new Point(x, x); } *)
+blockFactoredVarsList: separated_nonempty_list(SEMICOLON, blockFactoredVars) {}
+
+(* Un seul groupe de variables locales factorisées *)
+(* Ex:    x, y : Integer      *)
+blockFactoredVars: separated_nonempty_list(COMMA, ID) returnedType {}
 
 
 
-(* N'importe quelle instruction du programme principal (sauf RETURN) ou des méthodes *)
+(* N'importe quelle instruction du programme principal ou des méthodes *)
 instruction:
   e = expression SEMICOLON {Exp(e)}
 | b = block {Bloc(b)}

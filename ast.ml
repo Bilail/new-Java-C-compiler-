@@ -15,7 +15,7 @@ type class_type = {
 and constructor = {
   name_constuctor : string;
   param_constuctor : decl list; 
-  body_constuctor : instrType;
+  body_constuctor : bloc;
   (* superCall : *)
   } 
 
@@ -29,7 +29,7 @@ and decl = {
 and methode = {
   name_methode : string;
   param_methode : decl list;
-  body_methode : instrType ;
+  body_methode : bloc;
   static_methode : bool;
   override : bool;
   retour_methode : string  (* le type est un string ex : int est INTEGER *)
@@ -161,14 +161,9 @@ let getMethsFromAMCList (amcList:attrsMethsConstructor list) =
 let nonOptionalConstr constr =
   match constr with
   | Some c -> c
-  | None -> {name_constuctor="ERRORCONSTR";param_constuctor=[];body_constuctor=Return}
+  | None -> {
+      name_constuctor="ERRORCONSTR";
+      param_constuctor=[];
+      body_constuctor={declarations=[];instructions=[]}
+    }
 ;;
-
-
-(**
-let nonOptionalConstr constr =
-  match constr with
-  | Some constructor -> constr
-  | None -> {name_constuctor="ERRORCONSTR";param_constuctor=[];body_constuctor=Return}
-;;
-**)
