@@ -16,7 +16,7 @@ and constructor = {
   name_constuctor : string;
   param_constuctor : decl list; 
   body_constuctor : bloc;
-  (* superCall : *)
+  super_call : constructor_call option
   } 
 
 and decl = {
@@ -32,7 +32,7 @@ and methode = {
   body_methode : bloc;
   static_methode : bool;
   override : bool;
-  retour_methode : string  (* le type est un string ex : int est INTEGER *)
+  retour_methode : string option  (* le type est un string ex : int est INTEGER *)
 }
 
 
@@ -49,6 +49,13 @@ and bloc = {
   declarations : decl list;
   instructions : instrType list;
 }
+
+
+and constructor_call = {
+  classe : string;
+  arguments : exp_type list
+}
+
  (*
 type exp_type =
  (* var_type *)
@@ -67,6 +74,7 @@ type exp_type =
 
 and exp_type =
   | Id of string
+  | Result
   | Selection of exp_type*exp_type
   (*| Assignment of assignment
   | Conditional of expr_e * (expr_e * expr_e) *)
@@ -83,7 +91,7 @@ and exp_type =
   | Cste of int 
   (*| New of instance_creation
   | Field_access of  field_obj * string *)
-  | Method_call of methode * (exp_type list)
+  | Method_call of methode * (exp_type list) (* S'assurer que la méthode renvoie quelque chose à l'analyse contextuelle *)
   | Comp of opComp*exp_type*exp_type
 
   and unary_op =
@@ -169,6 +177,7 @@ let nonOptionalConstr constr =
   | None -> {
       name_constuctor="ERRORCONSTR";
       param_constuctor=[];
-      body_constuctor={declarations=[];instructions=[]}
+      body_constuctor={declarations=[];instructions=[]};
+      super_call=None
     }
 ;;
