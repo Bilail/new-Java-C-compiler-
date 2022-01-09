@@ -362,32 +362,32 @@ let
 
   | 19 ->
 # 100 "Lex.mll"
-                  ( RELOP (Ast.Lt) )
+                  ( RELOP (Ast.LT) )
 # 367 "Lex.ml"
 
   | 20 ->
 # 101 "Lex.mll"
-                   ( RELOP (Ast.Le) )
+                   ( RELOP (Ast.LE) )
 # 372 "Lex.ml"
 
   | 21 ->
 # 102 "Lex.mll"
-                   ( RELOP (Ast.Gt) )
+                   ( RELOP (Ast.GT) )
 # 377 "Lex.ml"
 
   | 22 ->
 # 103 "Lex.mll"
-                   ( RELOP (Ast.Ge) )
+                   ( RELOP (Ast.GE) )
 # 382 "Lex.ml"
 
   | 23 ->
 # 104 "Lex.mll"
-                   ( RELOP (Ast.Eq) )
+                   ( RELOP (Ast.EQ) )
 # 387 "Lex.ml"
 
   | 24 ->
 # 105 "Lex.mll"
-                   ( RELOP (Ast.Neq) )
+                   ( RELOP (Ast.NEQ) )
 # 392 "Lex.ml"
 
   | 25 ->

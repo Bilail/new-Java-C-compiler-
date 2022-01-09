@@ -12,7 +12,7 @@ type prog_def = {
 } 
   
 
-type class_def = {
+and class_def = {
   name : string; 
   superclass : string option; 
   attributes : variable_def list; (* param + attribut *)
@@ -111,14 +111,13 @@ and expression_t =
   | Unary of unary_operator_t * expression_t
   | Cast of string * expression_t (* string = Nom de la classe de destination ; expression_t = Valeur à caster *)
   | This
-  | Comp of compare_operator_t*expression_t*expression_t
   | NewClass of string * expression_t list
 
   and unary_operator_t =
     | UMINUS
 
 and binary_operator_t =
-  | IntOperator of int_binary_operator_t
+  | IntBinOp of int_binary_operator_t
   | StringConcat
 
 and int_binary_operator_t =

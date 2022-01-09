@@ -11,7 +11,7 @@
 %token <int> CSTE (* 42 *)
 
 (* Symbols *)
-%token <Ast.opComp> RELOP (* = <> > < >= <= *)   
+%token <Ast.int_binary_operator_t> RELOP (* = <> > < >= <= *)   
 %token PLUS MINUS TIMES DIV (*  + - * /  *)
 %token LPAREN RPAREN (* ( ) *)
 %token LBRACKET RBRACKET    (* { } *)
@@ -417,33 +417,33 @@ attributeCall:
 
 
 expression:
-g = expr1 op = RELOP d = expr1 { Comp(op, g,d) (*Binary(op,g,d) *)}
+g=expr1 op=RELOP d=expr1 { Binary( (IntBinOp op), g, d) }
 | e = expr1 { e }
 
 expr1:
-  g = expr1 PLUS d = expr2 { Binary(PLUS,g,d)}
-| g = expr1 MINUS d = expr2 { Binary(MINUS,g,d)}
+  g = expr1 PLUS d = expr2 { Binary( IntBinOp(PLUS), g, d)}
+| g = expr1 MINUS d = expr2 { Binary( IntBinOp(MINUS), g, d)}
 | e=expr2 { e }
 
 expr2:
-  g = expr2 TIMES d = expr3 { Binary(TIMES,g,d)}
-| g = expr2 DIV d = expr3 { Binary(DIV,g,d)}
-| expr3 {}
+  g = expr2 TIMES d = expr3 { Binary( IntBinOp(TIMES), g, d)}
+| g = expr2 DIV d = expr3 { Binary( IntBinOp(DIV), g, d)}
+| e=expr3 { e }
 
 expr3:
   v = CSTE { Cste v}  (* A Voir comment faire comme ca peut etre float/int etc..*)
 | PLUS e=expr3  { e }
-| MINUS e=expr3  { UMinus e }
-| container {}
-| methodeCall {}
-| instanciation {}
-| delimited(LPAREN, expression, RPAREN) {}
-| castedExpr {}
+| MINUS e=expr3  { Unary(UMINUS, e) }
+| c=container { Container c }
+| m=methodeCall { Method m }
+| i=instanciation { i }
+| e=delimited(LPAREN, expression, RPAREN) { e }
+| e=castedExpr { e }
 
 
-instanciation: NEW CLASSNAME argumentsList {}
+instanciation: NEW n=CLASSNAME el=argumentsList { NewClass(n, el) }
 
 (* Cast d'une expression *)
 (* Ex :        (Point p) *)
 (* avec p un PointColoré. Le résultat de cette expression est un Point normal avec les mêmes attributs que p *)
-castedExpr: LPAREN CLASSNAME expression RPAREN {}
+castedExpr: LPAREN n=CLASSNAME e=expression RPAREN { Cast(n, e) }
