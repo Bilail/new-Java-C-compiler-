@@ -73,8 +73,19 @@ and instruction_t =
   
 
 and container_t =
-  | Select of selection_beg_t
+  | Select of attribute_call
   | LocalVar of string
+
+
+and attribute_call = {
+  beginning : selection_beg_t
+}
+
+and method_call = {
+  beginning : selection_beg_t
+}
+
+
 
 
 
@@ -91,14 +102,14 @@ and container_t =
 and expression_t =
   | IntLiteral of int
   | StringLiteral of string
-  | Id of string
+  | Local of string
   | Result
-  | SelectionChain of selection_t
+  | Attrib of attribute_call
+  | Method of method_call (* S'assurer que la méthode renvoie quelque chose à l'analyse contextuelle *)
   | Binary of binary_operator_t * expression_t * expression_t
   | Unary of unary_operator_t * expression_t
   | Cast of string * expression_t (* string = Nom de la classe de destination ; expression_t = Valeur à caster *)
   | This
-  | Method_call of methode_def * (expression_t list) (* S'assurer que la méthode renvoie quelque chose à l'analyse contextuelle *)
   | Comp of compare_operator_t*expression_t*expression_t
   | NewClass of string * expression_t list
 
@@ -118,8 +129,9 @@ and int_binary_operator_t =
 
 and selection_beg_t =
   | ExprSelect of expression_t * selection_end_t
-  | ClassSelect of string * selection_end_t
   | ThisSelect * selection_end_t
+  | ClassSelect of string * selection_end_t
+  | SuperSelect of string * selection_end_t
 
 and selection_end_t =
   | AttrSelect of string * selection_end_t * selection_end_t option
