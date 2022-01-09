@@ -75,6 +75,7 @@ and instruction_t =
 and container_t =
   | Select of attribute_call
   | LocalVar of string
+  | Result
 
 
 and attribute_call = {
@@ -102,9 +103,7 @@ and method_call = {
 and expression_t =
   | IntLiteral of int
   | StringLiteral of string
-  | Local of string
-  | Result
-  | Attrib of attribute_call
+  | Container of container_t
   | Method of method_call (* S'assurer que la méthode renvoie quelque chose à l'analyse contextuelle *)
   | Binary of binary_operator_t * expression_t * expression_t
   | Unary of unary_operator_t * expression_t
@@ -128,13 +127,13 @@ and int_binary_operator_t =
 
 
 and selection_beg_t =
-  | ExprSelect of expression_t * selection_end_t
+  | VarSelect of expression_t * selection_end_t
   | ThisSelect * selection_end_t
   | ClassSelect of string * selection_end_t
   | SuperSelect of string * selection_end_t
 
 and selection_end_t =
-  | AttrSelect of string * selection_end_t * selection_end_t option
+  | AttrSelect of string * selection_end_t option
   | MethSelect of string * expression_t list * selection_end_t option
 
 

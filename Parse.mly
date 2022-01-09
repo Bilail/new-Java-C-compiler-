@@ -49,13 +49,11 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <Ast.class_def> classe (* Coder *)
 %type <string> extends (* Coder *)
 
-%type <Ast.methode_def> methode (* Typer *) (* A verif *)
-%type <Ast.expression_t> expression (* Typer *)
-
 %type <Ast.attrsMethsConstructor> classeBody  (* Typer *)
 %type <Ast.attrsMethsConstructor> anyClDeclAndConstructor
 %type <Ast.attrsMethsConstructor> anyClassDecl  (* Typer ?? Méthode ou atttribut *)
 %type <Ast.variable_def list> factoredAttributes (* Typer *) (* A verif *)
+%type <Ast.methode_def> methode (* Typer *) (* A verif *)
 
 %type <Ast.constructor> constructor (* Typer *) (* A verif *) 
 %type <Ast.superconstructor_call> superclasseCall 
@@ -69,7 +67,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <Ast.variable_def list> blockFactoredVarsList (* Typer *)
 %type <Ast.variable_def list> blockFactoredVars (* Typer *)
 %type <Ast.instruction_t> instruction (* Coder *) 
-%type <Ast.expression_t> container (* Typer *)
+%type <Ast.container_t> container (* Typer *)
 %type <Ast.selection_beg_t> classeCallBeginning (* Typer *)
 %type <Ast.selection_end_t> classeCallMiddle (* Typer *)
 %type <Ast.selection_end_t> methodeCallEnd (* Typer *)
@@ -77,12 +75,12 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <Ast.method_call> methodeCall (* Typer *)
 %type <Ast.attribute_call> attributeCall (* Typer *)
 
-%type <Ast.exp_type> expression (* Typer *)
-%type <Ast.exp_type> expr1 (* Typer *)
-%type <Ast.exp_type> expr2 (* Typer *)
-%type <Ast.exp_type> expr3 (* Typer *)
-%type <Ast.exp_type> instanciation  (* Typer *)
-%type <Ast.exp_type> castedExpr (* Typer *)
+%type <Ast.expression_t> expression (* Typer *)
+%type <Ast.expression_t> expr1 (* Typer *)
+%type <Ast.expression_t> expr2 (* Typer *)
+%type <Ast.expression_t> expr3 (* Typer *)
+%type <Ast.expression_t> instanciation  (* Typer *)
+%type <Ast.expression_t> castedExpr (* Typer *)
 
 
 
@@ -337,9 +335,10 @@ blockFactoredVarsList: dl=separated_nonempty_list(SEMICOLON, blockFactoredVars) 
 (* Ex:    x, y : Integer      *)
 blockFactoredVars: idL=separated_nonempty_list(COMMA, ID) r=returnedType { 
   List.map (fun id -> {
-    var=false; stati=false;
-    typ=r;
-    nom=id;
+    name = id;
+    is_var = false;
+    is_static = false;
+    typ = r
   }) idL
  }
 
@@ -358,9 +357,9 @@ instruction:
 (* Variable ou attribut, n'importe quoi pouvant contenir une valeur *)
 (* Ex:     x   ou    Point2D.multiply(3*y).length    *)
 container:
-  n=ID { Id n }
+  n=ID { LocalVar n }
 | RESULT { Result }
-| a=attributeCall { a }
+| a=attributeCall { Select a }
 
 
 (* Premier token du début de n'importe quel appel de méthode ou attribut *)
@@ -375,8 +374,8 @@ classeCallBeginning:
 (* Tout les appels de méthodes et attributs entre le premier et le dernier appel dans un appel de méthode ou attribut *)
 (* Ex :    [...].name.clone()[...] *)
 classeCallMiddle:
-  SELECTION ID {}
-| SELECTION ID classeCallBeginning {}
+  SELECTION id=ID { AttrSelect( id ; None ) }
+| SELECTION id=ID classeCallBeginning {}
 | SELECTION ID argumentsList {}
 | SELECTION ID argumentsList classeCallBeginning {}
 
