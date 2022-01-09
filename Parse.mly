@@ -278,7 +278,6 @@ constructor:
   }
 
 
-(* Comment prendre en compte "argumentsLust ?" *)
 superclasseCall: COLON n=CLASSNAME al=argumentsList { {superclass=n; arguments=al} }
 
 
@@ -289,21 +288,27 @@ superclasseCall: COLON n=CLASSNAME al=argumentsList { {superclass=n; arguments=a
 \ ___________________________________________ /
 **)
 
+(* !!! flatten *)
 (* Liste de paramètres optionnellement VAR entouré de parenthèses ( ) *)
-factoredVarParamList: f = delimited(LPAREN, separated_list(COMMA, factoredVarParam), RPAREN) { f }
+factoredVarParamList: f = delimited(LPAREN, separated_list(COMMA, factoredVarParam), RPAREN) { List.flatten f }
 
 
 
 (* Paramètre ou paramètres groupés optionnellement VAR *)
 (* Ex: var x1, x2, x3 : Integer *)
-factoredVarParam: boption(VAR) separated_nonempty_list(COMMA, ID) COLON r = returnedType {
-  let e = match b with | None -> [] | Some m -> m in
-  nom = i, typ = r }
+factoredVarParam: v=boption(VAR) ids=separated_nonempty_list(COMMA, ID) COLON r=returnedType {
+  List.map (fun n -> {
+    name = n
+    is_var = v;
+    is_static = false;
+    typ = r
+  }) ids
+}
 
 
 (* Liste d'arguments, c'est-à-dire les expressions qu'on met comme paramètres lorsqu'on fait un appel (à une méthode par exemple) *)
 (* Ex:    ( 3, z, Point3D.getHeight() )     *)
-argumentsList: el=delimited(LPAREN, separated_list(COMMA, expression), RPAREN) { el } (* A revoir *)
+argumentsList: el=delimited(LPAREN, separated_list(COMMA, expression), RPAREN) { el }
 
 
 (* Ex:   : Point3D *)
