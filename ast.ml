@@ -79,11 +79,13 @@ and container_t =
 
 
 and attribute_call = {
-  beginning : selection_beg_t
+  beginning : selection_beg_t;
+  selections_to_attrs : selection_end_t list
 }
 
 and method_call = {
-  beginning : selection_beg_t
+  beginning : selection_beg_t;
+  selections_to_meths : selection_end_t list;
 }
 
 
@@ -127,14 +129,14 @@ and int_binary_operator_t =
 
 
 and selection_beg_t =
-  | VarSelect of expression_t * selection_end_t
-  | ThisSelect * selection_end_t
-  | ClassSelect of string * selection_end_t
-  | SuperSelect of string * selection_end_t
+  | VarSelect of expression_t
+  | ClassSelect of string
+  | ThisSelect
+  | SuperSelect of string
 
 and selection_end_t =
-  | AttrSelect of string * selection_end_t option
-  | MethSelect of string * expression_t list * selection_end_t option
+  | AttrSelect of string
+  | MethSelect of string * expression_t list
 
 
 

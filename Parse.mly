@@ -69,8 +69,8 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <Ast.instruction_t> instruction (* Coder *) 
 %type <Ast.container_t> container (* Typer *)
 %type <Ast.selection_beg_t> classeCallBeginning (* Typer *)
-%type <Ast.selection_end_t> methodeCallEnd (* Typer *)
-%type <Ast.selection_end_t> attributeCallEnd (* Typer *)
+%type <Ast.selection_end_t list> methodeCallEnd (* Typer *)
+%type <Ast.selection_end_t list> attributeCallEnd (* Typer *)
 %type <Ast.method_call> methodeCall (* Typer *)
 %type <Ast.attribute_call> attributeCall (* Typer *)
 
@@ -364,37 +364,47 @@ container:
 (* Premier token du début de n'importe quel appel de méthode ou attribut *)
 (* Ex :    this       ou      myVariable      ou     MaClasse     *)
 classeCallBeginning:
-  ID {}
-| CLASSNAME {}
-| THIS {}
-| SUPER {}
+  id=ID { VarSelect(Container(LocalVar(id))) }
+| CLASSNAME { ClassSelect }
+| THIS { ThisSelect }
+| SUPER { SuperSelect }
 
 
 
 (* Dernier élément d'un appel de méthode en cascade *)
 (* Ex : .getZ() *)
 methodeCallEnd:
-  SELECTION ID argumentsList {}
-| SELECTION ID methodeCallEnd {}
-| SELECTION ID argumentsList methodeCallEnd {}
+  SELECTION id=ID el=argumentsList { [MethSelect(id, el)] }
+| SELECTION id=ID selecL=methodeCallEnd { (AttrSelect id)::selecL }
+| SELECTION id=ID el=argumentsList selecL=methodeCallEnd { (MethSelect(id, el))::selecL }
 
 (* Appel de méthode et tous ses constituants *)
 (* Ex : myVariable.name.clone().getZ() *)
 methodeCall:
-  classeCallBeginning methodeCallEnd {}
+  b=classeCallBeginning sl=methodeCallEnd { 
+    {
+      beginning = b;
+      selections_to_meths = sl;
+    } 
+  }
 
 
 (* Dernier élément d'un appel d'attributs en cascade *)
 (* Ex : .length *)
 attributeCallEnd:
-  SELECTION ID {}
-| SELECTION ID attributeCallEnd {}
-| SELECTION ID argumentsList attributeCallEnd {}
+  SELECTION id=ID { [AttrSelect id] }
+| SELECTION id=ID selecL=attributeCallEnd { (AttrSelect id)::selecL }
+| SELECTION id=ID el=argumentsList selecL=attributeCallEnd { (MethSelect(id, el))::selecL }
 
 (* Appel d'un attribut d'une classe ou instance de classe, et tous les constituants de l'appel en cascade *)
 (* Ex : MaClasse.name.clone().length  *)
 attributeCall:
-  classeCallBeginning attributeCallEnd {}
+  b=classeCallBeginning sl=attributeCallEnd {
+    {
+      beginning = b;
+      selections_to_attrs = sl
+    }
+  }
 
 
 
