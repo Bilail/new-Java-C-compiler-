@@ -69,7 +69,6 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <Ast.instruction_t> instruction (* Coder *) 
 %type <Ast.container_t> container (* Typer *)
 %type <Ast.selection_beg_t> classeCallBeginning (* Typer *)
-%type <Ast.selection_end_t> classeCallMiddle (* Typer *)
 %type <Ast.selection_end_t> methodeCallEnd (* Typer *)
 %type <Ast.selection_end_t> attributeCallEnd (* Typer *)
 %type <Ast.method_call> methodeCall (* Typer *)
@@ -371,35 +370,31 @@ classeCallBeginning:
 | SUPER {}
 
 
-(* Tout les appels de méthodes et attributs entre le premier et le dernier appel dans un appel de méthode ou attribut *)
-(* Ex :    [...].name.clone()[...] *)
-classeCallMiddle:
-  SELECTION id=ID { AttrSelect( id ; None ) }
-| SELECTION id=ID classeCallBeginning {}
-| SELECTION ID argumentsList {}
-| SELECTION ID argumentsList classeCallBeginning {}
-
 
 (* Dernier élément d'un appel de méthode en cascade *)
 (* Ex : .getZ() *)
-methodeCallEnd: SELECTION ID argumentsList {}
+methodeCallEnd:
+  SELECTION ID argumentsList {}
+| SELECTION ID methodeCallEnd {}
+| SELECTION ID argumentsList methodeCallEnd {}
 
 (* Appel de méthode et tous ses constituants *)
 (* Ex : myVariable.name.clone().getZ() *)
 methodeCall:
   classeCallBeginning methodeCallEnd {}
-| classeCallBeginning classeCallMiddle methodeCallEnd {}
 
 
 (* Dernier élément d'un appel d'attributs en cascade *)
 (* Ex : .length *)
-attributeCallEnd: SELECTION ID {}
+attributeCallEnd:
+  SELECTION ID {}
+| SELECTION ID attributeCallEnd {}
+| SELECTION ID argumentsList attributeCallEnd {}
 
 (* Appel d'un attribut d'une classe ou instance de classe, et tous les constituants de l'appel en cascade *)
 (* Ex : MaClasse.name.clone().length  *)
 attributeCall:
   classeCallBeginning attributeCallEnd {}
-| classeCallBeginning classeCallMiddle attributeCallEnd {}
 
 
 
