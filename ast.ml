@@ -13,7 +13,7 @@ type prog_def = {
   
 
 and class_def = {
-  name : string; 
+  name_class : string; 
   superclass : string option; 
   attributes : variable_def list; (* param + attribut *)
   methods : methode_def list;
@@ -21,22 +21,22 @@ and class_def = {
 }
 
 and constructor_def = {
-  name : string;
-  parameters : variable_def list; 
-  body : block_t;
+  name_constructor : string;
+  param_constructor : variable_def list; 
+  body_constructor : block_t;
   super_call : superconstructor_call option
 }
 
 and superconstructor_call = {
-  superclass : string;
+  superclass_constructor : string;
   arguments : expression_t list
 }
 
 and methode_def = {
-  name : string;
-  parameters : variable_def list;
-  body : block_t;
-  is_static : bool;
+  name_method : string;
+  param_method : variable_def list;
+  body_method : block_t;
+  is_static_method : bool;
   is_override : bool;
   return_type : string option  (* le type est un string ex : int est INTEGER *)
 }
@@ -69,7 +69,7 @@ and instruction_t =
   | Block of block_t
   | Ite of expression_t * instruction_t * instruction_t
   | Return 
-  | Affectation of container * expression_t
+  | Affectation of container_t * expression_t
   
 
 and container_t =
@@ -84,7 +84,7 @@ and attribute_call = {
 }
 
 and method_call = {
-  beginning : selection_beg_t;
+  beginning_call : selection_beg_t;
   selections_to_meths : selection_end_t list;
 }
 
@@ -131,7 +131,7 @@ and selection_beg_t =
   | VarSelect of expression_t
   | ClassSelect of string
   | ThisSelect
-  | SuperSelect of string
+  | SuperSelect
 
 and selection_end_t =
   | AttrSelect of string
@@ -157,6 +157,8 @@ and selection_end_t =
 |               absents de la version finale
 \ ___________________________________________ /
 **)
+
+exception MISC_Errror of string
 
 type attrsMethsConstructor = {attrs: variable_def list; meths: methode_def list; construct: constructor_def option}
 
@@ -189,9 +191,9 @@ let nonOptionalConstr constr =
   match constr with
   | Some c -> c
   | None -> {
-      name_constuctor="ERRORCONSTR";
-      param_constuctor=[];
-      body_constuctor={declarations=[];instructions=[]};
+      name_constructor="ERRORCONSTR";
+      param_constructor=[];
+      body_constructor={declarations=[];instructions=[]};
       super_call=None
     }
 ;;

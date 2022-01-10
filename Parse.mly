@@ -55,7 +55,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 %type <Ast.variable_def list> factoredAttributes (* Typer *) (* A verif *)
 %type <Ast.methode_def> methode (* Typer *) (* A verif *)
 
-%type <Ast.constructor> constructor (* Typer *) (* A verif *) 
+%type <Ast.constructor_def> constructor (* Typer *) (* A verif *) 
 %type <Ast.superconstructor_call> superclasseCall 
 
 %type <Ast.variable_def list> factoredVarParamList (* A verif *)
@@ -158,7 +158,7 @@ prog: cl=list(classe) b=block EOF {
 classe: CLASSE n=CLASSNAME p=factoredVarParamList s=option(extends) IS LBRACKET b=classeBody RBRACKET 
 { 
   {
-    name = n;
+    name_class = n;
     superclass = s; 
     attributes = b.attrs;
     methods = b.meths;
@@ -214,7 +214,7 @@ anyClassDecl:
 factoredAttributes: VAR s=boption(STATIC) v=separated_nonempty_list(COMMA, ID) COLON r = returnedType 
 {
   List.map (fun n -> {
-    name = n
+    name = n;
     is_var = true;
     is_static = s;
     typ = r
@@ -229,10 +229,10 @@ methode:
   DEF s=boption(STATIC) o=boption(OVERRIDE) n=ID p=factoredVarParamList r=returnedType IS b=block 
   { 
     {
-    name = n;
-    parameters = p;
-    body = {declarations=({var=false; stati=false; typ=r; nom="result"}::b.declarations); instructions=b.instructions};
-    is_static = s;
+    name_method = n;
+    param_method = p;
+    body_method = {declarations=({is_var=false; is_static=false; typ=r; name="result"}::b.declarations); instructions=b.instructions};
+    is_static_method = s;
     is_override = o;
     return_type = Some r
     }
@@ -241,10 +241,10 @@ methode:
 | DEF s=boption(STATIC) o=boption(OVERRIDE) n=ID p=factoredVarParamList IS b=block 
   { 
     {
-    name = n;
-    parameters = p;
-    body = b;
-    is_static = s;
+    name_method = n;
+    param_method = p;
+    body_method = b;
+    is_static_method = s;
     is_override = o;
     return_type = None
     }
@@ -253,10 +253,10 @@ methode:
 | DEF s=boption(STATIC) o=boption(OVERRIDE) n=ID p=factoredVarParamList r=returnedType ASSIGN e=expression  
 {  (*let rt = match r with | None -> [] | Some m -> m in*)
   {
-    name = n;
-    parameters = p;
-    body = {declarations=[]; instructions=[Affectation(Id("result"), e); Return] };
-    is_static = s;
+    name_method = n;
+    param_method = p;
+    body_method = {declarations=[]; instructions=[Affectation(LocalVar("result"), e); Return] };
+    is_static_method = s;
     is_override = o;
     return_type = Some r
     }
@@ -267,15 +267,15 @@ constructor:
   DEF n = CLASSNAME p = factoredVarParamList s=option(superclasseCall) IS b = block 
   { (* Ajouter dans l'AST UN ARGUMENT DASN CONSTRUCTOR POUR PRENDRE EN COMPLE LE SuperClasseCall ?? *)
     {
-    name = n;
-    parameters = p; 
-    body = b;
+    name_constructor = n;
+    param_constructor = p; 
+    body_constructor = b;
     super_call = s
     } 
   }
 
 
-superclasseCall: COLON n=CLASSNAME al=argumentsList { {superclass=n; arguments=al} }
+superclasseCall: COLON n=CLASSNAME al=argumentsList { {superclass_constructor=n; arguments=al} }
 
 
 (**
@@ -295,7 +295,7 @@ factoredVarParamList: f = delimited(LPAREN, separated_list(COMMA, factoredVarPar
 (* Ex: var x1, x2, x3 : Integer *)
 factoredVarParam: v=boption(VAR) ids=separated_nonempty_list(COMMA, ID) COLON r=returnedType {
   List.map (fun n -> {
-    name = n
+    name = n;
     is_var = v;
     is_static = false;
     typ = r
@@ -323,7 +323,7 @@ returnedType: COLON n = CLASSNAME { n }
 (* Bloc d'instructions entouré d'accolades *)
 block:
   il=delimited(LBRACKET, list(instruction), RBRACKET) { {declarations=[]; instructions=il} }
-| LBRACKET dl=blockFactoredVarsList IS il=list(instruction) RBRACKET { {declarations=dl, instructions=il} }
+| LBRACKET dl=blockFactoredVarsList IS il=list(instruction) RBRACKET { {declarations=dl; instructions=il} }
 
 
 (* Déclarations des variables locales au début d'un bloc *)
@@ -346,7 +346,7 @@ blockFactoredVars: idL=separated_nonempty_list(COMMA, ID) r=returnedType {
 (* N'importe quelle instruction du programme principal ou des méthodes *)
 instruction:
   e=expression SEMICOLON {Exp(e)}
-| b=block {Bloc(b)}
+| b=block {Block(b)}
 | RETURN SEMICOLON {Return}
 | IF si=expression THEN alors=instruction ELSE sinon=instruction {Ite(si,alors,sinon)}
 | g=container ASSIGN d=expression SEMICOLON {Affectation(g,d)}
@@ -365,7 +365,7 @@ container:
 (* Ex :    this       ou      myVariable      ou     MaClasse     *)
 classeCallBeginning:
   id=ID { VarSelect(Container(LocalVar(id))) }
-| CLASSNAME { ClassSelect }
+| n=CLASSNAME { ClassSelect n }
 | THIS { ThisSelect }
 | SUPER { SuperSelect }
 
@@ -383,7 +383,7 @@ methodeCallEnd:
 methodeCall:
   b=classeCallBeginning sl=methodeCallEnd { 
     {
-      beginning = b;
+      beginning_call = b;
       selections_to_meths = sl;
     } 
   }
@@ -431,7 +431,7 @@ expr2:
 | e=expr3 { e }
 
 expr3:
-  v = CSTE { Cste v}  (* A Voir comment faire comme ca peut etre float/int etc..*)
+  v = CSTE { IntLiteral v } 
 | PLUS e=expr3  { e }
 | MINUS e=expr3  { Unary(UMINUS, e) }
 | c=container { Container c }

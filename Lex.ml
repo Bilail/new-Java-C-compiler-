@@ -1,7 +1,7 @@
 # 1 "Lex.mll"
  
 open Ast
-open TpParse
+open Parse
 open Lexing
 exception Eof
 
@@ -18,9 +18,7 @@ let _ =
     [ "if", IF;
       "then", THEN;
       "else", ELSE;
-      "begin", BEGIN;
-      "end", END;
-      "class" , CLASS;
+      "class" , CLASSE;
       "super" , SUPER;
       "this" , THIS;
       "result", RESULT;
@@ -33,6 +31,7 @@ let _ =
     ]
 
 # 36 "Lex.ml"
+(**
 let __ocaml_lex_tables = {
   Lexing.lex_base =
    "\000\000\252\255\253\255\254\255\000\000\255\255\008\000\229\255\
@@ -187,6 +186,7 @@ let __ocaml_lex_tables = {
   Lexing.lex_code =
    "";
 }
+**)
 
 let rec comment lexbuf =
    __ocaml_lex_comment_rec lexbuf 0

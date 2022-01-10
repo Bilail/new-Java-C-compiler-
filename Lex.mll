@@ -1,6 +1,6 @@
 {
 open Ast
-open TpParse
+open Parse
 open Lexing
 exception Eof
 
@@ -17,9 +17,7 @@ let _ =
     [ "if", IF;
       "then", THEN;
       "else", ELSE;
-      "begin", BEGIN;
-      "end", END;
-      "class" , CLASS;
+      "class" , CLASSE;
       "super" , SUPER;
       "this" , THIS;
       "result", RESULT;
@@ -97,12 +95,12 @@ and
   | ','            { COMMA }
   | '.'            { SELECTION }
   | ":="           { ASSIGN }
-  | "<"		         { RELOP (Ast.Lt) }
-  | "<="           { RELOP (Ast.Le) }
-  | ">"            { RELOP (Ast.Gt) }
-  | ">="           { RELOP (Ast.Ge) }
-  | "="            { RELOP (Ast.Eq) }
-  | "<>"           { RELOP (Ast.Neq) }
+  | "<"		         { RELOP (Ast.LT) }
+  | "<="           { RELOP (Ast.LE) }
+  | ">"            { RELOP (Ast.GT) }
+  | ">="           { RELOP (Ast.GE) }
+  | "="            { RELOP (Ast.EQ) }
+  | "<>"           { RELOP (Ast.NEQ) }
   | eof            { EOF } 
   | _ as lxm       { (* action par défaut: filtre un unique caractere, different
                       * de ceux qui precedent. Il s'agit d'un caratere errone:
