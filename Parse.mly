@@ -433,7 +433,9 @@ expr2:
 | e=expr3 { e }
 
 expr3:
-  v = CSTE { IntLiteral v } 
+| id=ID { Container(LocalVar id) }
+| THIS { This }
+| v = CSTE { IntLiteral v } 
 | PLUS e=expr3  { e }
 | MINUS e=expr3  { Unary(UMINUS, e) }
 | c=container { Container c }
