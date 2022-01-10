@@ -6,6 +6,7 @@ let output token =
     match token with
       CSTE v    -> "Constante entiere: " ^ (string_of_int v)
     | ID id     -> "Idend: " ^ id
+    | STRING s -> " string : " ^ s
     | CLASSNAME cln -> "classe name " ^ cln
     | RELOP op  -> "operateur " (*^ Misc.string_of_relop op*)
     | PLUS      -> "operateur +"
@@ -30,8 +31,9 @@ let output token =
     | DEF       -> "mot-clef: DEF"
     | VAR       -> "mot-clef: VAR"
     | THIS      -> "mot-clef: THIS"
-    | SUPER     -> "mot-clef: SUPER"  
-    | RESULT    -> "mot-clef: RESULT" 
+    | SUPER     -> "mot-clef: SUPER" 
+    | CONCAT -> "symbole & " 
+    (*| RESULT    -> "mot-clef: RESULT" *)
     | IS        -> "mot-clef: IS"
     | NEW       -> "mot-clef: NEW"
     | STATIC    -> "mot-clef: STATIC "

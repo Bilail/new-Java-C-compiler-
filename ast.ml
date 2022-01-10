@@ -75,7 +75,7 @@ and instruction_t =
 and container_t =
   | Select of attribute_call
   | LocalVar of string
-  | Result
+  | This
 
 
 and attribute_call = {
@@ -110,16 +110,15 @@ and expression_t =
   | Binary of binary_operator_t * expression_t * expression_t
   | Unary of unary_operator_t * expression_t
   | Cast of string * expression_t (* string = Nom de la classe de destination ; expression_t = Valeur à caster *)
-  | This
   | NewClass of string * expression_t list
 
-  and unary_operator_t =
-    | UMINUS
+and unary_operator_t =
+    UMINUS
 
 and binary_operator_t =
   | IntBinOp of int_binary_operator_t
-  | StringConcat
-  
+  | StringConcat 
+
 
 and int_binary_operator_t =
   (* Comparaison *)
@@ -129,9 +128,8 @@ and int_binary_operator_t =
 
 
 and selection_beg_t =
-  | VarSelect of expression_t
+  | ExpSelect of expression_t
   | ClassSelect of string
-  | ThisSelect
   | SuperSelect
 
 and selection_end_t =

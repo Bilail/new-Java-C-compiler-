@@ -4,9 +4,11 @@ SOURCES    = ast.ml Parse.ml Lex.ml  main.ml
 GENERATED  = Lex.ml Parse.ml Parse.mli Parse.automaton Parse.conflicts
 
 projet: Parse.mli $(SOURCES)
+	clear
 	ocamlc -c ast.ml
 	ocamlc $(INTERFACES)
 	ocamlc -o tp $(SOURCES)
+	./tp ./test/ex1-V3.txt
 
 testLex : Parse.mli Lex.ml testLex.ml 
 	ocamlc -c ast.ml
@@ -16,7 +18,6 @@ testLex : Parse.mli Lex.ml testLex.ml
 
 Lex.ml: Lex.mll 
 	ocamllex Lex.mll
-	./testLex ./test/ex1.txtclear 
 
 Parse.mli : Parse.mly ast.ml
 	menhir --dump --explain --strict Parse.mly

@@ -20,7 +20,8 @@
 %token COLON  (* , *)
 %token ASSIGN (* := *)
 %token SELECTION (* . *)
-%token QUOTE 
+%token CONCAT
+%token <string> STRING 
 %token EOF (* End of file symbol *)
 
 (* Keywords *)
@@ -28,7 +29,7 @@
 %token IF THEN ELSE
 %token VAR
 %token NEW
-%token THIS SUPER RESULT
+%token THIS SUPER
 %token CLASSE
 %token IS
 %token DEF
@@ -328,8 +329,8 @@ block:
 
 
 (* Déclarations des variables locales au début d'un bloc *)
-(* Ex (début seulement): { x, y: Integer; p1: Point; is x := 0; p1 := new Point(x, x); } *)
-blockFactoredVarsList: dl=separated_nonempty_list(SEMICOLON, blockFactoredVars) { List.flatten dl }
+(* Ex (début seulement): { x, y: Integer p1: Point is x := 0; p1 := new Point(x, x); } *)
+blockFactoredVarsList: dl=nonempty_list(blockFactoredVars) { List.flatten dl }
 
 (* Un seul groupe de variables locales factorisées *)
 (* Ex:    x, y : Integer      *)
@@ -358,18 +359,21 @@ instruction:
 (* Ex:     x   ou    Point2D.multiply(3*y).length    *)
 container:
   n=ID { LocalVar n }
-| RESULT { Result }
+| THIS { This }
 | a=attributeCall { Select a }
-| THIS {  }
 
 
 (* Premier token du début de n'importe quel appel de méthode ou attribut *)
 (* Ex :    this       ou      myVariable      ou     MaClasse     *)
 classeCallBeginning:
-  id=ID { VarSelect(Container(LocalVar(id))) }
 | n=CLASSNAME { ClassSelect n }
-| THIS { ThisSelect }
-| SUPER { SuperSelect }
+| THIS { ExpSelect( Container This ) }
+| SUPER { SuperSelect } (* Le considérer comme instance de classe *)
+| e=delimited(LPAREN, expression, RPAREN) { ExpSelect e }
+| LPAREN n=CLASSNAME e=expression RPAREN { ExpSelect( Cast(n,e) ) }
+| n=CSTE { ExpSelect(IntLiteral n) }
+| s=STRING { ExpSelect(StringLiteral s) }
+| id=ID { ExpSelect(Container(LocalVar id)) }
 
 
 
@@ -404,7 +408,7 @@ attributeCall:
   b=classeCallBeginning sl=attributeCallEnd {
     {
       beginning = b;
-      selections_to_attrs = sl
+      selections_to_attrs = sl;
     }
   }
 
@@ -425,6 +429,7 @@ g=expr1 op=RELOP d=expr1 { Binary( (IntBinOp op), g, d) }
 expr1:
   g = expr1 PLUS d = expr2 { Binary( IntBinOp(PLUS), g, d)}
 | g = expr1 MINUS d = expr2 { Binary( IntBinOp(MINUS), g, d)}
+| g = expr1 CONCAT d = expr2 { Binary(StringConcat, g, d)}
 | e=expr2 { e }
 
 expr2:
@@ -433,9 +438,8 @@ expr2:
 | e=expr3 { e }
 
 expr3:
-| id=ID { Container(LocalVar id) }
-| THIS { This }
-| v = CSTE { IntLiteral v } 
+| v = CSTE { IntLiteral v }
+| s = STRING {StringLiteral s} 
 | PLUS e=expr3  { e }
 | MINUS e=expr3  { Unary(UMINUS, e) }
 | c=container { Container c }
