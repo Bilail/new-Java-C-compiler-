@@ -119,6 +119,7 @@ and expression_t =
 and binary_operator_t =
   | IntBinOp of int_binary_operator_t
   | StringConcat
+  
 
 and int_binary_operator_t =
   (* Comparaison *)
@@ -158,7 +159,7 @@ and selection_end_t =
 \ ___________________________________________ /
 **)
 
-exception MISC_Errror of string
+exception MISC_Error of string
 
 type attrsMethsConstructor = {attrs: variable_def list; meths: methode_def list; construct: constructor_def option}
 

@@ -30,8 +30,7 @@ let _ =
       "override", OVERRIDE
     ]
 
-# 36 "Lex.ml"
-(**
+# 34 "Lex.ml"
 let __ocaml_lex_tables = {
   Lexing.lex_base =
    "\000\000\252\255\253\255\254\255\000\000\255\255\008\000\229\255\
@@ -186,33 +185,32 @@ let __ocaml_lex_tables = {
   Lexing.lex_code =
    "";
 }
-**)
 
 let rec comment lexbuf =
    __ocaml_lex_comment_rec lexbuf 0
 and __ocaml_lex_comment_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 42 "Lex.mll"
+# 40 "Lex.mll"
                   ( (* fin de commentaire trouvee. Le commentaire ne doit pas
                      * etre transmis. On renvoie donc ce que nous renverra un
                      * nouvel appel a l'analyseur lexical
                      *)
                     token lexbuf
                   )
-# 204 "Lex.ml"
+# 202 "Lex.ml"
 
   | 1 ->
-# 48 "Lex.mll"
+# 46 "Lex.mll"
                    ( (* incremente le compteur de ligne et poursuit la
                       * reconnaissance du commentaire en cours
                       *)
                      new_line lexbuf; comment lexbuf
                    )
-# 213 "Lex.ml"
+# 211 "Lex.ml"
 
   | 2 ->
-# 53 "Lex.mll"
+# 51 "Lex.mll"
                    ( (* detecte les commentaires non fermes pour pouvoir
                       * faire un message d'erreur clair.
                       * On pourrait stocker la position du dernier commentaire
@@ -220,16 +218,16 @@ and __ocaml_lex_comment_rec lexbuf __ocaml_lex_state =
                       *)
                      raise (MISC_Error "unclosed comment")
                    )
-# 224 "Lex.ml"
+# 222 "Lex.ml"
 
   | 3 ->
-# 60 "Lex.mll"
+# 58 "Lex.mll"
                    ( (* rien a faire de special pour ce caractere, donc on
                       * poursuit la reconnaissance du commentaire en cours
                       *)
                      comment lexbuf
                    )
-# 233 "Lex.ml"
+# 231 "Lex.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf;
       __ocaml_lex_comment_rec lexbuf __ocaml_lex_state
@@ -240,21 +238,21 @@ and __ocaml_lex_token_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
 let
-# 67 "Lex.mll"
+# 65 "Lex.mll"
                  classe_name
-# 246 "Lex.ml"
+# 244 "Lex.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 67 "Lex.mll"
-                             ( CLASSENAME classe_name )
-# 250 "Lex.ml"
+# 65 "Lex.mll"
+                             ( CLASSNAME classe_name )
+# 248 "Lex.ml"
 
   | 1 ->
 let
-# 68 "Lex.mll"
+# 66 "Lex.mll"
                      id
-# 256 "Lex.ml"
+# 254 "Lex.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 69 "Lex.mll"
+# 67 "Lex.mll"
       ( (* id contient le texte reconnu. On verifie s'il s'agit d'un mot-clef
          * auquel cas on renvoie le token associe. Sinon on renvoie Id avec le
          * texte reconnu en valeur 
@@ -263,145 +261,145 @@ let
           Hashtbl.find keyword_table id
         with Not_found -> ID id
       )
-# 267 "Lex.ml"
+# 265 "Lex.ml"
 
   | 2 ->
-# 78 "Lex.mll"
+# 76 "Lex.mll"
                     ( (* consommer les delimiteurs, ne pas les transmettre
                        * et renvoyer ce que renverra un nouvel appel a
                        *  l'analyseur lexical
                        *)
                        token lexbuf
                     )
-# 277 "Lex.ml"
+# 275 "Lex.ml"
 
   | 3 ->
-# 84 "Lex.mll"
+# 82 "Lex.mll"
                    ( next_line lexbuf; token lexbuf)
-# 282 "Lex.ml"
+# 280 "Lex.ml"
 
   | 4 ->
 let
-# 85 "Lex.mll"
+# 83 "Lex.mll"
                 lxm
-# 288 "Lex.ml"
+# 286 "Lex.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 85 "Lex.mll"
+# 83 "Lex.mll"
                     ( CSTE(int_of_string lxm) )
-# 292 "Lex.ml"
+# 290 "Lex.ml"
 
   | 5 ->
-# 86 "Lex.mll"
+# 84 "Lex.mll"
                    ( comment lexbuf )
-# 297 "Lex.ml"
+# 295 "Lex.ml"
 
   | 6 ->
-# 87 "Lex.mll"
+# 85 "Lex.mll"
                    ( PLUS )
-# 302 "Lex.ml"
+# 300 "Lex.ml"
 
   | 7 ->
-# 88 "Lex.mll"
+# 86 "Lex.mll"
                    ( MINUS )
-# 307 "Lex.ml"
+# 305 "Lex.ml"
 
   | 8 ->
-# 89 "Lex.mll"
+# 87 "Lex.mll"
                    ( TIMES )
-# 312 "Lex.ml"
+# 310 "Lex.ml"
 
   | 9 ->
-# 90 "Lex.mll"
+# 88 "Lex.mll"
                    ( DIV )
-# 317 "Lex.ml"
+# 315 "Lex.ml"
 
   | 10 ->
-# 91 "Lex.mll"
+# 89 "Lex.mll"
                    ( LPAREN )
-# 322 "Lex.ml"
+# 320 "Lex.ml"
 
   | 11 ->
-# 92 "Lex.mll"
+# 90 "Lex.mll"
                    ( RPAREN )
-# 327 "Lex.ml"
+# 325 "Lex.ml"
 
   | 12 ->
-# 93 "Lex.mll"
+# 91 "Lex.mll"
                    ( LBRACKET )
-# 332 "Lex.ml"
+# 330 "Lex.ml"
 
   | 13 ->
-# 94 "Lex.mll"
+# 92 "Lex.mll"
                    ( RBRACKET )
-# 337 "Lex.ml"
+# 335 "Lex.ml"
 
   | 14 ->
-# 95 "Lex.mll"
+# 93 "Lex.mll"
                    ( SEMICOLON )
-# 342 "Lex.ml"
+# 340 "Lex.ml"
 
   | 15 ->
-# 96 "Lex.mll"
+# 94 "Lex.mll"
                    ( COLON )
-# 347 "Lex.ml"
+# 345 "Lex.ml"
 
   | 16 ->
-# 97 "Lex.mll"
+# 95 "Lex.mll"
                    ( COMMA )
-# 352 "Lex.ml"
+# 350 "Lex.ml"
 
   | 17 ->
-# 98 "Lex.mll"
+# 96 "Lex.mll"
                    ( SELECTION )
-# 357 "Lex.ml"
+# 355 "Lex.ml"
 
   | 18 ->
-# 99 "Lex.mll"
+# 97 "Lex.mll"
                    ( ASSIGN )
-# 362 "Lex.ml"
+# 360 "Lex.ml"
 
   | 19 ->
-# 100 "Lex.mll"
+# 98 "Lex.mll"
                   ( RELOP (Ast.LT) )
-# 367 "Lex.ml"
+# 365 "Lex.ml"
 
   | 20 ->
-# 101 "Lex.mll"
+# 99 "Lex.mll"
                    ( RELOP (Ast.LE) )
-# 372 "Lex.ml"
+# 370 "Lex.ml"
 
   | 21 ->
-# 102 "Lex.mll"
+# 100 "Lex.mll"
                    ( RELOP (Ast.GT) )
-# 377 "Lex.ml"
+# 375 "Lex.ml"
 
   | 22 ->
-# 103 "Lex.mll"
+# 101 "Lex.mll"
                    ( RELOP (Ast.GE) )
-# 382 "Lex.ml"
+# 380 "Lex.ml"
 
   | 23 ->
-# 104 "Lex.mll"
+# 102 "Lex.mll"
                    ( RELOP (Ast.EQ) )
-# 387 "Lex.ml"
+# 385 "Lex.ml"
 
   | 24 ->
-# 105 "Lex.mll"
+# 103 "Lex.mll"
                    ( RELOP (Ast.NEQ) )
-# 392 "Lex.ml"
+# 390 "Lex.ml"
 
   | 25 ->
-# 106 "Lex.mll"
+# 104 "Lex.mll"
                    ( EOF )
-# 397 "Lex.ml"
+# 395 "Lex.ml"
 
   | 26 ->
 let
-# 107 "Lex.mll"
+# 105 "Lex.mll"
          lxm
-# 403 "Lex.ml"
+# 401 "Lex.ml"
 = Lexing.sub_lexeme_char lexbuf lexbuf.Lexing.lex_start_pos in
-# 107 "Lex.mll"
+# 105 "Lex.mll"
                    ( (* action par défaut: filtre un unique caractere, different
                       * de ceux qui precedent. Il s'agit d'un caratere errone:
                       * on le signale et on poursuit quand meme l'analyse.
@@ -412,7 +410,7 @@ let
                        ("undefined character: " ^ (String.make 1 lxm));
                      token lexbuf
                    )
-# 416 "Lex.ml"
+# 414 "Lex.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf;
       __ocaml_lex_token_rec lexbuf __ocaml_lex_state

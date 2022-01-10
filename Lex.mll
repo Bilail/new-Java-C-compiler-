@@ -62,7 +62,7 @@ rule
                    }
 and
  token = parse
-    l_MAJ LC* as classe_name { CLASSENAME classe_name }
+    l_MAJ LC* as classe_name { CLASSNAME classe_name }
     | lettre LC * as id
       { (* id contient le texte reconnu. On verifie s'il s'agit d'un mot-clef
          * auquel cas on renvoie le token associe. Sinon on renvoie Id avec le

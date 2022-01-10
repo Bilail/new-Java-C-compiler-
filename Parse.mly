@@ -12,7 +12,7 @@
 
 (* Symbols *)
 %token <Ast.int_binary_operator_t> RELOP (* = <> > < >= <= *)   
-%token PLUS MINUS TIMES DIV (*  + - * /  *)
+%token PLUS MINUS TIMES DIV UMINUS (*  + - * /  *)
 %token LPAREN RPAREN (* ( ) *)
 %token LBRACKET RBRACKET    (* { } *)
 %token COMMA (* , *)
@@ -20,6 +20,7 @@
 %token COLON  (* , *)
 %token ASSIGN (* := *)
 %token SELECTION (* . *)
+%token QUOTE 
 %token EOF (* End of file symbol *)
 
 (* Keywords *)
@@ -98,7 +99,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 
 
 (* Axiome *)
-%start <Ast.prog_def> prog (* Do we have progType ? *)
+%start <Ast.prog_def> prog 
 %%
 (**
   ____________________________________________
@@ -211,7 +212,7 @@ anyClassDecl:
 
 (* Attributs de classee *)
 (* Ex : var static x1, x2 : Integer *)
-factoredAttributes: VAR s=boption(STATIC) v=separated_nonempty_list(COMMA, ID) COLON r = returnedType 
+factoredAttributes: VAR s=boption(STATIC) v=separated_nonempty_list(COMMA, ID) r = returnedType 
 {
   List.map (fun n -> {
     name = n;
@@ -293,7 +294,7 @@ factoredVarParamList: f = delimited(LPAREN, separated_list(COMMA, factoredVarPar
 
 (* Paramètre ou paramètres groupés optionnellement VAR *)
 (* Ex: var x1, x2, x3 : Integer *)
-factoredVarParam: v=boption(VAR) ids=separated_nonempty_list(COMMA, ID) COLON r=returnedType {
+factoredVarParam: v=boption(VAR) ids=separated_nonempty_list(COMMA, ID) r=returnedType {
   List.map (fun n -> {
     name = n;
     is_var = v;
@@ -359,6 +360,7 @@ container:
   n=ID { LocalVar n }
 | RESULT { Result }
 | a=attributeCall { Select a }
+| THIS {  }
 
 
 (* Premier token du début de n'importe quel appel de méthode ou attribut *)
