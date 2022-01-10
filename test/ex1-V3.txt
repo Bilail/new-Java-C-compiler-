@@ -12,11 +12,6 @@ class Point(var x, y: Integer, var name: String) is {
    * Le probleme est qu'on n'a pas l'equivalent de NULL (du bon type)
    */
   var clone : Point
-  var patate = "Une super chaîne
-      de caractères en 2 lignes
-      wowowow
-      Beaucoup plus en fin de compte
-      si si si"
 
 
   /* L'en-tete du constructeur doit etre identique a celui de la classe.
@@ -33,7 +28,10 @@ class Point(var x, y: Integer, var name: String) is {
 
   def gety() : Integer := this.y
 
-  def setName(s: String) is { this.name := s; }
+  def setName(s: String) is { this.name := "Un nom beaucoup trop 
+  pour tenir sur une seule 
+  ligne
+  voyons"; }
 
   def isCloned() : Integer := this.hasClone <> 0
 
@@ -45,7 +43,7 @@ class Point(var x, y: Integer, var name: String) is {
        * On aurait pu ecrire aussi
        * return this;
        */
-      result := this;
+      result := this a;
   }
 
   def print(verbose : Integer) is {
