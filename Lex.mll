@@ -1,6 +1,6 @@
 {
 open Ast
-open TpParse
+open Parse
 open Lexing
 exception Eof
 
@@ -17,18 +17,17 @@ let _ =
     [ "if", IF;
       "then", THEN;
       "else", ELSE;
-      "begin", BEGIN;
-      "end", END;
-      "class" , CLASS;
+      "class" , CLASSE;
       "super" , SUPER;
       "this" , THIS;
-      "result", RESULT;
+      (*"result", RESULT;*)
       "new", NEW;
       "var", VAR;
       "def", DEF;
       "is", IS;
       "static", STATIC;
-      "override", OVERRIDE
+      "override", OVERRIDE;
+      "extends", EXTENDS
     ]
 }
 
@@ -62,9 +61,26 @@ rule
                       *)
                      comment lexbuf
                    }
+ and
+ read_string buf = parse
+  | '"'       { STRING (Buffer.contents buf) }
+  | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
+  | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
+  | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
+  | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }
+  | '\\' 'r'  { Buffer.add_char buf '\r'; read_string buf lexbuf }
+  | '\\' 't'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
+  | [^ '"' '\\']+
+    { Buffer.add_string buf (Lexing.lexeme lexbuf);
+      read_string buf lexbuf
+    }
+  (*| _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
+  | eof { raise (SyntaxError ("String is not terminated")) }*)
+
+
 and
  token = parse
-    l_MAJ LC* as classe_name { CLASSENAME classe_name }
+    l_MAJ LC* as classe_name { CLASSNAME classe_name }
     | lettre LC * as id
       { (* id contient le texte reconnu. On verifie s'il s'agit d'un mot-clef
          * auquel cas on renvoie le token associe. Sinon on renvoie Id avec le
@@ -74,6 +90,7 @@ and
           Hashtbl.find keyword_table id
         with Not_found -> ID id
       }
+    
 
   | [' ''\t''\r']+  { (* consommer les delimiteurs, ne pas les transmettre
                        * et renvoyer ce que renverra un nouvel appel a
@@ -81,10 +98,12 @@ and
                        *)
                        token lexbuf
                     }
-  | '\n'           { next_line lexbuf; token lexbuf}
+  | '\n'     { next_line lexbuf; token lexbuf}
+  | '"'      { read_string (Buffer.create 17) lexbuf }
   | chiffre+ as lxm { CSTE(int_of_string lxm) }
   | "/*"           { comment lexbuf }
   | '+'            { PLUS }
+  | '&'            {CONCAT}
   | '-'            { MINUS }
   | '*'            { TIMES }
   | '/'            { DIV }
@@ -97,14 +116,13 @@ and
   | ','            { COMMA }
   | '.'            { SELECTION }
   | ":="           { ASSIGN }
-  | "<"		         { RELOP (Ast.Lt) }
-  | "<="           { RELOP (Ast.Le) }
-  | ">"            { RELOP (Ast.Gt) }
-  | ">="           { RELOP (Ast.Ge) }
-  | "="            { RELOP (Ast.Eq) }
-  | "<>"           { RELOP (Ast.Neq) }
-  | eof            { EOF }
-  | 
+  | "<"		         { RELOP (Ast.LT) }
+  | "<="           { RELOP (Ast.LE) }
+  | ">"            { RELOP (Ast.GT) }
+  | ">="           { RELOP (Ast.GE) }
+  | "="            { RELOP (Ast.EQ) }
+  | "<>"           { RELOP (Ast.NEQ) }
+  | eof            { EOF } 
   | _ as lxm       { (* action par défaut: filtre un unique caractere, different
                       * de ceux qui precedent. Il s'agit d'un caratere errone:
                       * on le signale et on poursuit quand meme l'analyse.
@@ -114,4 +132,7 @@ and
                      print_endline
                        ("undefined character: " ^ (String.make 1 lxm));
                      token lexbuf
-                   }
+
+  }
+
+

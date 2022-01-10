@@ -24,7 +24,7 @@ let parse_with_error lexbuf file_in chan =
      * Ci-dessous ld contient donc une liste de records dont chacun représente
      * une déclaration et l'ast de l'expression comprise entre begin et end
      *)
-    let ld, e = TpParse.prog TpLex.token lexbuf in
+    let {classes; program} = Parse.prog Lex.token lexbuf in ()
 
     (* Dans ce TP d'initiation on réalise à la fois l'impression des AST,
      * les vérifications contextuelles, une version sous forme d'interprète
@@ -32,30 +32,12 @@ let parse_with_error lexbuf file_in chan =
      * utilisee pour le projet.
      *)
 
-    Print.printAll ld e; (* impression non ambigue de tout l'AST *)
-
-    (* Verifications Contextuelles: incluses dans le fichier eval.ml
-     * Lance l'exception VC_Error en cas d'erreur. En ce cas ni la partie
-     * interprétation, ni la partie compilation ne sera lancée et on se
-     * retrouvera directement dans le traite-exception ci-dessous.
-     *)
-    Eval.vc ld e; 
-
-    (* partie interprete: on procede à l'évaluation des déclarations ainsi
-     * qu'à celle de l'expression entre le begin et le end
-     * Lance l'exception RUN_error en cas d'erreur à l'exécution
-     *)
-    let res = Eval.eval ld e in
-    print_string "Evaluation finale: ";  print_int res; print_newline ();
-    
-    (* partie compilation: on engendre du code pour la machine abstraite *)
-    Compil.compile ld e chan;
-    
+     
   with (* traite exception général ... *)
-    TpParse.Error -> (* levée par l'analyseur syntaxique *)
+    Parse.Error -> (* levée par l'analyseur syntaxique *)
     Printf.fprintf stderr "Syntax error at position %a\n" print_position lexbuf;
     exit (-1)
-  | VC_Error msg ->
+  (*| VC_Error msg ->
      Printf.fprintf stderr "Erreur contextuelle: %s\n" msg;
      exit (-1)
   | RUN_Error msg -> (* uniquement pour la version interprete *)
@@ -63,7 +45,7 @@ let parse_with_error lexbuf file_in chan =
      exit (-1)
   | MISC_Error msg -> (* pour l'instant juste erreur lexicale *)
      Printf.fprintf stderr "Error: %s\n" msg;
-     exit (-1)
+     exit (-1)*)
 
 let _ =
   let argc = Array.length Sys.argv in

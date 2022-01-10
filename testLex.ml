@@ -6,8 +6,9 @@ let output token =
     match token with
       CSTE v    -> "Constante entiere: " ^ (string_of_int v)
     | ID id     -> "Idend: " ^ id
-    | CLASSENAME cln -> "classe name " ^ cln
-    | RELOP op  -> "operateur " ^ Misc.string_of_relop op
+    | STRING s -> " string : " ^ s
+    | CLASSNAME cln -> "classe name " ^ cln
+    | RELOP op  -> "operateur " (*^ Misc.string_of_relop op*)
     | PLUS      -> "operateur +"
     | MINUS     -> "operateur -"
     | TIMES     -> "operateur *"
@@ -24,21 +25,22 @@ let output token =
     | IF        -> "mot-clef: IF"
     | THEN      -> "mot-clef: THEN"
     | ELSE      -> "mot-clef: ELSE"
-    | END       -> "mot-clef: END"
-    | BEGIN     -> "mot-clef: BEGIN"
-    | CLASS     -> "mot-clef: CLASS"
+    (*| END       -> "mot-clef: END"*)
+    (*| BEGIN     -> "mot-clef: BEGIN"*)
+    | CLASSE     -> "mot-clef: CLASS"
     | DEF       -> "mot-clef: DEF"
     | VAR       -> "mot-clef: VAR"
     | THIS      -> "mot-clef: THIS"
-    | SUPER     -> "mot-clef: SUPER"  
-    | RESULT    -> "mot-clef: RESULT" 
+    | SUPER     -> "mot-clef: SUPER" 
+    | CONCAT -> "symbole & " 
+    (*| RESULT    -> "mot-clef: RESULT" *)
     | IS        -> "mot-clef: IS"
     | NEW       -> "mot-clef: NEW"
     | STATIC    -> "mot-clef: STATIC "
     | OVERRIDE  -> "mot-clef: OVERRIDE "
     | EOF       -> (* gere avant l'appel a cette fonction, donc impossible *)
        failwith "Should not happen in testLex"
-    | UMINUS ->
+    | UMINUS -> 
        failwith "UMINUS seen in testLex"
     | _ -> "Unexpected token in testLex"
 
@@ -55,7 +57,7 @@ let () =
       let lexbuf = Lexing.from_channel file
       in
       let rec process () =
-        match TpLex.token lexbuf with
+        match Lex.token lexbuf with
           EOF -> close_in file
         | tok -> print_endline (output tok); process ()
       in process ();

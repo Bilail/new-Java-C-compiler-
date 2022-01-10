@@ -1,24 +1,27 @@
 (* Dependencies *)
 %{
-  Ast
+  open Ast
 %}
 
 (** TOKENS **)
 
 (* Complex tokens *)
 %token <string> ID (* myIdentifier *)
-%token <string> CLASSENAME (* Myclasse *)
+%token <string> CLASSNAME (* Myclasse *)
 %token <int> CSTE (* 42 *)
 
 (* Symbols *)
-%token <Ast.opComp> RELOP (* = <> > < >= <= *)
-%token PLUS MINUS TIMES DIV (*  + - * /  *)
+%token <Ast.int_binary_operator_t> RELOP (* = <> > < >= <= *)   
+%token PLUS MINUS TIMES DIV UMINUS (*  + - * /  *)
 %token LPAREN RPAREN (* ( ) *)
 %token LBRACKET RBRACKET    (* { } *)
 %token COMMA (* , *)
 %token SEMICOLON (* ; *)
+%token COLON  (* , *)
 %token ASSIGN (* := *)
 %token SELECTION (* . *)
+%token CONCAT
+%token <string> STRING 
 %token EOF (* End of file symbol *)
 
 (* Keywords *)
@@ -26,13 +29,14 @@
 %token IF THEN ELSE
 %token VAR
 %token NEW
-%token THIS SUPER RESULT
+%token THIS SUPER
 %token CLASSE
 %token IS
 %token DEF
 %token STATIC
 %token OVERRIDE
 %token RETURN
+%token EXTENDS
 
 
 
@@ -44,32 +48,45 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 *)
 
 
-%type <Ast.classeType> classe (* Coder *)
+%type <Ast.class_def> classe (* Coder *)
 %type <string> extends (* Coder *)
-%type classeBody (* Typer *)
-%type anyclasseDecl (* Typer ?? Méthode ou atttribut *)
-%type factoredAttributes (* Typer *)
-%type method (* Typer *)
-%type constructor (* Typer *)
-%type superclasseCall (* Typer *)
 
-%type factoredVarParamList (* Typer *)
-%type factoredVarParam (* Typer *)
-%type argumentsList (* Typer *)
-%type returnedType (* Typer *)
+%type <Ast.attrsMethsConstructor> classeBody  (* Typer *)
+%type <Ast.attrsMethsConstructor> anyClDeclAndConstructor
+%type <Ast.attrsMethsConstructor> anyClassDecl  (* Typer ?? Méthode ou atttribut *)
+%type <Ast.variable_def list> factoredAttributes (* Typer *) (* A verif *)
+%type <Ast.methode_def> methode (* Typer *) (* A verif *)
 
-%type block (* Typer *)
-%type <Ast.instrType> instruction (* Coder *)
-%type container (* Typer *)
-%type containerA (* Typer *)
-%type methodCall (* Typer *)
+%type <Ast.constructor_def> constructor (* Typer *) (* A verif *) 
+%type <Ast.superconstructor_call> superclasseCall 
 
-%type expression (* Typer *)
-%type expr1 (* Typer *)
-%type expr2 (* Typer *)
-%type expr3 (* Typer *)
-%type instanciation  (* Typer *)
-%type castedExpr (* Typer *)
+%type <Ast.variable_def list> factoredVarParamList (* A verif *)
+%type <Ast.variable_def list> factoredVarParam  (* A verif *)
+%type <Ast.expression_t list> argumentsList (* A verif *)
+%type <string> returnedType (* Typer *)
+
+%type <Ast.block_t> block
+%type <Ast.variable_def list> blockFactoredVarsList (* Typer *)
+%type <Ast.variable_def list> blockFactoredVars (* Typer *)
+%type <Ast.instruction_t> instruction (* Coder *) 
+%type <Ast.container_t> container (* Typer *)
+%type <Ast.selection_beg_t> classeCallBeginning (* Typer *)
+%type <Ast.selection_end_t list> methodeCallEnd (* Typer *)
+%type <Ast.selection_end_t list> attributeCallEnd (* Typer *)
+%type <Ast.method_call> methodeCall (* Typer *)
+%type <Ast.attribute_call> attributeCall (* Typer *)
+
+%type <Ast.expression_t> expression (* Typer *)
+%type <Ast.expression_t> expr1 (* Typer *)
+%type <Ast.expression_t> expr2 (* Typer *)
+%type <Ast.expression_t> expr3 (* Typer *)
+%type <Ast.expression_t> instanciation  (* Typer *)
+%type <Ast.expression_t> castedExpr (* Typer *)
+
+
+
+(* Priorités *)
+(* AUCUNE POUR L'INSTANT *)
 
 
 
@@ -83,9 +100,8 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 
 
 (* Axiome *)
-%start <Ast.prog_type> prog (* Do we have progType ? *)
+%start <Ast.prog_def> prog 
 %%
-
 (**
   ____________________________________________
 /                    ------------°°°°------------                      \
@@ -101,10 +117,10 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
   ne pouvant avoir "var" amènerait des ambiguités. Le problème serait qu'une liste d'arguments
   sans "var" peut à la fois être un factoredVarParam et et nonfactoredVarParam. -Gaël
 
-  [2] classeNAME et ID distingués
+  [2] CLASSNAME et ID distingués
   Dans les spécifications du langage, il est indiqué que les noms de classee commencent par une
   majuscule et les autres identificateurs par une minuscule. Cela signifie qu'un nom de classee
-  classeNAME peut être identifié dès l'analyse lexicale. Je choisis donc de le faire, ce qui simplifie
+  CLASSNAME peut être identifié dès l'analyse lexicale. Je choisis donc de le faire, ce qui simplifie
   grandement le travail des analyses lexicale et contextuelle. -Gaël
 
 
@@ -125,66 +141,143 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 (**
   ____________________________________________
 /                    ------------°°°°------------                      \
-|         GRAMMAIRE - REGLES : classeES
+|         GRAMMAIRE - REGLES : CLASSES
 \ ___________________________________________ /
 **)
 
 (* 1 programme = Des classees + un bloc de programme principal à la fin *)
-prog: cl=list(classe) il=block { }
+prog: cl=list(classe) b=block EOF {
+  {
+    classes = cl;
+    program = b;
+  }
+}
+
 
 
 (* classee *)
 (* Ex : classe Point(var xc, yc : Integer, name:String) IS { **Corpsclassee** } *)
-classe: CLASSE n = classeNAME p = factoredVarParamList s = option(extends) IS b = delimited(LBRACKET, classeBody, RBRACKET)
-{(*
-  n,
-  s,
-  p,
-  b,*)
+classe: CLASSE n=CLASSNAME p=factoredVarParamList s=option(extends) IS LBRACKET b=classeBody RBRACKET 
+{ 
+  {
+    name_class = n;
+    superclass = s; 
+    attributes = b.attrs;
+    methods = b.meths;
+    constructor = nonOptionalConstr b.construct
+  }
 }
 
 
+
 (* Extends d'une classee, optionnel *)
-extends : EXTENDS classeNAME {}
+(* CSTR : Renvoie la string contenant le nom de la superclasse ou None *)
+extends : EXTENDS s = CLASSNAME { s }
+
+
 
 
 (* Corps de la classee *)
 (* Ex : attributs, méthode, méthode, constructeur, méthode, attribut ... *)
 (* Puisqu'on sait qu'il doit y avoir un constructeur par classee, on le cherche directement à l'analyse syntaxique *)
-classeBody : list(anyclasseDecl) constructor list(anyclasseDecl) {}
+classeBody : beg=anyClDeclAndConstructor endl=list(anyClassDecl)
+{ 
+  {
+    attrs = (beg.attrs @ getAttrsFromAMCList endl);
+    meths = (beg.meths @ getMethsFromAMCList endl);
+    construct = beg.construct;
+  }
+ }
+
+(* Auxiliaire de la règle précédente pour éviter un conflit shift-reduce si on écrivait : *)
+(* clasesBody : list(anyClassDecl) constructor list(anyClassDecl)  *)
+anyClDeclAndConstructor :
+  newAny=anyClassDecl next=anyClDeclAndConstructor {
+    {
+      attrs = (newAny.attrs @ next.attrs);
+      meths = (newAny.meths @ next.meths);
+      construct = None
+    }
+  }
+| c=constructor {
+   { attrs = []; meths = []; construct = Some c }
+  }
 
 
 (* Une déclaration quelconque dans une classee : méthode ou attributs *)
 (* On sépare les méthodes en constructeur, méthode, et méthodeOuConstructeur, car il y a ambiguité lors de l'analyse syntaxique *)
-anyclasseDecl: 
-| factoredAttributes {}
-| methode {}
+anyClassDecl: 
+  a=factoredAttributes{ { attrs=a; meths=[]; construct=None } }
+| m=methode { {attrs=[]; meths=[m]; construct=None } }
 
 
 (* Attributs de classee *)
 (* Ex : var static x1, x2 : Integer *)
-factoredAttributes: VAR boption(STATIC) list(ID) returnedType
+factoredAttributes: VAR s=boption(STATIC) v=separated_nonempty_list(COMMA, ID) r = returnedType 
+{
+  List.map (fun n -> {
+    name = n;
+    is_var = true;
+    is_static = s;
+    typ = r
+  }) v
+}
+
 
 
 (* Méthode de classee *)
 methode:
-  (* cas finissant par un bloc *)
-  DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList option(returnedType) IS block
-
+  (* cas finissant par un bloc et retournant un objet *)
+  DEF s=boption(STATIC) o=boption(OVERRIDE) n=ID p=factoredVarParamList r=returnedType IS b=block 
+  { 
+    {
+    name_method = n;
+    param_method = p;
+    body_method = {declarations=({is_var=false; is_static=false; typ=r; name="result"}::b.declarations); instructions=b.instructions};
+    is_static_method = s;
+    is_override = o;
+    return_type = Some r
+    }
+   }
+   (* cas finissant par un bloc mais ne retournant aucun objet *)
+| DEF s=boption(STATIC) o=boption(OVERRIDE) n=ID p=factoredVarParamList IS b=block 
+  { 
+    {
+    name_method = n;
+    param_method = p;
+    body_method = b;
+    is_static_method = s;
+    is_override = o;
+    return_type = None
+    }
+   }
   (* cas finissant par "nomclassee := expression" *)
-| DEF boption(STATIC) boption(OVERRIDE) ID factoredVarParamList returnedType ASSIGN expression
-
-
+| DEF s=boption(STATIC) o=boption(OVERRIDE) n=ID p=factoredVarParamList r=returnedType ASSIGN e=expression  
+{  (*let rt = match r with | None -> [] | Some m -> m in*)
+  {
+    name_method = n;
+    param_method = p;
+    body_method = {declarations=[]; instructions=[Affectation(LocalVar("result"), e); Return] };
+    is_static_method = s;
+    is_override = o;
+    return_type = Some r
+    }
+   }
 
 (* Constructeur de classee *)
 constructor:
-  DEF classeNAME factoredVarParamList option(superclasseCall) IS block
+  DEF n = CLASSNAME p = factoredVarParamList s=option(superclasseCall) IS b = block 
+  { (* Ajouter dans l'AST UN ARGUMENT DASN CONSTRUCTOR POUR PRENDRE EN COMPLE LE SuperClasseCall ?? *)
+    {
+    name_constructor = n;
+    param_constructor = p; 
+    body_constructor = b;
+    super_call = s
+    } 
+  }
 
 
-
-superclasseCall: COLON classeNAME argumentsList
-
-
+superclasseCall: COLON n=CLASSNAME al=argumentsList { {superclass_constructor=n; arguments=al} }
 
 
 (**
@@ -194,27 +287,31 @@ superclasseCall: COLON classeNAME argumentsList
 \ ___________________________________________ /
 **)
 
-
-
-
+(* !!! flatten *)
 (* Liste de paramètres optionnellement VAR entouré de parenthèses ( ) *)
-factoredVarParamList: delimited(LPAREN, separated_list(COMMA, factoredVarParam), RPAREN)
+factoredVarParamList: f = delimited(LPAREN, separated_list(COMMA, factoredVarParam), RPAREN) { List.flatten f }
+
 
 
 (* Paramètre ou paramètres groupés optionnellement VAR *)
 (* Ex: var x1, x2, x3 : Integer *)
-factoredVarParam: boption(VAR) separated_list(COMMA, ID) COLON returnedType
+factoredVarParam: v=boption(VAR) ids=separated_nonempty_list(COMMA, ID) r=returnedType {
+  List.map (fun n -> {
+    name = n;
+    is_var = v;
+    is_static = false;
+    typ = r
+  }) ids
+}
 
 
 (* Liste d'arguments, c'est-à-dire les expressions qu'on met comme paramètres lorsqu'on fait un appel (à une méthode par exemple) *)
 (* Ex:    ( 3, z, Point3D.getHeight() )     *)
-argumentsList: delimited(LPAREN, separated_list(COMMA, expression), RPAREN)
+argumentsList: el=delimited(LPAREN, separated_list(COMMA, expression), RPAREN) { el }
 
 
 (* Ex:   : Point3D *)
-returnedType: COLON classeNAME
-
-
+returnedType: COLON n = CLASSNAME { n }
 
 
 (**
@@ -226,42 +323,95 @@ returnedType: COLON classeNAME
 
 
 (* Bloc d'instructions entouré d'accolades *)
-block: delimited(LBRACKET, list(instruction), RBRACKET)
+block:
+  il=delimited(LBRACKET, list(instruction), RBRACKET) { {declarations=[]; instructions=il} }
+| LBRACKET dl=blockFactoredVarsList IS il=list(instruction) RBRACKET { {declarations=dl; instructions=il} }
+
+
+(* Déclarations des variables locales au début d'un bloc *)
+(* Ex (début seulement): { x, y: Integer p1: Point is x := 0; p1 := new Point(x, x); } *)
+blockFactoredVarsList: dl=nonempty_list(blockFactoredVars) { List.flatten dl }
+
+(* Un seul groupe de variables locales factorisées *)
+(* Ex:    x, y : Integer      *)
+blockFactoredVars: idL=separated_nonempty_list(COMMA, ID) r=returnedType { 
+  List.map (fun id -> {
+    name = id;
+    is_var = false;
+    is_static = false;
+    typ = r
+  }) idL
+ }
 
 
 
-(* N'importe quelle instruction du programme principal (sauf RETURN) ou des méthodes *)
+(* N'importe quelle instruction du programme principal ou des méthodes *)
 instruction:
-  expression SEMICOLON
-| block
-| RETURN SEMICOLON
-| IF si = expression THEN alors = instruction ELSE sinon = instruction
-| container ASSIGN expression SEMICOLON
+  e=expression SEMICOLON {Exp(e)}
+| b=block {Block(b)}
+| RETURN SEMICOLON {Return}
+| IF si=expression THEN alors=instruction ELSE sinon=instruction {Ite(si,alors,sinon)}
+| g=container ASSIGN d=expression SEMICOLON {Affectation(g,d)}
 
 
 
 (* Variable ou attribut, n'importe quoi pouvant contenir une valeur *)
 (* Ex:     x   ou    Point2D.multiply(3*y).length    *)
 container:
-  classeNAME SELECTION containerA
-| THIS SELECTION containerA
-| SUPER SELECTION containerA
-| containerA
-
-containerA:
-  ID
-| ID SELECTION containerA
-| ID argumentsList SELECTION containerA
+  n=ID { LocalVar n }
+| THIS { This }
+| a=attributeCall { Select a }
 
 
-(* Appel de méthode *)
-(* A peu près comme un container, mais avec des arguments à la fin et au moins 1 sélection "." *)
-(* Ex:   text.getSize()     ou    Point2D.multiply(3*y).substract(myPoint)    *)
+(* Premier token du début de n'importe quel appel de méthode ou attribut *)
+(* Ex :    this       ou      myVariable      ou     MaClasse     *)
+classeCallBeginning:
+| n=CLASSNAME { ClassSelect n }
+| THIS { ExpSelect( Container This ) }
+| SUPER { SuperSelect } (* Le considérer comme instance de classe *)
+| e=delimited(LPAREN, expression, RPAREN) { ExpSelect e }
+| LPAREN n=CLASSNAME e=expression RPAREN { ExpSelect( Cast(n,e) ) }
+| n=CSTE { ExpSelect(IntLiteral n) }
+| s=STRING { ExpSelect(StringLiteral s) }
+| id=ID { ExpSelect(Container(LocalVar id)) }
+
+
+
+(* Dernier élément d'un appel de méthode en cascade *)
+(* Ex : .getZ() *)
+methodeCallEnd:
+  SELECTION id=ID el=argumentsList { [MethSelect(id, el)] }
+| SELECTION id=ID selecL=methodeCallEnd { (AttrSelect id)::selecL }
+| SELECTION id=ID el=argumentsList selecL=methodeCallEnd { (MethSelect(id, el))::selecL }
+
+(* Appel de méthode et tous ses constituants *)
+(* Ex : myVariable.name.clone().getZ() *)
 methodeCall:
-  classeNAME SELECTION containerA argumentsList
-| ID SELECTION containerA argumentsList
-| SUPER SELECTION containerA argumentsList
-| THIS SELECTION containerA argumentsList
+  b=classeCallBeginning sl=methodeCallEnd { 
+    {
+      beginning_call = b;
+      selections_to_meths = sl;
+    } 
+  }
+
+
+(* Dernier élément d'un appel d'attributs en cascade *)
+(* Ex : .length *)
+attributeCallEnd:
+  SELECTION id=ID { [AttrSelect id] }
+| SELECTION id=ID selecL=attributeCallEnd { (AttrSelect id)::selecL }
+| SELECTION id=ID el=argumentsList selecL=attributeCallEnd { (MethSelect(id, el))::selecL }
+
+(* Appel d'un attribut d'une classe ou instance de classe, et tous les constituants de l'appel en cascade *)
+(* Ex : MaClasse.name.clone().length  *)
+attributeCall:
+  b=classeCallBeginning sl=attributeCallEnd {
+    {
+      beginning = b;
+      selections_to_attrs = sl;
+    }
+  }
+
 
 
 (**
@@ -273,36 +423,35 @@ methodeCall:
 
 
 expression:
-  expr1 RELOP expr1
-| expr1
+g=expr1 op=RELOP d=expr1 { Binary( (IntBinOp op), g, d) }
+| e = expr1 { e }
 
 expr1:
-  expr1 PLUS expr2
-| expr1 MINUS expr2
-| expr2
+  g = expr1 PLUS d = expr2 { Binary( IntBinOp(PLUS), g, d)}
+| g = expr1 MINUS d = expr2 { Binary( IntBinOp(MINUS), g, d)}
+| g = expr1 CONCAT d = expr2 { Binary(StringConcat, g, d)}
+| e=expr2 { e }
 
 expr2:
-  expr2 TIMES expr3
-| expr2 DIV expr3
-| expr3
+  g = expr2 TIMES d = expr3 { Binary( IntBinOp(TIMES), g, d)}
+| g = expr2 DIV d = expr3 { Binary( IntBinOp(DIV), g, d)}
+| e=expr3 { e }
 
 expr3:
-  CSTE
+| v = CSTE { IntLiteral v }
+| s = STRING {StringLiteral s} 
 | PLUS e=expr3  { e }
-| MINUS e=expr3 %prec UMINUS   { UMinus e }
-| container
-| methodeCall
-| instanciation
-| delimited(LPAREN, expression, RPAREN)
-| castedExpr
+| MINUS e=expr3  { Unary(UMINUS, e) }
+| c=container { Container c }
+| m=methodeCall { Method m }
+| i=instanciation { i }
+| e=delimited(LPAREN, expression, RPAREN) { e }
+| e=castedExpr { e }
 
 
-instanciation: NEW classeNAME argumentsList
+instanciation: NEW n=CLASSNAME el=argumentsList { NewClass(n, el) }
 
-
-castedExpr: delimited(LPAREN, classeNAME expression, RPAREN) 
-
-
-
-
-(** Ajouter commentaires : Fait dans l'analyse lexicale ? **)
+(* Cast d'une expression *)
+(* Ex :        (Point p) *)
+(* avec p un PointColoré. Le résultat de cette expression est un Point normal avec les mêmes attributs que p *)
+castedExpr: LPAREN n=CLASSNAME e=expression RPAREN { Cast(n, e) }
