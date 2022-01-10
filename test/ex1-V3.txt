@@ -12,6 +12,11 @@ class Point(var x, y: Integer, var name: String) is {
    * Le probleme est qu'on n'a pas l'equivalent de NULL (du bon type)
    */
   var clone : Point
+  var patate = "Une super chaîne
+      de caractères en 2 lignes
+      wowowow
+      Beaucoup plus en fin de compte
+      si si si"
 
 
   /* L'en-tete du constructeur doit etre identique a celui de la classe.
