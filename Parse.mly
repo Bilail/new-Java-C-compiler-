@@ -360,6 +360,7 @@ instruction:
 container:
   n=ID { LocalVar n }
 | THIS { This }
+| SUPER { Super }
 | a=attributeCall { Select a }
 
 
@@ -368,7 +369,7 @@ container:
 classeCallBeginning:
 | n=CLASSNAME { ClassSelect n }
 | THIS { ExpSelect( Container This ) }
-| SUPER { SuperSelect } (* Le considérer comme instance de classe *)
+| SUPER { ExpSelect( Container Super ) } (* Le considérer comme instance de classe *)
 | e=delimited(LPAREN, expression, RPAREN) { ExpSelect e }
 | LPAREN n=CLASSNAME e=expression RPAREN { ExpSelect( Cast(n,e) ) }
 | n=CSTE { ExpSelect(IntLiteral n) }

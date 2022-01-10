@@ -76,6 +76,7 @@ and container_t =
   | Select of attribute_call
   | LocalVar of string
   | This
+  | Super
 
 
 and attribute_call = {
@@ -130,7 +131,6 @@ and int_binary_operator_t =
 and selection_beg_t =
   | ExpSelect of expression_t
   | ClassSelect of string
-  | SuperSelect
 
 and selection_end_t =
   | AttrSelect of string
