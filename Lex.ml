@@ -1,7 +1,7 @@
 # 1 "Lex.mll"
  
 open Ast
-open TpParse
+open Parse
 open Lexing
 exception Eof
 
@@ -18,9 +18,7 @@ let _ =
     [ "if", IF;
       "then", THEN;
       "else", ELSE;
-      "begin", BEGIN;
-      "end", END;
-      "class" , CLASS;
+      "class" , CLASSE;
       "super" , SUPER;
       "this" , THIS;
       "result", RESULT;
@@ -33,6 +31,7 @@ let _ =
     ]
 
 # 36 "Lex.ml"
+(**
 let __ocaml_lex_tables = {
   Lexing.lex_base =
    "\000\000\252\255\253\255\254\255\000\000\255\255\008\000\229\255\
@@ -187,6 +186,7 @@ let __ocaml_lex_tables = {
   Lexing.lex_code =
    "";
 }
+**)
 
 let rec comment lexbuf =
    __ocaml_lex_comment_rec lexbuf 0
@@ -362,32 +362,32 @@ let
 
   | 19 ->
 # 100 "Lex.mll"
-                  ( RELOP (Ast.Lt) )
+                  ( RELOP (Ast.LT) )
 # 367 "Lex.ml"
 
   | 20 ->
 # 101 "Lex.mll"
-                   ( RELOP (Ast.Le) )
+                   ( RELOP (Ast.LE) )
 # 372 "Lex.ml"
 
   | 21 ->
 # 102 "Lex.mll"
-                   ( RELOP (Ast.Gt) )
+                   ( RELOP (Ast.GT) )
 # 377 "Lex.ml"
 
   | 22 ->
 # 103 "Lex.mll"
-                   ( RELOP (Ast.Ge) )
+                   ( RELOP (Ast.GE) )
 # 382 "Lex.ml"
 
   | 23 ->
 # 104 "Lex.mll"
-                   ( RELOP (Ast.Eq) )
+                   ( RELOP (Ast.EQ) )
 # 387 "Lex.ml"
 
   | 24 ->
 # 105 "Lex.mll"
-                   ( RELOP (Ast.Neq) )
+                   ( RELOP (Ast.NEQ) )
 # 392 "Lex.ml"
 
   | 25 ->
