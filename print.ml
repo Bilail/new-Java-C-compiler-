@@ -1,5 +1,16 @@
 open Ast
 
+
+let string_of_relop (op: Ast.opComp)  =
+   match op with
+     Eq -> "="
+   | Neq -> "<>"
+   | Lt -> "<"
+   | Le -> "<="
+   | Gt -> ">"
+   | Ge -> ">="
+ 
+
 (* imprime une expression sous forme entierement parenthésée, de façon à
  * ce qu'on puisse facilement verifier si les précédences et associativités
  * demandées sont bien respectées.
@@ -23,7 +34,7 @@ let rec printExpr e =
     | UMinus e -> print_string "[ - ";  printExpr e; print_string "]"
     | Comp(op, g, d) ->
        print_string "["; printExpr g;
-       print_string (Misc.string_of_relop op); printExpr d; print_string "]"
+       print_string (string_of_relop op); printExpr d; print_string "]"
     | Selection () ->
     | Instanciation () -> 
     | Envoi () -> 
@@ -44,14 +55,14 @@ let printClass c =
 (* PRINT METHOD *) (* A VERIFIER *)
 let printmethod m =
   print_string "DEF";
-  match m.static with 
+  match m.is_static_method with 
     | false -> print_string " " 
-    | true -> print_string "STATIC";
-   match m.override with 
+    | true -> print_string " STATIC";
+   match m.is_override with 
     | false -> print_string " " 
     | true -> print_string "OVERRIDE";
-   print_string m.nom;
-   List.iter printDecl m.param;
+   print_string m.name_method;
+   List.iter printDecl m.param_method;
    match c._____ with 
     |true -> print_string ":" ; print_string  m.typretour ; print_string ":="; printInstr m.instruction (* A VOIR*)
     |false -> print_string "IS" ; printBloc ______ (* JE SUIS PAS SUR *) 
