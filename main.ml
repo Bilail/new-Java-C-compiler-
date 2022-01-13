@@ -1,5 +1,7 @@
 open Ast
 open Lexing
+open ContextAnalysis
+open Print
 
 (* lexbuf: correspond au buffer d'entrée associé au programme qu'on traite
  * file_in: descripteur de fichier pour ce programme
@@ -24,7 +26,8 @@ let parse_with_error lexbuf file_in chan =
      * Ci-dessous ld contient donc une liste de records dont chacun représente
      * une déclaration et l'ast de l'expression comprise entre begin et end
      *)
-    let {classes; program} = Parse.prog Lex.token lexbuf in ()
+    let prog = Parse.prog Lex.token lexbuf
+    in printEnv (analyseProgram prog);
 
     (* Dans ce TP d'initiation on réalise à la fois l'impression des AST,
      * les vérifications contextuelles, une version sous forme d'interprète
