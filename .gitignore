@@ -4,6 +4,9 @@ builds/
 Parse.ml
 Parse.mli
 Parse.automaton
+brouillon.ml
+Lex.ml
+tp
 
 
 *.annot
