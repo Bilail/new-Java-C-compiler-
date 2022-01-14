@@ -1,7 +1,6 @@
 open Ast
 open Lexing
-open ContextAnalysis
-open Print
+(* open Print *)
 
 (* lexbuf: correspond au buffer d'entrée associé au programme qu'on traite
  * file_in: descripteur de fichier pour ce programme
@@ -27,14 +26,18 @@ let parse_with_error lexbuf file_in chan =
      * une déclaration et l'ast de l'expression comprise entre begin et end
      *)
     let prog = Parse.prog Lex.token lexbuf
-    in printEnv (analyseProgram prog);
+    in ContextAnalysis.printEnv (ContextAnalysis.analyseProgram prog);
 
     (* Dans ce TP d'initiation on réalise à la fois l'impression des AST,
      * les vérifications contextuelles, une version sous forme d'interprète
      * et une version sous forme d'un compilateur pour la machine virtuelle
      * utilisee pour le projet.
      *)
+<<<<<<< HEAD
      Print.printProg prog; (* impression non ambigue de tout l'AST *)  
+=======
+  (* Print.printAll classes program; *) (* impression non ambigue de tout l'AST *)  
+>>>>>>> verif_context
      
   with (* traite exception général ... *)
     Parse.Error -> (* levée par l'analyseur syntaxique *)
