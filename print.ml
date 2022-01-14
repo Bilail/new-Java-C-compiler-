@@ -9,7 +9,7 @@ let printProg prog =
 
 
 (* Print de class_def *)
-and let printClass c =
+and  printClass c =
    print_string " CLASS"; print_string c.name_class; print_string "( "; List.iter printVariable c.attributes;
    print_string " )";
    match c.superclass with 
@@ -29,13 +29,13 @@ and let printClass c =
 **)
 
 (* Print de block_t*)
-and let printBloc b =       
+and  printBloc b =       
    List.iter printVariable b.declarations;
    List.iter printInstr b.instructions;
    
 
 (* Print de constructor_def*)
-and let printConstructor cons = 
+and  printConstructor cons = 
    print_string "DEF";
    print_string cons.name_constructor;
    print_string " ( ";
@@ -47,12 +47,12 @@ and let printConstructor cons =
    printBloc cons.body_constructor;
 
 (* Print de superconstructor_call *)
-and let printSuperConstructor cons = 
+and  printSuperConstructor cons = 
    print_string cons.superclass_constructor;
    List.iter printExpr cons.arguments;
 
 (* Print de methode_def *)
-and let printMethod m =
+and  printMethod m =
    print_string " DEF ";
    match m.is_static_method with 
      | false -> print_string " " 
@@ -73,40 +73,42 @@ and let printMethod m =
     print_newline();
 
    (* Print de variable_def *)
-   and let printVariable d =
-      match d.is_var with 
+   and  printVariable d =
+       ( match d.is_var with 
          | None -> " "
-         | Some s -> print_string "VAR"; 
-      match d.is_static with 
+         | Some s -> print_string "VAR");
+     ( match d.is_static with 
          | None -> " "
-         | Some s -> print_string "STATIC"; 
+         | Some s -> print_string "STATIC"); 
       print_string d.name; print_string " : "; print_string d.typ;
       print_newline ();
 
    (* Print de block_t*)
-   and let printBloc b = 
+   and printBloc b = 
       List.iter printVariable b.declarations;
       List.iter printInstr b.instructions;
       print_newline();
    
    (* Print d'instruction_t*) 
-   and let rec printInstr ins =
+   and printInstr ins =
+      let rec printInstrec ins = 
       match ins with
       | Exp e -> printExpr e
       | Block b -> printBloc b 
       | Return -> print_string print_string "return ;" (* On verra jsp *)
       | Ite (si, alors, sinon) ->
       print_string " IF "; printExpr si;
-      print_string " THEN "; printInstr alors;
-      print_string " ELSE "; printInstr sinon;
+      print_string " THEN "; printInstrec alors;
+      print_string " ELSE "; printInstrec sinon;
       print_endline "]"
       | Affectation (g, d) ->
          print_string "["; print_string "["; printContainer g; print_string "]"; print_string ".";
          print_string "["; printExpr d; print_string "]"; print_string "]"; print_string ";";
       print_newline();
+      in printInstr ins;
 
    (* Print container_t*) 
-   and let printContainer c = 
+   and  printContainer c = 
       match c with 
       | Select a -> printAttributeCall a;
       | LocalVar n -> print_string n
@@ -115,51 +117,53 @@ and let printMethod m =
    print_newline();
 
    (* Print attribute_call*) 
-   and let printAttributeCall a = 
+   and  printAttributeCall a = 
       printCallBeginning a.beginning;
       List.iter printCallEnd a.selections_to_attrs;
 
    (* Print method_call*) 
-   and let printMethodCall a = 
+   and  printMethodCall a = 
       printCallBeginning a.beginning;
       List.iter printCallEnd a.selections_to_meths;
 
    (* selection_beg_t *)
-   and let printCallBeginning a =
+   and  printCallBeginning a =
       match a with 
       | ExpSelect e -> printExpr e; 
       | ClassSelect s -> print_string s;
 
    (* selection_end_t *)
-   and let printCallEnd a =
+   and  printCallEnd a =
       match a with 
-      | AttrSelect s -> print_string s; 
-      | MethSelect s le -> print_string s; print_string "."; List.iter printExpr le;
+      | AttrSelect s -> print_string s;
+      | MethSelect (s,le) -> print_string s; print_string "."; List.iter printExpr le;
 
    (* print de expression_t*)
-   and let rec printExpr e =
+   and  printExpr e =
+         let rec printExprec e = 
       match e with
       | IntLiteral i -> print_int i
       | StringLiteral s -> print_string s 
       | Container cont -> printContainer cont
       | Method meth -> printMethod meth
-      | Binary op g d -> printBinary op printExpr g printExpr d
-      | Unary op e -> printUnary op printExpr e
-      | Cast s e -> print_string s printExpr e
-      | NewClass s le -> print_string s List.iter printExpr le
+      | Binary (op,g,d) -> printBinary op printExprec g printExprec d
+      | Unary (op,e) -> printUnary op printExprec e
+      | Cast (s,e) -> print_string s printExprec e
+      | NewClass (s,le) -> print_string s List.iter printExprec le
+      in printExprec e;
 
     (* print de unary_operator_t*)
-    and let printUnary u =
+    and  printUnary u =
       match u with 
       | UMINUS -> " - " 
     (* binary_operator_t *)
-    and  let printBinary b = 
+    and   printBinary b = 
       match b with 
       | IntBinOp i -> printIntBinary i
       | StringConcat -> " & "
 
    (* and int_binary_operator_t *)
-   and let printIntBinary op  =
+   and  printIntBinary op  =
       match op with
         EQ -> "="
       | NEG -> "<>"
