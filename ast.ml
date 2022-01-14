@@ -1,16 +1,16 @@
 (**
-  ___________________________________________________________
-/                                ------------°°°°------------                                  \
-|                                TYPES DEFINITIONS
-|        Stockent les définitions déclarés dans le programme
-\ __________________________________________________________ /
-**)
+   ___________________________________________________________
+   /                                ------------°°°°------------                                  \
+   |                                TYPES DEFINITIONS
+   |        Stockent les définitions déclarés dans le programme
+   \ __________________________________________________________ /
+ **)
 
 type prog_def = {
   classes : class_def list;
   program : block_t 
 } 
-  
+
 
 and class_def = {
   name_class : string; 
@@ -51,12 +51,12 @@ and variable_def = {
 
 
 (**
-  ___________________________________________________________
-/                                ------------°°°°------------                                  \
-|                               TYPES INSTRUCTIONS
-|        Stockent les différentes instructions dans les blocs
-\ __________________________________________________________ /
-**)
+   ___________________________________________________________
+   /                                ------------°°°°------------                                  \
+   |                               TYPES INSTRUCTIONS
+   |        Stockent les différentes instructions dans les blocs
+   \ __________________________________________________________ /
+ **)
 
 
 and block_t = {
@@ -70,7 +70,7 @@ and instruction_t =
   | Ite of expression_t * instruction_t * instruction_t
   | Return 
   | Affectation of container_t * expression_t
-  
+
 
 and container_t =
   | Select of attribute_call
@@ -96,12 +96,12 @@ and method_call = {
 
 
 (**
-  ___________________________________________________________
-/                                ------------°°°°------------                                  \
-|                                TYPES EXPRESSIONS
-|                   Stockent des expressions à évaluer
-\ __________________________________________________________ /
-**)
+   ___________________________________________________________
+   /                                ------------°°°°------------                                  \
+   |                                TYPES EXPRESSIONS
+   |                   Stockent des expressions à évaluer
+   \ __________________________________________________________ /
+ **)
 
 and expression_t =
   | IntLiteral of int
@@ -114,7 +114,7 @@ and expression_t =
   | NewClass of string * expression_t list
 
 and unary_operator_t =
-    UMINUS
+    UMINUS 
 
 and binary_operator_t =
   | IntBinOp of int_binary_operator_t
@@ -138,13 +138,13 @@ and selection_end_t =
 
 
 (**
-  ____________________________________________
-/                    ------------°°°°------------                      \
-|                 TYPES INTERMEDIAIRES
-|            Utiles pour construire l'AST, et
-|               absents de la version finale
-\ ___________________________________________ /
-**)
+   ____________________________________________
+   /                    ------------°°°°------------                      \
+   |                 TYPES INTERMEDIAIRES
+   |            Utiles pour construire l'AST, et
+   |               absents de la version finale
+   \ ___________________________________________ /
+ **)
 
 exception MISC_Error of string
 
@@ -153,26 +153,26 @@ type attrsMethsConstructor = {attrs: variable_def list; meths: methode_def list;
 
 
 (**
-  ____________________________________________
-/                    ------------°°°°------------                      \
-|     FONCTIONS UTILES A LA CONSTRUCTION
-|    Utiles pour construire l'AST dans Parse.mly
-\ ___________________________________________ /
-**)
+   ____________________________________________
+   /                    ------------°°°°------------                      \
+   |     FONCTIONS UTILES A LA CONSTRUCTION
+   |    Utiles pour construire l'AST dans Parse.mly
+   \ ___________________________________________ /
+ **)
 
 
 let getAttrsFromAMCList (amcList:attrsMethsConstructor list) =
   List.fold_left (fun (acc:variable_def list) (attrib:variable_def) -> attrib::acc ) [] (* Inverse la liste à nouveau *)
     (List.fold_left (fun (acc:variable_def list) (amc:attrsMethsConstructor) ->
-      (List.fold_left (fun (acc:variable_def list) (attrib:variable_def) -> attrib::acc) acc amc.attrs))
-    [] amcList)
+         (List.fold_left (fun (acc:variable_def list) (attrib:variable_def) -> attrib::acc) acc amc.attrs))
+        [] amcList)
 ;;
 
 let getMethsFromAMCList (amcList:attrsMethsConstructor list) =
   List.fold_left (fun (acc:methode_def list) (meth:methode_def) -> meth::acc ) [] (* Inverse la liste à nouveau *)
     (List.fold_left (fun (acc:methode_def list) (amc:attrsMethsConstructor) ->
-      (List.fold_left (fun (acc:methode_def list) (meth:methode_def) -> meth::acc) acc amc.meths)
-    ) [] amcList)
+         (List.fold_left (fun (acc:methode_def list) (meth:methode_def) -> meth::acc) acc amc.meths)
+       ) [] amcList)
 ;;
 
 let nonOptionalConstr constr =
