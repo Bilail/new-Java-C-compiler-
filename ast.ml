@@ -13,7 +13,8 @@ type prog_def = {
   
 
 and class_def = {
-  name_class : string; 
+  name_class : string;
+  params_class : variable_def list;
   superclass : string option; 
   attributes : variable_def list; (* param + attribut *)
   methods : methode_def list;
