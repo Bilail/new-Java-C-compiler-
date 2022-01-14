@@ -161,6 +161,7 @@ classe: CLASSE n=CLASSNAME p=factoredVarParamList s=option(extends) IS LBRACKET 
 { 
   {
     name_class = n;
+    params_class = p;
     superclass = s; 
     attributes = b.attrs;
     methods = b.meths;
