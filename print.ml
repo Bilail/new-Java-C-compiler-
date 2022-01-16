@@ -95,12 +95,12 @@ and printInstr ins =
       print_string " IF "; printExpr si;
       print_string " THEN "; printInstrec alors;
       print_string " ELSE "; printInstrec sinon;
-      print_endline "]";
+      print_endline "]"
     | Affectation (g, d) ->
       print_string "["; print_string "["; printContainer g; print_string "]"; print_string ".";
       print_string "["; printExpr d; print_string "]"; print_string "]"; print_string ";";
-      print_newline();
-  in printInstr ins;
+      print_newline()
+  in printInstrec ins;
 
   (* Print container_t*) 
 and  printContainer c = 
@@ -155,21 +155,21 @@ and  printUnary u =
 and   printBinary b = 
   match b with 
   | IntBinOp i -> printIntBinary i
-  | StringConcat -> " & ";
+  | StringConcat -> print_string " & ";
 
 (* and int_binary_operator_t *)
 and  printIntBinary op  =
   match op with
-    EQ -> "="
-  | NEQ -> "<>"
-  | LT -> "<"
-  | LE -> "<="
-  | GT -> ">"
-  | GE -> ">="
-  | PLUS -> " + "
-  | MINUS -> " - "
-  | TIMES -> " * "
-  | DIV -> " / "
+    EQ -> print_string "="
+  | NEQ -> print_string "<>"
+  | LT -> print_string "<"
+  | LE -> print_string "<="
+  | GT -> print_string ">"
+  | GE -> print_string ">="
+  | PLUS -> print_string " + "
+  | MINUS -> print_string " - "
+  | TIMES -> print_string " * "
+  | DIV -> print_string " / "
 
 
 (**
