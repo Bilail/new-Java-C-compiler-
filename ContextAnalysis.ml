@@ -14,13 +14,13 @@ open Ast
 1. Classes
     1. Plusieurs classes ne peuvent pas avoir le même nom
     2. Les paramètres de la classe sont les mêmes que les params du constructeur
+    3. Le constructeur et sa classe extend-ent la même superclasse
+    L'appel à la superclasse dans le constructeur a des arguments qui correspondent à la superclasse
 
 
 
 A faire
     Les params du constructeur correspondent aux args de l'instanciation
-    - Le constructeur et sa classe extend-ent la même superclasse
-    L'appel à la superclasse dans le constructeur a des arguments qui correspondent à la superclasse
     Les params des méthodes correspondent aux arguments des appels
     On doit extend une classe qui existe (pas forcément déclarée plus haut)
     On ne peut pas faire d'héritage circulaire
