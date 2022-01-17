@@ -8,7 +8,7 @@ projet: Parse.mli $(SOURCES)
 	clear
 	ocamlc -c ast.ml
 	ocamlc $(INTERFACES)
-	ocamlc -o tp $(SOURCES)
+	ocamlc -o projet $(SOURCES)
 	./tp ./test/ex1-V3.txt
 	
 
