@@ -51,6 +51,26 @@ let countClassnameAmong classes name =
     (countOccurrences name (List.map (fun c -> c.name_class) classes))
 
 
+(* Retoune la classe associé au nom de classe donnée en param*)
+let find_class s l_c =
+  List.find_opt (fun c -> c.name_class == s) l_c
+
+
+(*Vérifier qu'un type est sous type d'un autre type *)
+let rec is_subclass m f l_cl =
+  let fi = find_class f l_cl in 
+  match fi with
+  | None -> false
+  | Some fille -> (
+    if (m == fille.name_class) then
+      true 
+    else 
+      (match fille.superclass with 
+        | None -> false 
+        | Some s -> is_subclass m s l_cl)
+  )
+
+
 (* Affiche une erreur si "name" est un nom porté par une classe dans "classes" *)
 let forbidClassName (classes:class_def list) name =
 	let check = ((countClassnameAmong classes name) = 1)
@@ -84,7 +104,7 @@ let chckSuperclassExistence call c classes =
 let forbidInheritanceCycle c classes =
     let check =
         match c.superclass with
-        | Some supername -> not (is_subclass supername c.name_class classes) 
+        | Some supername -> not (is_subclass c.name_class supername classes) 
         | None -> true
     in match check with
     | true -> true
@@ -97,7 +117,7 @@ let forbidInheritanceCycle c classes =
 (* Affiche une erreur s'il y a un problème dans le graphe d'héritage *)
 let chckSuperclass call c (classes:class_def list) =
     chckSuperclassExistence call c classes &&
-    true
+    forbidInheritanceCycle c classes
 
 
 (* Affiche une erreur si la classe et son constructeur n'appellent pas la même superclasse *)
