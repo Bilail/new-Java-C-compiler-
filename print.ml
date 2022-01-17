@@ -12,6 +12,7 @@ let rec printProg prog =
 and  printClass c =
   print_string "class "; print_string c.name_class; print_string "( "; List.iter printVariable c.attributes;
   print_string " )";
+  print_newline();
   (match c.superclass with 
    | None -> print_string " "
    | Some s -> print_string "EXTENDS"; print_string s);
