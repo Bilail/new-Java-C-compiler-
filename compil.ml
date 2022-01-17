@@ -55,7 +55,14 @@ let compile ld e chan =
     match e with
     | Container c ->
       (match c with
-       | Select ->
+       | Select att -> 
+        (match att.beginning with
+        | ExpSelect exp ->
+          compileExpr exp env
+        | ClassSelect s -> 
+
+        )
+
        | LocalVar ->
        | This ->
        | Super ->    )
@@ -88,7 +95,9 @@ let compile ld e chan =
 
     (* -- -- -- -- -- -- -- -- Gestion des BinaryOp -- -- -- -- -- -- -- -- *)
 
-    | Binary binaryOp ->
+    | Binary (binaryOp, g, d) ->
+
+      compileExpr g env; compileExpr d env;
       (match binaryOp with
 
        (* -- -- -- -- -- -- -- -- Gestion des intBinaryOp -- -- -- -- -- -- -- -- *)
@@ -96,49 +105,49 @@ let compile ld e chan =
        | IntBinOp intBinOp ->
          (match intBinOp with
 
-          | Plus(g, d) ->
-            compileExpr g env; compileExpr d env; output_string chan "ADD\n"
+          | Plus ->
+          output_string chan "ADD\n"
 
-          | Minus (g, d) ->
-            compileExpr g env; compileExpr d env; output_string chan "SUB\n"
+          | Minus ->
+          output_string chan "SUB\n"
 
-          | Times (g, d) ->
-            compileExpr g env; compileExpr d env; output_string chan "MUL\n"
+          | Times ->
+          output_string chan "MUL\n"
 
-          | Div (g, d) ->
-            compileExpr g env; compileExpr d env; output_string chan "DIV\n"
+          | Div ->
+          output_string chan "DIV\n"
 
-          | EQ (g, d) ->
-            compileExpr g env; compileExpr d env; output_string chan "EQUAL\n"
+          | EQ  ->
+          output_string chan "EQUAL\n"
 
-          | NEQ (g, d) ->
-            compileExpr g env; compileExpr d env; output_string chan "EQUAL\n"; output_string chan "NOT\n"
+          | NEQ  ->
+          output_string chan "EQUAL\n"; output_string chan "NOT\n"
 
-          | LT (g, d) ->
-            compileExpr g env; compileExpr d env; output_string chan "INF\n"
+          | LT ->
+          output_string chan "INF\n"
 
-          | LE (g, d) ->
-            compileExpr g env; compileExpr d env; output_string chan "INFEQ\n"
+          | LE ->
+          output_string chan "INFEQ\n"
 
-          | GT (g, d) ->
-            compileExpr g env; compileExpr d env; output_string chan "SUP\n"
+          | GT ->
+          output_string chan "SUP\n"
 
-          | GE (g, d) ->
-            compileExpr g env; compileExpr d env; output_string chan "SUPEQ\n")
+          | GE ->
+          output_string chan "SUPEQ\n")
 
        (* -- -- -- -- -- -- -- -- Gestion des StringBinaryOp -- -- -- -- -- -- -- -- *)
 
-       | StringConcat (g, d) -> 
-         compileExpr g env; compileExpr d env; outpute_string chan "CONCAT\n")
+       | StringConcat -> 
+       outpute_string chan "CONCAT\n")
 
     (* -- -- -- -- -- -- -- -- Gestion des UnaryOp -- -- -- -- -- -- -- -- *)
     
-    | Unary d -> 
-      (match d with
-       | UMINUS d -> (* traduit en 0 - d *)
-         output_string chan "PUSHI 0\n";
-         compileExpr d env;
-         output_string chan "SUB\n")
+    | Unary (op, d) -> 
+      output_string chan "PUSHI 0\n";
+      compileExpr d env;
+      (match op with
+       | UMINUS -> (* traduit en 0 - d *)
+       output_string chan "SUB\n")
 
     | Ite (si, alors, sinon) ->
       let (etiElse, etiFin) = makeEti () in
