@@ -197,7 +197,7 @@ anyClDeclAndConstructor :
     {
       attrs = (newAny.attrs @ next.attrs);
       meths = (newAny.meths @ next.meths);
-      construct = None
+      construct = next.construct
     }
   }
 | c=constructor {
