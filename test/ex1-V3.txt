@@ -125,14 +125,14 @@ class CouleurFactory() is {
 /* ci-dessous on ne met pas var devant x et y sinon ca definirait deux
  * nouveaux champs qui masqueraient ceux herites de Point
  */
-class PointColore(x, y:Integer, var coul: Couleur) extends PointNoir is {
+class PointColore(x, y:Integer, var coul: Couleur) extends Point is {
 
    def couleur() : Couleur := this.coul
 
    def colore() : Integer := this.coul.estGris() <> 0
 
    def PointColore (x, y:Integer, var coul: Couleur)
-     : PointNoir(x, y, "P-" & Point.howMany().toString() ) is { /* empty */ }
+     : Point(x, y, "P-" & Point.howMany().toString() ) is { /* empty */ }
 
  /* pas PointColore: pas de covariance ! On ne peut pas reutiliser le
   * clone de Point car ca nous donnerait une instance de Point.

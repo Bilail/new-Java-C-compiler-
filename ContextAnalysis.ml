@@ -61,6 +61,12 @@ let countOccurrences elem lis =
 
 
 
+let print_bool b = match b with
+| true -> print_string "YES"
+| false -> print_string "NO"
+
+
+
 (*-----------------------------------------------------------------------------------------------
                                        pour les classes
 -----------------------------------------------------------------------------------------------*)
@@ -73,22 +79,44 @@ let countClassnameAmong classes name =
       
 (* Retoune la classe associée au nom de classe donnée en param *)
 let find_class s l_c =
-  List.find_opt(fun c -> c.name_class == s) l_c
+  List.find_opt(fun c -> c.name_class = s) l_c
 
 
 (* Vérifie qu'un type est sous type d'un autre type *)
 let rec is_subclass m f l_cl =
-  let fi = find_class f l_cl in 
-  match fi with
-  | None -> false
-  | Some fille -> (
-    if (m == fille.name_class) then
-      true 
-    else 
-      (match fille.superclass with 
-        | None -> false 
-        | Some s -> is_subclass m s l_cl)
-  )
+  if m = f then
+    true
+  else
+    let fi = find_class f l_cl
+    in match fi with
+    | None -> print_string f; print_string " inexistante\n"; false
+    | Some fille -> ( 
+      match fille.superclass with 
+        | None -> print_string "Pas de superclasse pour "; print_string fille.name_class; print_newline (); false
+        | Some s -> is_subclass m s l_cl
+    )
+
+
+exception Error_inherit_cycle of string
+
+let is_subclass_cyclesafe parentName childName classes = 
+    let rec findInInheritance parentName childName classes (alreadyVisited: string list) =
+        if parentName = childName then
+            true
+        else if List.mem childName alreadyVisited then
+            raise (Error_inherit_cycle childName)
+        else
+            let child = find_class childName classes
+            in
+            match child with
+            | None -> false
+            | Some c -> (
+                match c.superclass with
+                | None -> false
+                | Some supername -> findInInheritance parentName supername classes (childName::alreadyVisited)
+            )
+    in
+    findInInheritance parentName childName classes []
 
 
 
@@ -167,15 +195,16 @@ let chckSuperclassExistence call c classes =
 
 (* Affiche une erreur si une classe hérite d'elle-même *)
 let forbidInheritanceCycle c classes =
-    let check =
-        match c.superclass with
-        | Some supername -> not (is_subclass c.name_class supername classes) 
-        | None -> true
-    in match check with
-    | true -> true
-    | false ->
-        (print_string "[Error] Class "; print_string c.name_class; print_string " inherits itself, which is forbidden"; print_newline ());
-        false
+    match c.superclass with
+    | None -> true
+    | Some supername -> (
+        match (
+                try not (is_subclass_cyclesafe c.name_class supername classes) with
+                | Error_inherit_cycle classname -> print_string "[Error] "; print_string c.name_class; print_string " is part of an inheritance cycle involving "; print_string classname; print_newline (); false
+        ) with
+        | true -> true
+        | false -> print_string "[Error] "; print_string c.name_class; print_string " extends a class that's part of an inheritance cycle"; print_newline (); false
+    )
 
 
 
@@ -259,7 +288,7 @@ let expr_verif expr env =
   | Method m -> methode_verif m env 
   | Binary (op,e1,e2) -> binary_verif op e1 e2 env 
   | Unary (u,e) -> unary_verif u e env
-  | Cast(s,e) -> is_subclass s e env.decl_classes
+  | Cast(s,e) -> is_subclass_cyclesafe s e env.decl_classes
   | NewClasse (s,e_list) -> add_env_classe env c (* A vérifier *)
 
 let container_verif c env = 
