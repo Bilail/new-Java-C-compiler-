@@ -1,33 +1,12 @@
 open Ast
 
-(* Les "références" sont utilisées pour simuler des variables "globales" dans
- * lesquelles on fera des affectation. Quand on declare une référence, on doit
- * donner sa valeur initiale pour le compilateur ocaml puisse inférer le type
- * de valeurs qu'elle va référencer
- * Exemple d'usage
- * let cpt = ref 0    cpt est une "référence" sur un entier et vaut 0
- * ! cpt              accède à la valeur courante de la reference cpt
- * cpt := 23          change la valeur de la reference cpt.
- *
- * Ci-dessous on s'en sert pour avoir un compteur qui va permettre de générer
- * des noms d'étiquette différents à chaque appel.
- * Correspond à ce qu'on ferait en Java avec un compteur qui serait un champ
- * de classe déclaré comme 
- * static int cpt
-*)
 let cptEti = ref 0	(* compteur: variable globale *)
 
-(* generateur d'etiquettes fraiches. A chaque appel, on renvoie une paire
- * d'étiquettes dont on garantit qu'elles n'ont jamais été utilisées.
- * Sert ici à produire des étiquettes pour engendrer du code pour les
- * if-then-else, comme vu en TD.
- * Les étiquettes auront la forme "else1", "fin1", "else2", "fin2", etc
-*)
+
 let makeEti () =
   let v = ! cptEti in
   let sv = string_of_int v in
   cptEti := v + 1;
-  ("else"^sv, "fin"^sv)  (* ^ est l'operateur de concatenation de strings *)
 
 
 (* paramètres: la liste de déclarations, l'expression finale et le fichier
@@ -207,3 +186,33 @@ let compile ld e chan =
             "STOP"
           ]
   *)
+
+
+  (* Début du code *)
+type info_classe {index : int , nbMeth = int, nbAtt = int, nbMethStat = int, nbAttStat = int}
+let classe_hash = (string, info_classe) Hashtbl.create 16
+
+let i = ref -1 in 
+List.iter(fun c -> Hastbl.add classe_hash c.name_class {
+  index = i := !i + 1; !i
+  nbMeth = List.lenght c.methods;
+  nbAtt = List.length c.attributes;
+  nbMethStat = List.fold_left (fun acc m -> if m.is_static_method then acc + 1 else acc) 0 c.methods;
+  nbAttStat = List.fold_left (fun acc m -> if m.is_static then acc + 1 else acc) 0 c.attributes;
+})
+
+let init_code prog chan =
+  let n = 
+  outpute_string chan "ALLOC "^ string_of_int n ^"\n"
+
+let generate_code prog = 
+  let lc = prog.classes in 
+  let bloc = prog.program in 
+
+ 
+  init_code prog;
+  block_code bloc;
+  List.iter (c -> meth_code c.methods ) lc;
+  
+
+
