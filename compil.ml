@@ -51,36 +51,56 @@ let compile ld e chan =
     | { lhs; rhs; } :: ld' ->
       compileExpr rhs env;
       compileDecl ld' ((lhs, rang)  :: env) (rang+1)
+
+  and compileClassDef attributes methods env 
+    
   and compileExpr e env =
     match e with
     | Container c ->
       (match c with
        | Select att -> 
-        (match att.beginning with
-        | ExpSelect exp ->
-          compileExpr exp env
-        | ClassSelect s -> 
+         (match att.beginning with
+          | ExpSelect exp ->
 
-        )
+          | ClassSelect s -> 
 
-       | LocalVar ->
+         );
+
+         (match att.selections_to_attrs with
+          | [] -> env
+          | AttrSelect s :: att.selections_to_attrs ->
+
+          | MethSelect (s, expr_list) :: att.selections_to_attrs ->
+
+         )
+
+       | LocalVar s ->
+
        | This ->
-       | Super ->    )
 
+       | Super ->
+      )
 
+    | Method m ->
+      (match m.beginning_call with
+       | ExpSelect exp ->
+         compileExpr exp env
+       | ClassSelect s -> 
 
-        Id x ->
-      begin
-        (* retrouve le rang, donc l'adresse par rapport a GP, de la variable *)
-        try let adr = List.assoc x env
-          in output_string chan "PUSHG ";
-          output_string chan (string_of_int adr);
-          output_string chan "\n"
-        with Not_found ->
-          (* ne peut arriver si les vérifications contextuelles sont faites *)
-          failwith "unexpected situation in compileExpr"
-      end
+      );
+      (match m.selections_to_meths with
+       | [] -> env
+       | AttrSelect s :: m.selections_to_meths ->
 
+       | MethSelect (s, expr_list) :: m.selections_to_meths ->
+
+      )
+
+    | Cast (s, expr) ->
+
+    | NewClass (s, expr_list) ->
+      output_string chan ""
+      
     (* -- -- -- -- -- -- -- -- Gestion du IntLiteral -- -- -- -- -- -- -- -- *)
 
     | IntLiteral v ->
@@ -106,48 +126,48 @@ let compile ld e chan =
          (match intBinOp with
 
           | Plus ->
-          output_string chan "ADD\n"
+            output_string chan "ADD\n"
 
           | Minus ->
-          output_string chan "SUB\n"
+            output_string chan "SUB\n"
 
           | Times ->
-          output_string chan "MUL\n"
+            output_string chan "MUL\n"
 
           | Div ->
-          output_string chan "DIV\n"
+            output_string chan "DIV\n"
 
           | EQ  ->
-          output_string chan "EQUAL\n"
+            output_string chan "EQUAL\n"
 
           | NEQ  ->
-          output_string chan "EQUAL\n"; output_string chan "NOT\n"
+            output_string chan "EQUAL\n"; output_string chan "NOT\n"
 
           | LT ->
-          output_string chan "INF\n"
+            output_string chan "INF\n"
 
           | LE ->
-          output_string chan "INFEQ\n"
+            output_string chan "INFEQ\n"
 
           | GT ->
-          output_string chan "SUP\n"
+            output_string chan "SUP\n"
 
           | GE ->
-          output_string chan "SUPEQ\n")
+            output_string chan "SUPEQ\n")
 
        (* -- -- -- -- -- -- -- -- Gestion des StringBinaryOp -- -- -- -- -- -- -- -- *)
 
        | StringConcat -> 
-       outpute_string chan "CONCAT\n")
+         outpute_string chan "CONCAT\n")
 
     (* -- -- -- -- -- -- -- -- Gestion des UnaryOp -- -- -- -- -- -- -- -- *)
-    
+
     | Unary (op, d) -> 
       output_string chan "PUSHI 0\n";
       compileExpr d env;
       (match op with
        | UMINUS -> (* traduit en 0 - d *)
-       output_string chan "SUB\n")
+         output_string chan "SUB\n")
 
     | Ite (si, alors, sinon) ->
       let (etiElse, etiFin) = makeEti () in
