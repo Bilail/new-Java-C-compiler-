@@ -33,7 +33,7 @@ let parse_with_error lexbuf file_in chan =
      * et une version sous forme d'un compilateur pour la machine virtuelle
      * utilisee pour le projet.
      *)
-     Print.printProg prog; (* impression non ambigue de tout l'AST *)  
+     (**Print.printProg prog; (* impression non ambigue de tout l'AST *) **) 
      
   with (* traite exception général ... *)
     Parse.Error -> (* levée par l'analyseur syntaxique *)
