@@ -8,8 +8,8 @@ projet: Parse.mli $(SOURCES)
 	clear
 	ocamlc -c ast.ml
 	ocamlc $(INTERFACES)
-	ocamlc -o projet $(SOURCES)
-	./tp ./test/ex1-V3.txt
+	ocamlc -o awesomeCompiler $(SOURCES)
+	./awesomeCompiler ./test/ex1-V3.txt
 	
 
 testLex : Parse.mli Lex.ml testLex.ml 
@@ -25,4 +25,4 @@ Parse.mli : Parse.mly ast.ml
 	menhir --dump --explain --strict Parse.mly
 
 clean:
-	rm -rf  tp testLex *.o *.cmi *.cmo *.cmx *~ $(GENERATED)
+	rm -rf  awesomeCompiler testLex *.o *.cmi *.cmo *.cmx *~ $(GENERATED)

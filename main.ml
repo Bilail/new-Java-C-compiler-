@@ -26,7 +26,7 @@ let parse_with_error lexbuf file_in chan =
      * une déclaration et l'ast de l'expression comprise entre begin et end
      *)
     let prog = Parse.prog Lex.token lexbuf
-    in (ContextAnalysis.analyseProgram prog);
+    in (ContextAnalysis.analyseProgram prog); 
 
     (* Dans ce TP d'initiation on réalise à la fois l'impression des AST,
      * les vérifications contextuelles, une version sous forme d'interprète
