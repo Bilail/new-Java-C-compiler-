@@ -27,6 +27,7 @@ A faire
     L'appel à la superclasse dans le constructeur a des arguments qui correspondent à la superclasse
     On ne peut pas déclarer de variables locales avec le même nom dans la même portée
     Les membres gauche et droit d'une affectation doivent avoir même type
+    Une expression renvoie un type existant
 
 **)
 
@@ -42,12 +43,24 @@ A faire
                                       Types auxiliaires
 -----------------------------------------------------------------------------------------------*)
 
+(*  Contient : classes existantes ; variables locales ; validité jusqu'à présent *)
 type environment = {
 	decl_classes : class_def list;
 	decl_vars : variable_def list;
+  current_class : class_def option;
 	is_correct_env : bool
 }
-let emptyEnv = {decl_classes=[]; decl_vars=[]; is_correct_env=true}
+let emptyEnv = {decl_classes=[]; decl_vars=[]; current_class=None; is_correct_env=true}
+
+
+
+(* Est renvoyé par la vérification d'une expression *)
+(* Contient type de retour de l'expression ; validité jusqu'à présent *)
+type exprUpward = {
+  expr_return_type : string;
+  is_correct_expr : bool
+}
+let emptyExprUpw = {expr_return_type="Integer"; is_correct_expr=true}
 
 
 
@@ -125,6 +138,11 @@ let is_subclass_cyclesafe parentName childName classes =
 (*-----------------------------------------------------------------------------------------------
                                     pour les environnements
 -----------------------------------------------------------------------------------------------*)
+
+(* Verifie qu'une variable est dans l'envrionnement *)
+let var_in_env env e = 
+  List.exists (fun c -> c.name == e) env.decl_vars
+
 
 (**
 (* Ajout d'une variable à un environnement *)
@@ -256,6 +274,7 @@ let analyseClass env c =
 	let newEnv = {
 		decl_classes = c::env.decl_classes;
 		decl_vars = env.decl_vars;
+    current_class = Some c;
 		is_correct_env =
 			env.is_correct_env &&
 			forbidClassName env.decl_classes c.name_class &&
@@ -269,7 +288,7 @@ let analyseClass env c =
     newEnv.is_correct_env
 
 
-(**
+
 
 (**
   ____________________________________________
@@ -278,52 +297,108 @@ let analyseClass env c =
 \ ___________________________________________ /
 **)
 
+let chckCastTarget target source classes =
+  let check =
+    is_subclass_cyclesafe target source classes
+  in match check with
+  | true -> true
+  | false ->
+    print_string "[Error] Cannot cast "; print_string source; print_string " into "; print_string " because the former doesn't inherit the latter";
+    false
 
 
-let expr_verif expr env =
+let chckExpectedType expected actualType =
+  if expected = actualType then
+    true
+  else
+    (print_string "[Error] Expected type "; print_string expected; print_string " but found type "; print_string actualType;
+    false)
+
+
+
+
+(*-----------------------------------------------------------------------------------------------
+                                           Appels
+-----------------------------------------------------------------------------------------------*)
+
+
+let rec expr_verif expr env = (
   match expr with 
-  | IntLiteral i -> (*add_env_var env i*)
-  | StringLiteral s -> in_env env s 
+  | IntLiteral i -> { expr_return_type="Integer"; is_correct_expr=true }
+  | StringLiteral s -> { expr_return_type="String"; is_correct_expr=true }
   | Container c  -> container_verif c env
   | Method m -> methode_verif m env 
   | Binary (op,e1,e2) -> binary_verif op e1 e2 env 
-  | Unary (u,e) -> unary_verif u e env
-  | Cast(s,e) -> is_subclass_cyclesafe s e env.decl_classes
-  | NewClasse (s,e_list) -> add_env_classe env c (* A vérifier *)
+  | Unary (op,e) -> unary_verif op e env
+  | Cast(target,e) -> cast_verif e target env
+  | NewClass (s,e_list) -> emptyExprUpw
+)
 
-let container_verif c env = 
-  match c with
-    Select s -> 
-    LocalVar -> 
-    This -> 
-    Super -> 
 
-let methode_verif m env = 
-  match m with   
+and container_verif c env = 
+  (match c with
+  | Select s -> emptyExprUpw
+  | LocalVar s -> emptyExprUpw
+  | This -> emptyExprUpw
+  | Super -> emptyExprUpw
+)
 
-let binary_verif op e1 e2 env = 
+
+
+(* Vérifie la validité d'un appel de méthode *)
+and methode_verif m env = 
+  emptyExprUpw
+
+
+
+and unary_verif op e env =
+  emptyExprUpw
+
+
+
+and binary_verif op e1 e2 env =
+  let verifiedExpr1 = expr_verif e1 env
+  in
+  let verifiedExpr2 = expr_verif e2 env
+  in
   match op with 
-    IntBinOp int_op -> (
-      match int_op with 
-      (* Comparaison *)
-       | EQ -> 
-       | NEQ -> 
-       | LT -> 
-       | LE -> 
-       | GT -> 
-       | GE -> 
+  | IntBinOp int_op ->
+      {
+      expr_return_type = "Integer";
+      is_correct_expr =
+        chckExpectedType "Integer" verifiedExpr1.expr_return_type &&
+        chckExpectedType "Integer" verifiedExpr2.expr_return_type &&
+        verifiedExpr1.is_correct_expr &&
+        verifiedExpr2.is_correct_expr
+      }
+  | StringConcat ->
+    {
+      expr_return_type = "String";
+      is_correct_expr =
+        chckExpectedType "String" verifiedExpr1.expr_return_type &&
+        chckExpectedType "String" verifiedExpr2.expr_return_type &&
+        verifiedExpr1.is_correct_expr &&
+        verifiedExpr2.is_correct_expr
+    }
 
-      (* Arithmétique *)
-       | PLUS -> e1.typ = "Integer" &&  e2.typ = "Integer"
-                              && bf e1 && bf e2        
-       | MINUS -> e1.typ = "Integer" &&  e2.typ = "Integer"
-                              && bf e1 && bf e2 
-       | TIMES -> e1.typ = "Integer" &&  e2.typ = "Integer"
-                              && bf e1 && bf e2 
-       | DIV -> e1.typ = "Integer" &&  e2.typ = "Integer"
-                              && bf e1 && bf e2 
-    )
 
+(* Vérifie la validité d'un cast *)
+and cast_verif expr target env =
+  let verifiedExpr = expr_verif expr env
+  in
+    if chckCastTarget target verifiedExpr.expr_return_type env.decl_classes then
+      {
+        expr_return_type = target;
+        is_correct_expr = verifiedExpr.is_correct_expr
+      }
+    else
+      {
+        expr_return_type = target;
+        is_correct_expr = false
+      }
+
+
+(*
 let instr_verif instr env = 
   match instr with 
   | Exp(e) -> expr_verif e env
@@ -334,10 +409,11 @@ let instr_verif instr env =
   | Return ->
   | Affectation(c,e) -> (* Vérification des types module heritage *)
     (* On doit vérifié que le type de e est un type ou sous type de c *)
+*)
 
-
+(**
 let block_verif b env =
-  
+  **)
 
 
 
@@ -345,12 +421,10 @@ let block_verif b env =
                               Fonction Utile pour les verifs 
 -----------------------------------------------------------------------------------------------*)
 
-(* Verifie qu'une variable est dans l'envrionnement *)
-let in_env env e = 
-  List.find(fun c -> c.name == e) env.decl_vars
 
 
-**)
+
+
 (**
   ____________________________________________
 /         ------------°°°°------------        \
@@ -363,6 +437,7 @@ let analyseProgram prog =
     let env = {
         decl_classes = prog.classes;
         decl_vars = [];
+        current_class = None;
         is_correct_env = true
     }
     in
