@@ -16,18 +16,32 @@ open Ast
     2. Les paramètres de la classe sont les mêmes que les params du constructeur
     3. Le constructeur et sa classe extend-ent la même superclasse
     4. On doit extend une classe qui existe (pas forcément déclarée plus haut)
-    5. On ne peut pas s'extend soi-même // A tester
-    6. On ne peut pas faire d'héritage circulaire // A tester
+    5. On ne peut pas s'extend soi-même
+    6. On ne peut pas faire d'héritage circulaire
+    7. L'appel à la superclasse dans le constructeur a des arguments qui correspondent à la superclasse // A tester
 
 
 
 A faire
     Les params du constructeur correspondent aux args de l'instanciation
     Les params des méthodes correspondent aux arguments des appels
-    L'appel à la superclasse dans le constructeur a des arguments qui correspondent à la superclasse
     On ne peut pas déclarer de variables locales avec le même nom dans la même portée
     Les membres gauche et droit d'une affectation doivent avoir même type
     Une expression renvoie un type existant
+
+A faire (expressions return)
+  IntLiteral
+  StringLiteral
+  Container : Selec
+  Container : LocalVar
+  Container : This
+  Container : Super
+  Method 
+  Binary
+  Unary
+  Cast
+  NewClass
+
 
 **)
 
@@ -64,19 +78,50 @@ let emptyExprUpw = {expr_return_type="Integer"; is_correct_expr=true}
 
 
 
+type exprListUpward = {
+  expr_return_types : string list;
+  is_correct_exprs : bool
+}
+
+
+
+exception Error_inherit_cycle of string
+
+
 (*-----------------------------------------------------------------------------------------------
                                            divers
 -----------------------------------------------------------------------------------------------*)
 
 (* Compte les occurrences d'un élément dans une liste *)
-let countOccurrences elem lis =
+let rec countOccurrences elem lis =
     List.fold_left (fun count el -> if elem = el then count+1 else count) 0 lis
 
 
 
-let print_bool b = match b with
+and print_bool b = match b with
 | true -> print_string "YES"
 | false -> print_string "NO"
+
+
+
+(*-----------------------------------------------------------------------------------------------
+                    pour les appels de méthodes/constructeurs
+-----------------------------------------------------------------------------------------------*)
+
+and getExprTypes (exprs: expression_t list) env =
+  let upwards = (List.map (fun e -> expr_verif e env) exprs)
+  in
+  {
+    expr_return_types = List.map (fun u -> u.expr_return_type) upwards;
+    is_correct_exprs = List.fold_left (fun acc u -> u.is_correct_expr && acc) true upwards
+  }
+
+
+and getVarDeclTypes (variables: variable_def list) =
+  {
+    expr_return_types = List.map (fun var -> var.typ) variables;
+    is_correct_exprs = true
+  }
 
 
 
@@ -85,34 +130,37 @@ let print_bool b = match b with
 -----------------------------------------------------------------------------------------------*)
 
 (* Indique si un nom de classe existe dans une liste *)
-let countClassnameAmong classes name =
+and countClassnameAmong classes name =
     (countOccurrences name (List.map (fun c -> c.name_class) classes))
 
 
       
 (* Retoune la classe associée au nom de classe donnée en param *)
-let find_class s l_c =
+and find_class s l_c =
   List.find_opt(fun c -> c.name_class = s) l_c
 
 
 (* Vérifie qu'un type est sous type d'un autre type *)
-let rec is_subclass m f l_cl =
-  if m = f then
-    true
-  else
-    let fi = find_class f l_cl
-    in match fi with
-    | None -> print_string f; print_string " inexistante\n"; false
-    | Some fille -> ( 
-      match fille.superclass with 
-        | None -> print_string "Pas de superclasse pour "; print_string fille.name_class; print_newline (); false
-        | Some s -> is_subclass m s l_cl
-    )
+and is_subclass m f l_cl =
+  let rec issc m f l_cl =
+    if m = f then
+      true
+    else
+      let fi = find_class f l_cl
+      in match fi with
+      | None -> print_string f; print_string " inexistante\n"; false
+      | Some fille -> ( 
+        match fille.superclass with 
+          | None -> print_string "Pas de superclasse pour "; print_string fille.name_class; print_newline (); false
+          | Some s -> is_subclass m s l_cl
+      )
+  in issc m f l_cl
+  
 
 
-exception Error_inherit_cycle of string
 
-let is_subclass_cyclesafe parentName childName classes = 
+
+and is_subclass_cyclesafe parentName childName classes = 
     let rec findInInheritance parentName childName classes (alreadyVisited: string list) =
         if parentName = childName then
             true
@@ -140,7 +188,7 @@ let is_subclass_cyclesafe parentName childName classes =
 -----------------------------------------------------------------------------------------------*)
 
 (* Verifie qu'une variable est dans l'envrionnement *)
-let var_in_env env e = 
+and var_in_env env e = 
   List.exists (fun c -> c.name == e) env.decl_vars
 
 
@@ -183,7 +231,7 @@ let add_env_var env v =
 
 
 (* Affiche une erreur si "name" est un nom porté par une classe dans "classes" *)
-let forbidClassName (classes:class_def list) name =
+and forbidClassName (classes:class_def list) name =
 	let check = ((countClassnameAmong classes name) = 1)
 	in match check with
 	| true -> true
@@ -193,7 +241,7 @@ let forbidClassName (classes:class_def list) name =
 
 
 (* Affiche une erreur si les paramètres d'une classe et de son constructeur sont différents *)
-let chckParamsInClaAndConstr c =
+and chckParamsInClaAndConstr c =
     let check = c.params_class = c.constructor.param_constructor
     in match check with
     | true -> true
@@ -202,7 +250,7 @@ let chckParamsInClaAndConstr c =
         false
  
 (* Affiche une erreur si la superclasse n'existe pas *)
-let chckSuperclassExistence call c classes =
+and chckSuperclassExistence call c classes =
     let check = (countClassnameAmong classes call.superclass_constructor) = 1
     in match check with
     | true -> true
@@ -212,7 +260,7 @@ let chckSuperclassExistence call c classes =
 
 
 (* Affiche une erreur si une classe hérite d'elle-même *)
-let forbidInheritanceCycle c classes =
+and forbidInheritanceCycle c classes =
     match c.superclass with
     | None -> true
     | Some supername -> (
@@ -226,20 +274,44 @@ let forbidInheritanceCycle c classes =
 
 
 
+
+(* Affiche une erreur si les arguments de l'appel à la superclasse et les paramètres de ladite classe ne correspondent pas en terme de types *)
+and chckSuperclassCallParams call env =
+  let check = (
+    let superclass = find_class call.superclass_constructor env.decl_classes
+    in match superclass with
+    | None ->
+      print_string "[Error] Inexistent superclass "; print_string call.superclass_constructor;
+      false
+    | Some c -> (
+        (getVarDeclTypes c.params_class).expr_return_types = (getExprTypes call.arguments env).expr_return_types
+    )
+  )
+  in match check with
+  | true -> true
+  | false ->
+    print_string "[Error] Call to superclass "; print_string call.superclass_constructor; print_string " is impossible due to wrong arguments"; print_newline ();
+    false
+ 
+
+
+
 (* Affiche une erreur s'il y a un problème dans le graphe d'héritage *)
-let chckSuperclass call c (classes:class_def list) =
-    chckSuperclassExistence call c classes &&
-    forbidInheritanceCycle c classes
+and chckSuperclass call c env =
+    chckSuperclassExistence call c env.decl_classes &&
+    forbidInheritanceCycle c env.decl_classes &&
+    chckSuperclassCallParams call env
+
 
 
 (* Affiche une erreur si la classe et son constructeur n'appellent pas la même superclasse *)
-let chckSuperclassInClaAndConstr c classes = 
+and chckSuperclassInClaAndConstr c env = 
     match c.superclass with
     | Some s ->
       (match c.constructor.super_call with
       | Some call ->
         (if call.superclass_constructor = s then
-          chckSuperclass call c classes
+          chckSuperclass call c env
         else
           (print_string "[Error] Mismatch between the superclass of "; print_string c.name_class; print_string " and the superclass called by its constructor : "; print_string s; print_string " and "; print_string call.superclass_constructor; print_newline ();
           false)
@@ -261,16 +333,11 @@ let chckSuperclassInClaAndConstr c classes =
     
 
 
-(*
-let chckSuperclassCallParams call env =
-TODO : A faire quand les expressions renverront leur type 
-*) 
-
 (*-----------------------------------------------------------------------------------------------
                                            Appel
 -----------------------------------------------------------------------------------------------*)
 
-let analyseClass env c =
+and analyseClass env c =
 	let newEnv = {
 		decl_classes = c::env.decl_classes;
 		decl_vars = env.decl_vars;
@@ -279,7 +346,7 @@ let analyseClass env c =
 			env.is_correct_env &&
 			forbidClassName env.decl_classes c.name_class &&
       chckParamsInClaAndConstr c &&
-      chckSuperclassInClaAndConstr c env.decl_classes
+      chckSuperclassInClaAndConstr c env
 	}
     in
     (match newEnv.is_correct_env with
@@ -290,14 +357,43 @@ let analyseClass env c =
 
 
 
+
 (**
   ____________________________________________
 /         ------------°°°°------------        \
-|           ANALYSE : 2- Expressions           
+|       ANALYSE : 2- Instructions et appels           
 \ ___________________________________________ /
 **)
 
-let chckCastTarget target source classes =
+(* Vérifie que les arguments d'une instantiation "new" correspondent aux paramètres de la classe correspondante *)
+and chckParamsInClaAndNew cName arguments env =
+  let check = (
+    let newClass = find_class cName env.decl_classes
+    in match newClass with
+    | None ->
+      print_string "[Error] Inexistent class in new : "; print_string cName;
+      false
+    | Some c -> (
+        (getVarDeclTypes c.params_class).expr_return_types = (getExprTypes arguments env).expr_return_types
+    )
+  )
+  in match check with
+  | true -> true
+  | false ->
+    print_string "[Error] Instanciation of class  "; print_string cName; print_string " is impossible due to wrong arguments"; print_newline ();
+    false
+
+
+
+
+(**
+  ____________________________________________
+/         ------------°°°°------------        \
+|           ANALYSE : 3- Expressions           
+\ ___________________________________________ /
+**)
+
+and chckCastTarget target source classes =
   let check =
     is_subclass_cyclesafe target source classes
   in match check with
@@ -307,11 +403,11 @@ let chckCastTarget target source classes =
     false
 
 
-let chckExpectedType expected actualType =
+and chckExpectedType expected actualType =
   if expected = actualType then
     true
   else
-    (print_string "[Error] Expected type "; print_string expected; print_string " but found type "; print_string actualType;
+    (print_string "[Error] Expected type "; print_string expected; print_string " but found type "; print_string actualType; print_newline ();
     false)
 
 
@@ -322,7 +418,7 @@ let chckExpectedType expected actualType =
 -----------------------------------------------------------------------------------------------*)
 
 
-let rec expr_verif expr env = (
+and expr_verif expr env = (
   match expr with 
   | IntLiteral i -> { expr_return_type="Integer"; is_correct_expr=true }
   | StringLiteral s -> { expr_return_type="String"; is_correct_expr=true }
@@ -331,7 +427,7 @@ let rec expr_verif expr env = (
   | Binary (op,e1,e2) -> binary_verif op e1 e2 env 
   | Unary (op,e) -> unary_verif op e env
   | Cast(target,e) -> cast_verif e target env
-  | NewClass (s,e_list) -> emptyExprUpw
+  | NewClass (s,e_list) -> new_verif s e_list env
 )
 
 
@@ -396,6 +492,16 @@ and cast_verif expr target env =
         expr_return_type = target;
         is_correct_expr = false
       }
+
+
+(* Vérifie qu'une instanciation est valide *)
+and new_verif cName arguments env =
+  {
+    expr_return_type = cName;
+    is_correct_expr =
+      chckParamsInClaAndNew cName arguments env &&
+      List.fold_left (fun acc e -> (expr_verif e env).is_correct_expr && acc ) true arguments
+  }
 
 
 (*
