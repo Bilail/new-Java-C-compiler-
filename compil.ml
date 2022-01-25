@@ -192,27 +192,51 @@ let compile ld e chan =
 type info_classe {index : int , nbMeth = int, nbAtt = int, nbMethStat = int, nbAttStat = int}
 let classe_hash = (string, info_classe) Hashtbl.create 16
 
-let i = ref -1 in 
-List.iter(fun c -> Hastbl.add classe_hash c.name_class {
-  index = i := !i + 1; !i
-  nbMeth = List.lenght c.methods;
-  nbAtt = List.length c.attributes;
-  nbMethStat = List.fold_left (fun acc m -> if m.is_static_method then acc + 1 else acc) 0 c.methods;
-  nbAttStat = List.fold_left (fun acc m -> if m.is_static then acc + 1 else acc) 0 c.attributes;
-})
+let generate_hash lc = 
+  let i = ref -1 in 
+  List.iter(fun c -> Hastbl.add classe_hash c.name_class {
+    index = i := !i + 1; !i
+    nbMeth = List.lenght c.methods;
+    nbAtt = List.length c.attributes;
+    nbMethStat = List.fold_left (fun acc m -> if m.is_static_method then acc + 1 else acc) 0 c.methods;
+    nbAttStat = List.fold_left (fun acc m -> if m.is_static then acc + 1 else acc) 0 c.attributes;
+  }) lc
+
+
+
+let meth_code_tv m = 
+  outpute_string chan "DUPN 1 "^"\n";
+  outpute_string chan "PUSHA"^ makeEti ^"\n";
+  outpute_string chan "STORE"^ string_of_int n ^"\n"
+
+
+let generate_class c chan = 
+  Hashtbl.find classe_hash c 
+  let n = nbMeth+1 in 
+  outpute_string chan "Alloc "^ string_of_int n ^"\n";
+
+  List.iter (c -> meth_code_tv c.methods ) lc;
+
+
 
 let init_code prog chan =
   let n = 
-  outpute_string chan "ALLOC "^ string_of_int n ^"\n"
+  outpute_string chan "PUSHN "^ string_of_int n ^"\n"
+  
 
 let generate_code prog = 
   let lc = prog.classes in 
-  let bloc = prog.program in 
+  let bloc = prog.program in
+  let hash = generate_hash lc in 
+
+  
+
 
  
   init_code prog;
   block_code bloc;
-  List.iter (c -> meth_code c.methods ) lc;
+
+ (* Essayer de trier les classes dans l'ordre en commancencant par ceux qui n'hérite de personne*)
   
 
 
