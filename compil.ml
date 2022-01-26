@@ -204,18 +204,21 @@ let generate_hash lc =
 
 
 
-let meth_code_tv m = 
+let meth_code_tv m acc cont= 
   outpute_string chan "DUPN 1 "^"\n";
   outpute_string chan "PUSHA"^ makeEti ^"\n";
-  outpute_string chan "STORE"^ string_of_int n ^"\n"
+  outpute_string chan "STORE"^ string_of_int acc ^"\n"
+  cont (* ajoute les infos index, etickette*)
 
 
-let generate_class c chan = 
+let generate_class_TV c chan = 
   Hashtbl.find classe_hash c 
   let n = nbMeth+1 in 
+  
   outpute_string chan "Alloc "^ string_of_int n ^"\n";
+  List.fold_left (fun acc m ->meth_code_tv m acc+1 cont) 0 c.methods;
 
-  List.iter (c -> meth_code_tv c.methods ) lc;
+  (*List.iter (c -> meth_code_tv c.methods ) lc;*)
 
 
 
@@ -228,6 +231,8 @@ let generate_code prog =
   let lc = prog.classes in 
   let bloc = prog.program in
   let hash = generate_hash lc in 
+  generate_class_TV c chan
+
 
   
 
