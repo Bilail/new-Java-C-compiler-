@@ -28,6 +28,10 @@ A faire
     On ne peut pas déclarer de variables locales avec le même nom dans la même portée
     Les membres gauche et droit d'une affectation doivent avoir même type
     Une expression renvoie un type existant
+    This seulement en membre gauche d'une assignation
+    This seulement non-appelable dans une méthode statique
+    Une méthode appelée existe dans l'arbre d'héritage
+    Un attribut appelé existe dans l'arbre d'héritage
 
 A faire (expressions return)
   IntLiteral
@@ -57,6 +61,19 @@ A faire (expressions return)
                                       Types auxiliaires
 -----------------------------------------------------------------------------------------------*)
 
+
+let emptyClass =
+  let emptyConstructor = {
+    name_constructor="ERRORCLASS_CONSTRUCTOR";
+    param_constructor=[];
+    body_constructor={declarations=[];instructions=[]};
+    super_call=None
+  }
+  in
+  {name_class="ERRORCLASS"; params_class=[]; superclass=None; attributes=[]; methods=[]; constructor=emptyConstructor}
+
+
+
 (*  Contient : classes existantes ; variables locales ; validité jusqu'à présent *)
 type environment = {
 	decl_classes : class_def list;
@@ -74,7 +91,7 @@ type exprUpward = {
   expr_return_type : string;
   is_correct_expr : bool
 }
-let emptyExprUpw = {expr_return_type="Integer"; is_correct_expr=true}
+let emptyExprUpw = {expr_return_type="ERROR"; is_correct_expr=false}
 
 
 
@@ -385,11 +402,108 @@ and chckParamsInClaAndNew cName arguments env =
 
 
 
+(**
+  ____________________________________________
+/         ------------°°°°------------        \
+|           ANALYSE : 3- Containers           
+\ ___________________________________________ /
+**)
+
+(* Vérifie qu'un nom de variable existe bien dans un environnement *)
+and chckLocalVarExistence name env =
+  List.exists (fun var -> var.name = name) env.decl_vars
+
+(* Renvoie le nom d'une variable locale et affiche un message d'erreur si la variable n'existe pas *)
+and getLocalVarType name env =
+  let localVar = 
+    List.find_opt (fun var -> var.name = name) env.decl_vars
+  in
+  match localVar with
+  | Some var -> Some var.typ
+  | None ->
+    print_string "[Error] Local variable "; print_string name; print_string " doesn't exist in this scope"; print_newline ();
+    None
+
+
+(* Affiche une erreur si un "this" est hors d'une classe, renvoie la classe sinon *)
+and chckThiscallInsideClass env =
+  match env.current_class with
+  | Some c -> env.current_class
+  | None ->
+    print_string "[Error] Keyword \"this\" can only be used inside a class instance"; print_newline ();
+    None
+
+
+(* Affiche une erreur si le "super" est hors d'une classe ou que ladite classe n'a pas de superclasse, sinon renvoie la superclasse *)
+and chckSuperKeywordCall env =
+  match env.current_class with
+  
+  | None ->
+    print_string "[Error] Keyword \"this\" can only be used inside a class instance"; print_newline ();
+    None
+  
+  | Some c -> (
+    match c.superclass with
+    | Some name -> find_class name env.decl_classes
+    | None ->
+      print_string "[Error] Keyword \"super\" can only be used in classes inheriting at least one other class, unlike "; print_string c.name_class; print_newline();
+      None
+  )
+
+
+
+
+
+
+(*-----------------------------------------------------------------------------------------------
+                                           Appel
+-----------------------------------------------------------------------------------------------*)
+
+
+
+(* Vérifie la validité de l'appel à un container *)
+and analyseContainer c env = 
+  (match c with
+
+  | Select s -> emptyExprUpw (* TODO *)
+
+  
+  (* Vérifie pour une variable locale *)
+  (* Ex :      x     myVar     *)
+  | LocalVar s ->
+    (let typ = getLocalVarType s env
+    in
+      match typ with
+      | Some typename -> {
+          expr_return_type = typename;
+          is_correct_expr = true
+        }
+      | None -> emptyExprUpw
+    )
+
+  (* Vérifie pour un This appelé tout seul *)
+  | This -> (
+    let cla = chckThiscallInsideClass env 
+    in match cla with
+    | Some c -> { expr_return_type = c.name_class; is_correct_expr = true }
+    | None -> emptyExprUpw
+  )
+
+  | Super ->
+    let cla = chckSuperKeywordCall env
+    in match cla with
+    | Some superclass -> {
+        expr_return_type = superclass.name_class;
+        is_correct_expr = true
+    }
+    | None -> emptyExprUpw
+  )
+
 
 (**
   ____________________________________________
 /         ------------°°°°------------        \
-|           ANALYSE : 3- Expressions           
+|           ANALYSE : 4- Expressions           
 \ ___________________________________________ /
 **)
 
@@ -422,21 +536,12 @@ and expr_verif expr env = (
   match expr with 
   | IntLiteral i -> { expr_return_type="Integer"; is_correct_expr=true }
   | StringLiteral s -> { expr_return_type="String"; is_correct_expr=true }
-  | Container c  -> container_verif c env
+  | Container c  -> analyseContainer c env
   | Method m -> methode_verif m env 
   | Binary (op,e1,e2) -> binary_verif op e1 e2 env 
   | Unary (op,e) -> unary_verif op e env
   | Cast(target,e) -> cast_verif e target env
   | NewClass (s,e_list) -> new_verif s e_list env
-)
-
-
-and container_verif c env = 
-  (match c with
-  | Select s -> emptyExprUpw
-  | LocalVar s -> emptyExprUpw
-  | This -> emptyExprUpw
-  | Super -> emptyExprUpw
 )
 
 
