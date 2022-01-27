@@ -91,7 +91,7 @@ type exprUpward = {
   expr_return_type : string;
   is_correct_expr : bool
 }
-let emptyExprUpw = {expr_return_type="ERROR"; is_correct_expr=false}
+let (emptyExprUpw:exprUpward) = {expr_return_type="ERROR"; is_correct_expr=false}
 
 
 
@@ -101,8 +101,9 @@ type exprListUpward = {
 }
 
 
-
+exception Error_class_not_found of string
 exception Error_inherit_cycle of string
+exception Error_no_selection_after_class of string
 
 
 (*-----------------------------------------------------------------------------------------------
@@ -139,6 +140,27 @@ and getVarDeclTypes (variables: variable_def list) =
     expr_return_types = List.map (fun var -> var.typ) variables;
     is_correct_exprs = true
   }
+
+
+and find_attribute_in (name:string) (attributes:variable_def list) =
+  List.find_opt (fun attrib -> attrib.name = name) attributes
+
+and find_attribute (name: string) (classe: class_def) =
+  find_attribute_in name classe.attributes
+
+
+and find_method_in (name:string) (methods:methode_def list) =
+  List.find_opt (fun meth -> meth.name_method = name) methods
+
+and find_method (name: string) (classe: class_def) =
+  find_method_in name classe.methods
+
+
+and filter_attribs_static attributes is_static =
+  List.filter (fun attrib -> attrib.is_static = is_static) attributes
+
+and filter_meths_static methods is_static =
+  List.filter (fun meth -> meth.is_static_method = is_static) methods
 
 
 
@@ -265,6 +287,19 @@ and chckParamsInClaAndConstr c =
     | false -> 
         print_string "[Error] A class and its constructor must have the same parameters in "; print_string c.name_class;
         false
+
+
+(* Affiche une erreur si la classe n'existe pas, la classe sinon *)
+and chckClassExistence name classes = (
+  let check = List.find_opt (fun c -> c.name_class = name) classes
+  in match check with
+  | Some c -> Some c
+  | None -> (
+    print_string "[Error] Class "; print_string name; print_string " not found"; print_newline ();
+    None
+  )
+)
+
  
 (* Affiche une erreur si la superclasse n'existe pas *)
 and chckSuperclassExistence call c classes =
@@ -409,20 +444,17 @@ and chckParamsInClaAndNew cName arguments env =
 \ ___________________________________________ /
 **)
 
-(* Vérifie qu'un nom de variable existe bien dans un environnement *)
-and chckLocalVarExistence name env =
-  List.exists (fun var -> var.name = name) env.decl_vars
-
 (* Renvoie le nom d'une variable locale et affiche un message d'erreur si la variable n'existe pas *)
-and getLocalVarType name env =
+and chckLocalVarExistence name env =
   let localVar = 
     List.find_opt (fun var -> var.name = name) env.decl_vars
   in
   match localVar with
   | Some var -> Some var.typ
-  | None ->
+  | None -> (
     print_string "[Error] Local variable "; print_string name; print_string " doesn't exist in this scope"; print_newline ();
     None
+  )
 
 
 (* Affiche une erreur si un "this" est hors d'une classe, renvoie la classe sinon *)
@@ -451,6 +483,54 @@ and chckSuperKeywordCall env =
   )
 
 
+(* Affiche une erreur si un attribut statique n'appartient pas à une classe, et renvoie la définition de la variable si trouvée *)
+and chckAttributeExists_staticFilter name (c:class_def) is_static =
+  let (check:variable_def option) = find_attribute_in name (filter_attribs_static c.attributes is_static)
+  in (
+  match check with
+  | Some var -> Some var
+  | None ->
+    print_string "[Error] Static attribute "; print_string name; print_string " cannot be found in "; print_string c.name_class; print_newline ();
+    None
+  )
+
+
+(* Affiche une erreur si une méthode n'appartient pas à une classe, et renvoie la méthode si elle est trouvée *)
+and chckMethodExists_staticFilter name (c:class_def) is_static =
+  let (check:methode_def option) = find_method_in name (filter_meths_static c.methods is_static)
+  in (
+  match check with
+  | Some meth -> Some meth
+  | None ->
+    print_string "[Error] Static method "; print_string name; print_string " cannot be found in "; print_string c.name_class; print_newline ();
+    None
+  )
+
+
+and chckMethodExistsAndArgsMatch_staticFilter name (c:class_def) (arguments:expression_t list) (env:environment) is_static =
+  let meth = chckMethodExists_staticFilter name c is_static
+  in match meth with
+  | None -> (None, false)
+  | Some meth -> (
+    let verifiedExprs =
+      chckMethodArgsVsParams meth arguments env
+    in match verifiedExprs with
+    | Some verifiedExprs -> (Some meth, verifiedExprs.is_correct_exprs)
+    | None -> (None, false)
+  )
+
+(* Affiche une erreur si les paramètres et arguments ne correspondent pas, sinon renvoie un exprListUpward *)
+and chckMethodArgsVsParams (meth:methode_def) (arguments:expression_t list) env =
+  let verifiedExprs = getExprTypes arguments env
+  in
+  let check =
+    (getVarDeclTypes meth.param_method).expr_return_types = verifiedExprs.expr_return_types
+  in
+  match check with
+  | true -> Some verifiedExprs
+  | false ->
+    print_string "[Error] Method "; print_string meth.name_method; print_string " was not given the right arguments"; print_newline ();
+    None
 
 
 
@@ -459,20 +539,110 @@ and chckSuperKeywordCall env =
                                            Appel
 -----------------------------------------------------------------------------------------------*)
 
+and attributeCall_verif2 (verifiedExpr:exprUpward) selections env = (
+  if verifiedExpr.is_correct_expr then (
+    match selections with
+    | [] -> verifiedExpr
+    | s::lis -> (
+      let c = (find_class verifiedExpr.expr_return_type env.decl_classes)
+      in (
+        match c with
+        | None -> (raise (Error_class_not_found "Impossible not to find the class here"))
+        | Some c -> (
+          match s with
+          | AttrSelect name -> (
+            let attrib = chckAttributeExists_staticFilter name c false
+            in (
+              match attrib with
+              | None -> emptyExprUpw
+              | Some attrib -> (
+                let verifiedExpr = (
+                {
+                  expr_return_type = attrib.typ;
+                  is_correct_expr = true;
+                }
+                )
+                in
+                attributeCall_verif2 verifiedExpr lis env
+              )
+            )
+          )
+          | MethSelect(name, arguments) -> emptyExprUpw (* TODO *)
+        )
+      )
+    )
+  )
+  else (
+    emptyExprUpw
+  )
+)
+
+
+(* Vérifie qu'un attribute_call est valide, puis renvoie le exprUpward correspondant *)
+and attributeCall_verif (ac:attribute_call) (env:environment) =
+    match ac.beginning with
+    | ExpSelect e ->
+      let verifiedExpr = expr_verif e env
+      in
+      attributeCall_verif2 verifiedExpr ac.selections_to_attrs env
+
+    | ClassSelect classname -> (
+      let c = chckClassExistence classname env.decl_classes
+      in match c with
+      | None -> emptyExprUpw
+      | Some c ->
+        match ac.selections_to_attrs with
+        | [] -> raise (Error_no_selection_after_class "Impossible : Missing selection after the class in a selection")
+        | sel::lis ->
+          match sel with
+          | AttrSelect name -> (
+            let attrib = chckAttributeExists_staticFilter name c true
+            in match attrib with
+            | None -> emptyExprUpw
+            | Some attrib ->
+              let beginning =
+              {
+                expr_return_type = attrib.typ;
+                is_correct_expr = true
+              }
+              in
+              attributeCall_verif2 beginning lis env
+          )
+          | MethSelect(name, arguments) ->
+            let (meth, is_correct) = chckMethodExistsAndArgsMatch_staticFilter name c arguments env true
+            in match meth with
+            | None -> emptyExprUpw
+            | Some meth -> (
+              match meth.return_type with
+              | None -> emptyExprUpw
+              | Some typ ->
+                let beginning =
+                  {
+                    expr_return_type = typ;
+                    is_correct_expr = is_correct
+                  }
+                in
+                attributeCall_verif2 beginning lis env
+            )
+    )
+
 
 
 (* Vérifie la validité de l'appel à un container *)
-and analyseContainer c env = 
-  (match c with
+and analyseContainer container env = (
+  match container with
 
-  | Select s -> emptyExprUpw (* TODO *)
+
+  (* Vérifie pour une sélection *)
+  (* Ex :    Integer.print(x)       (Point myPoint3D).moveUp(4).y   *)
+  | Select ac -> attributeCall_verif ac env
 
   
   (* Vérifie pour une variable locale *)
   (* Ex :      x     myVar     *)
-  | LocalVar s ->
-    (let typ = getLocalVarType s env
-    in
+  | LocalVar s -> (
+    let typ = chckLocalVarExistence s env
+    in (
       match typ with
       | Some typename -> {
           expr_return_type = typename;
@@ -480,6 +650,7 @@ and analyseContainer c env =
         }
       | None -> emptyExprUpw
     )
+  )
 
   (* Vérifie pour un This appelé tout seul *)
   | This -> (
@@ -489,7 +660,7 @@ and analyseContainer c env =
     | None -> emptyExprUpw
   )
 
-  | Super ->
+  | Super -> (
     let cla = chckSuperKeywordCall env
     in match cla with
     | Some superclass -> {
@@ -498,6 +669,7 @@ and analyseContainer c env =
     }
     | None -> emptyExprUpw
   )
+)
 
 
 (**
