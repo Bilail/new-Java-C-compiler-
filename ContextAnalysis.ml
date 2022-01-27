@@ -231,16 +231,20 @@ and var_in_env env e =
   List.exists (fun c -> c.name == e) env.decl_vars
 
 
-(**
+
 (* Ajout d'une variable à un environnement *)
-let add_env_var env v = 
-  let new = {
+and add_env_var v env = 
+  {
     decl_classes = env.decl_classes;
 	  decl_vars = v::env.decl_vars;
-    is_correct_env =
-			env.is_correct_env && e.is_correct_env
+    current_class = env.current_class;
+    is_correct_env = env.is_correct_env
   }
-**)
+
+(* Ajout d'une liste de variables à un environnement *)
+and add_env_varList (vl:variable_def list) env =
+  List.fold_left (fun env v -> add_env_var v env) env vl
+
 
 (**
 (* Ajout d'une classe à un environnement *)
@@ -336,7 +340,10 @@ and chckSuperclassCallParams call env =
       print_string "[Error] Inexistent superclass "; print_string call.superclass_constructor;
       false
     | Some c -> (
-        (getVarDeclTypes c.params_class).expr_return_types = (getExprTypes call.arguments env).expr_return_types
+      let newEnv = (* Updating environment *)
+        add_env_varList c.params_class env
+      in
+        (getVarDeclTypes c.params_class).expr_return_types = (getExprTypes call.arguments newEnv).expr_return_types
     )
   )
   in match check with
@@ -502,7 +509,7 @@ and chckMethodExists_staticFilter name (c:class_def) is_static =
   match check with
   | Some meth -> Some meth
   | None ->
-    print_string "[Error] Static method "; print_string name; print_string " cannot be found in "; print_string c.name_class; print_newline ();
+    print_string "[Error] Method "; print_string name; print_string " cannot be found in "; print_string c.name_class; print_string "(static: "; print_bool is_static; print_string ")"; print_newline ();
     None
   )
 
@@ -539,7 +546,7 @@ and chckMethodArgsVsParams (meth:methode_def) (arguments:expression_t list) env 
                                            Appel
 -----------------------------------------------------------------------------------------------*)
 
-and attributeCall_verif2 (verifiedExpr:exprUpward) selections env = (
+and methAttribCallEnd_verif (verifiedExpr:exprUpward) selections env = (
   if verifiedExpr.is_correct_expr then (
     match selections with
     | [] -> verifiedExpr
@@ -563,11 +570,29 @@ and attributeCall_verif2 (verifiedExpr:exprUpward) selections env = (
                 }
                 )
                 in
-                attributeCall_verif2 verifiedExpr lis env
+                methAttribCallEnd_verif verifiedExpr lis env
               )
             )
           )
-          | MethSelect(name, arguments) -> emptyExprUpw (* TODO *)
+          | MethSelect(name, arguments) -> 
+            let (meth, is_correct) = chckMethodExistsAndArgsMatch_staticFilter name c arguments env false
+            in (
+              match meth with
+              | None -> emptyExprUpw
+              | Some meth ->
+                let typename = (
+                  match meth.return_type with
+                  | None -> "void"
+                  | Some typ -> typ
+                )
+                in let verifiedExpr =
+                {
+                  expr_return_type = typename;
+                  is_correct_expr = is_correct
+                }
+                in
+                methAttribCallEnd_verif verifiedExpr lis env
+            )
         )
       )
     )
@@ -584,7 +609,7 @@ and attributeCall_verif (ac:attribute_call) (env:environment) =
     | ExpSelect e ->
       let verifiedExpr = expr_verif e env
       in
-      attributeCall_verif2 verifiedExpr ac.selections_to_attrs env
+      methAttribCallEnd_verif verifiedExpr ac.selections_to_attrs env
 
     | ClassSelect classname -> (
       let c = chckClassExistence classname env.decl_classes
@@ -606,23 +631,26 @@ and attributeCall_verif (ac:attribute_call) (env:environment) =
                 is_correct_expr = true
               }
               in
-              attributeCall_verif2 beginning lis env
+              methAttribCallEnd_verif beginning lis env
           )
           | MethSelect(name, arguments) ->
             let (meth, is_correct) = chckMethodExistsAndArgsMatch_staticFilter name c arguments env true
             in match meth with
             | None -> emptyExprUpw
             | Some meth -> (
+              let typename = (
               match meth.return_type with
-              | None -> emptyExprUpw
-              | Some typ ->
+                | None -> "void"
+                | Some typ -> typ
+              )
+              in
                 let beginning =
                   {
-                    expr_return_type = typ;
+                    expr_return_type = typename;
                     is_correct_expr = is_correct
                   }
                 in
-                attributeCall_verif2 beginning lis env
+                methAttribCallEnd_verif beginning lis env
             )
     )
 
@@ -720,12 +748,12 @@ and expr_verif expr env = (
 
 (* Vérifie la validité d'un appel de méthode *)
 and methode_verif m env = 
-  emptyExprUpw
+  emptyExprUpw (*TODO*)
 
 
 
 and unary_verif op e env =
-  emptyExprUpw
+  emptyExprUpw (*TODO*)
 
 
 
