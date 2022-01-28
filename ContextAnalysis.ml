@@ -339,6 +339,17 @@ and chckMethodArgsVsParams (meth:methode_def) (arguments:expression_t list) env 
     None
 
 
+and chckSelectionClassExistence classname env =
+  let c = find_class classname env.decl_classes
+  in match c with
+  | Some classe -> c
+  | None ->
+    print_string "[Error] Cannot use a selection on a method or attribute returning inexistent type "; print_string classname; print_newline ();
+    None
+
+
+
+
 
 
 (*-----------------------------------------------------------------------------------------------
@@ -350,10 +361,10 @@ and methAttribCallEnd_verif (verifiedExpr:exprUpward) selections env = (
     match selections with
     | [] -> verifiedExpr
     | s::lis -> (
-      let c = (find_class verifiedExpr.expr_return_type env.decl_classes)
+      let c = chckSelectionClassExistence verifiedExpr.expr_return_type env
       in (
         match c with
-        | None -> (raise (Error_class_not_found "Impossible not to find the class here"))
+        | None -> emptyExprUpw
         | Some c -> (
           match s with
           | AttrSelect name -> (
@@ -403,19 +414,19 @@ and methAttribCallEnd_verif (verifiedExpr:exprUpward) selections env = (
 
 
 (* Vérifie qu'un attribute_call est valide, puis renvoie le exprUpward correspondant *)
-and attributeCall_verif (ac:attribute_call) (env:environment) =
-    match ac.beginning with
+and methAttribCallBeginning_verif (attribOrMeth:attribute_call) (env:environment) =
+    match attribOrMeth.beginning with
     | ExpSelect e ->
       let verifiedExpr = expr_verif e env
       in
-      methAttribCallEnd_verif verifiedExpr ac.selections_to_attrs env
+      methAttribCallEnd_verif verifiedExpr attribOrMeth.selections_to_attrs env
 
     | ClassSelect classname -> (
       let c = chckClassExistence classname env.decl_classes
       in match c with
       | None -> emptyExprUpw
       | Some c ->
-        match ac.selections_to_attrs with
+        match attribOrMeth.selections_to_attrs with
         | [] -> raise (Error_no_selection_after_class "Impossible : Missing selection after the class in a selection")
         | sel::lis ->
           match sel with
@@ -462,7 +473,7 @@ and analyseContainer container env = (
 
   (* Vérifie pour une sélection *)
   (* Ex :    Integer.print(x)       (Point myPoint3D).moveUp(4).y   *)
-  | Select ac -> attributeCall_verif ac env
+  | Select ac -> methAttribCallBeginning_verif ac env
 
   
   (* Vérifie pour une variable locale *)
@@ -535,7 +546,7 @@ and expr_verif expr env = (
   match expr with 
   | IntLiteral i -> { expr_return_type="Integer"; is_correct_expr=true }
   | StringLiteral s -> { expr_return_type="String"; is_correct_expr=true }
-  | Container c  -> printEnv env; print_newline (); analyseContainer c env
+  | Container c  -> analyseContainer c env
   | Method m -> methode_verif m env 
   | Binary (op,e1,e2) -> binary_verif op e1 e2 env 
   | Unary (op,e) -> unary_verif op e env
@@ -546,8 +557,14 @@ and expr_verif expr env = (
 
 
 (* Vérifie la validité d'un appel de méthode *)
-and methode_verif m env = 
-  emptyExprUpw (*TODO*)
+and methode_verif (mc:method_call) env = 
+  let (fakeAttributeCall:attribute_call) =
+    {
+      beginning = mc.beginning_call;
+      selections_to_attrs = mc.selections_to_meths
+    }
+  in
+  emptyExprUpw; methAttribCallBeginning_verif fakeAttributeCall env   (*TODO*)
 
 
 
