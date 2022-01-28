@@ -27,7 +27,7 @@ let parse_with_error lexbuf file_in chan =
      *)
     let prog = Parse.prog Lex.token lexbuf
     in PrintAnalyCont.printEnv (ContextAnalysis.analyseProgram prog);
-
+     Print.printProg prog;
     (* Dans ce TP d'initiation on réalise à la fois l'impression des AST,
      * les vérifications contextuelles, une version sous forme d'interprète
      * et une version sous forme d'un compilateur pour la machine virtuelle

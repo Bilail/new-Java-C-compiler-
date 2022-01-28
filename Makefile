@@ -9,7 +9,7 @@ projet: Parse.mli $(SOURCES)
 	ocamlc -c ast.ml
 	ocamlc $(INTERFACES)
 	ocamlc -o tp $(SOURCES)
-	./tp ./test/gn.txt
+	./tp ./test/ex1-V3.txt
 	
 
 testLex : Parse.mli Lex.ml testLex.ml 
