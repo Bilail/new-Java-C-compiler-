@@ -35,6 +35,8 @@ A faire
     Un attribut appelé existe dans l'arbre d'héritage
     On ne peut override que une méthode existante dans la chaîne d'héritage
     On ne peut pas override une méthode inexistante dans la chaîne d'héritage
+    On affecte une valeur à un container
+    Le container d'une affectation est d'un type égal ou parent de celui de l'expression
 
 A faire (expressions return)
   IntLiteral
@@ -230,7 +232,45 @@ and analyseClass env c =
                                            Appel
 -----------------------------------------------------------------------------------------------*)
 
-and analyseBlock block env = emptyEnv (*TODO*)
+and block_verif block env =
+  let newEnv = add_env_varList block.declarations env
+  in
+  List.fold_left (fun prevOK instr -> prevOK && instr_verif instr newEnv) true block.instructions
+
+
+
+and instr_verif instr env = 
+  match instr with 
+  | Exp(e) -> (expr_verif e env).is_correct_expr
+  | Block(b) -> block_verif b env
+  | Return -> true
+  
+  | Affectation(c,e) ->
+    let verifiedContainer = analyseContainer c env
+    in
+    let verifiedExpr = expr_verif e env
+    in
+    let inheritanceOK = (
+      match is_subclass_cyclesafe verifiedContainer.expr_return_type verifiedExpr.expr_return_type env.decl_classes with
+      | true -> true
+      | false -> print_string "[Error] "; print_string verifiedExpr.expr_return_type; print_string " cannot be assigned to "; print_string verifiedContainer.expr_return_type; " because it's not a subclass of the latter"; print_newline();
+      false
+    )
+    in
+      verifiedContainer.is_correct_expr &&
+      verifiedExpr.is_correct_expr &&
+      inheritanceOK
+  
+  (* TODO Vérification des types module heritage *)
+    (* On doit vérifié que le type de e est un type ou sous type de c *)
+  
+  | Ite(ifExpr, thenExpr, elseExpr) -> 
+    let verifiedIfExpr = expr_verif ifExpr env
+    in
+      chckExpectedType "Integer" verifiedIfExpr.expr_return_type &&
+      verifiedIfExpr.is_correct_expr &&
+      instr_verif thenExpr env &&
+      instr_verif elseExpr env
 
 
 (**
@@ -320,7 +360,7 @@ and chckMethodExists_staticFilter name (c:class_def) is_static =
   match check with
   | Some meth -> Some meth
   | None ->
-    print_string "[Error] Method "; print_string name; print_string " cannot be found in "; print_string c.name_class; print_string "(static: "; print_bool is_static; print_string ")"; print_newline ();
+    print_string "[Error] Method "; print_string name; print_string " cannot be found in "; print_string c.name_class; print_string " (static: "; print_bool is_static; print_string ")"; print_newline ();
     None
   )
 
@@ -643,31 +683,6 @@ and new_verif cName arguments env =
       chckParamsInClaAndNew cName arguments env &&
       List.fold_left (fun acc e -> (expr_verif e env).is_correct_expr && acc ) true arguments
   }
-
-
-(*
-let instr_verif instr env = 
-  match instr with 
-  | Exp(e) -> expr_verif e env
-  | Block(b) -> block_verif b env
-  | Ite(si, alors, sinon) ->  expr_verif si env; 
-                              instr_verif alors env; 
-                              instr_verif alors env
-  | Return ->
-  | Affectation(c,e) -> (* Vérification des types module heritage *)
-    (* On doit vérifié que le type de e est un type ou sous type de c *)
-*)
-
-(**
-let block_verif b env =
-  **)
-
-
-
-(*-----------------------------------------------------------------------------------------------
-                              Fonction Utile pour les verifs 
------------------------------------------------------------------------------------------------*)
-
 
 
 
