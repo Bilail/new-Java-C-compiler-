@@ -219,6 +219,6 @@ and add_env_varList (vl:variable_def list) env =
 let printEnv e =
   print_string "ENVIRONMENT {"; print_newline ();
   print_string "  Classes : "; print_int (List.length e.decl_classes); print_newline ();
-  print_string "  Local variables : "; print_int (List.length e.decl_vars); print_newline ();
+  print_string "  Local variables : "; List.iter (fun var -> print_string "-"; print_string var.name) e.decl_vars; print_string " ("; print_int (List.length e.decl_vars); print_string ")"; print_newline ();
   print_string "  Valid ? "; print_string (match e.is_correct_env with | true -> "Yes" | false -> "No"); print_newline ();
   print_string "}"; print_newline ();

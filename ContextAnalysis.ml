@@ -131,18 +131,18 @@ and forbidInheritanceCycle c classes =
 
 
 (* Affiche une erreur si les arguments de l'appel à la superclasse et les paramètres de ladite classe ne correspondent pas en terme de types *)
-and chckSuperclassCallParams call env =
+and chckSuperclassCallParams call c env =
   let check = (
     let superclass = find_class call.superclass_constructor env.decl_classes
     in match superclass with
     | None ->
       print_string "[Error] Inexistent superclass "; print_string call.superclass_constructor;
       false
-    | Some c -> (
+    | Some superclass -> (
       let newEnv = (* Updating environment *)
         add_env_varList c.params_class env
       in
-        (getVarDeclTypes c.params_class).expr_return_types = (getExprTypes call.arguments newEnv).expr_return_types
+        (getVarDeclTypes superclass.params_class).expr_return_types = (getExprTypes call.arguments newEnv).expr_return_types
     )
   )
   in match check with
@@ -158,7 +158,7 @@ and chckSuperclassCallParams call env =
 and chckSuperclass call c env =
     chckSuperclassExistence call c env.decl_classes &&
     forbidInheritanceCycle c env.decl_classes &&
-    chckSuperclassCallParams call env
+    chckSuperclassCallParams call c env
 
 
 
@@ -535,7 +535,7 @@ and expr_verif expr env = (
   match expr with 
   | IntLiteral i -> { expr_return_type="Integer"; is_correct_expr=true }
   | StringLiteral s -> { expr_return_type="String"; is_correct_expr=true }
-  | Container c  -> analyseContainer c env
+  | Container c  -> printEnv env; print_newline (); analyseContainer c env
   | Method m -> methode_verif m env 
   | Binary (op,e1,e2) -> binary_verif op e1 e2 env 
   | Unary (op,e) -> unary_verif op e env
