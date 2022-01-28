@@ -33,6 +33,8 @@ A faire
     This seulement non-appelable dans une méthode statique
     Une méthode appelée existe dans l'arbre d'héritage
     Un attribut appelé existe dans l'arbre d'héritage
+    On ne peut override que une méthode existante dans la chaîne d'héritage
+    On ne peut pas override une méthode inexistante dans la chaîne d'héritage
 
 A faire (expressions return)
   IntLiteral
@@ -344,7 +346,7 @@ and chckSelectionClassExistence classname env =
   in match c with
   | Some classe -> c
   | None ->
-    print_string "[Error] Cannot use a selection on a method or attribute returning inexistent type "; print_string classname; print_newline ();
+    print_string "[Error] Cannot use selection on a method or attribute returning inexistent type "; print_string classname; print_newline ();
     None
 
 

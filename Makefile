@@ -1,6 +1,6 @@
 INTERFACES = Parse.mli
 #SOURCES    = ast.ml Parse.ml Lex.ml misc.ml print.ml compil.ml main.ml
-SOURCES    = ast.ml Parse.ml Lex.ml print.ml ContextAnalysisTools.ml ContextAnalysis.ml main.ml
+SOURCES    = ast.ml StringAndInteger.ml Parse.ml Lex.ml print.ml ContextAnalysisTools.ml ContextAnalysis.ml main.ml
 #SOURCES    = ast.ml Parse.ml Lex.ml ContextAnalysis.ml main.ml
 GENERATED  = Lex.ml Parse.ml Parse.mli Parse.automaton Parse.conflicts
 

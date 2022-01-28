@@ -148,7 +148,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 (* 1 programme = Des classees + un bloc de programme principal à la fin *)
 prog: cl=list(classe) b=block EOF {
   {
-    classes = cl;
+    classes = StringAndInteger.integerClass::StringAndInteger.stringClass::cl;
     program = b;
   }
 }
