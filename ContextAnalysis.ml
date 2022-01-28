@@ -221,9 +221,26 @@ and analyseClass env c =
 (**
   ____________________________________________
 /         ------------°°°°------------        \
-|       ANALYSE : 2- Instructions et appels           
+|              ANALYSE : 2- Instructions           
 \ ___________________________________________ /
 **)
+
+
+(*-----------------------------------------------------------------------------------------------
+                                           Appel
+-----------------------------------------------------------------------------------------------*)
+
+and analyseBlock block env = emptyEnv (*TODO*)
+
+
+(**
+  ____________________________________________
+/         ------------°°°°------------        \
+|           ANALYSE : 3- Containers           
+\ ___________________________________________ /
+**)
+
+
 
 (* Vérifie que les arguments d'une instantiation "new" correspondent aux paramètres de la classe correspondante *)
 and chckParamsInClaAndNew cName arguments env =
@@ -244,13 +261,6 @@ and chckParamsInClaAndNew cName arguments env =
     false
 
 
-
-(**
-  ____________________________________________
-/         ------------°°°°------------        \
-|           ANALYSE : 3- Containers           
-\ ___________________________________________ /
-**)
 
 (* Renvoie le nom d'une variable locale et affiche un message d'erreur si la variable n'existe pas *)
 and chckLocalVarExistence name env =
@@ -566,12 +576,20 @@ and methode_verif (mc:method_call) env =
       selections_to_attrs = mc.selections_to_meths
     }
   in
-  emptyExprUpw; methAttribCallBeginning_verif fakeAttributeCall env   (*TODO*)
+  emptyExprUpw; methAttribCallBeginning_verif fakeAttributeCall env
 
 
 
-and unary_verif op e env =
-  emptyExprUpw (*TODO*)
+and unary_verif (op:unary_operator_t) e env =
+  let verifiedExpr = expr_verif e env
+  in match op with
+  | UMINUS ->
+    {
+      expr_return_type = "Integer";
+      is_correct_expr =
+        chckExpectedType "Integer" verifiedExpr.expr_return_type &&
+        verifiedExpr.is_correct_expr
+    }
 
 
 
