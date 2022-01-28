@@ -214,7 +214,6 @@ let meth_code_tv m acc cont=
 let generate_class_TV c chan = 
   Hashtbl.find classe_hash c 
   let n = nbMeth+1 in 
-  
   outpute_string chan "Alloc "^ string_of_int n ^"\n";
   List.fold_left (fun acc m ->meth_code_tv m acc+1 cont) 0 c.methods;
 
