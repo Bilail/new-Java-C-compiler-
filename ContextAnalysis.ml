@@ -23,11 +23,14 @@ open ContextAnalysisTools
 
 2. Instructions et appels
     1. Les params des méthodes correspondent aux arguments des appels modulo héritage
+    2. Les params du constructeur correspondent aux args de l'instanciation
+    3. On ne peut pas instancier une classe inexistante
+
+
+4. Expressions
+  1. 
 
 A faire
-    Les params du constructeur correspondent aux args de l'instanciation
-    On ne peut pas instancier une classe inexistante
-    
     On ne peut pas déclarer de variables locales avec le même nom dans la même portée
     Les membres gauche et droit d'une affectation doivent avoir même type
     Une expression renvoie un type existant
