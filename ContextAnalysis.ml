@@ -361,16 +361,31 @@ and chckSuperKeywordCall env =
   )
 
 
-(* Affiche une erreur si un attribut statique n'appartient pas à une classe, et renvoie la définition de la variable si trouvée *)
-and chckAttributeExists_staticFilter name (c:class_def) is_static =
-  let (check:variable_def option) = find_attribute_in name (filter_attribs_static c.attributes is_static)
-  in (
-  match check with
+(* Affiche une erreur si un attribut statique (ou non) n'appartient pas à une classe, et renvoie la définition de la variable si trouvée *)
+and chckAttributeExists_staticFilter name (c:class_def) env is_static =
+  let (check:variable_def option) = (
+    let (check:variable_def option) = find_attribute_in name (filter_attribs_static c.attributes is_static)
+    in (
+    match check with
+    | Some var -> Some var
+    | None ->
+      (
+        match c.superclass with
+        | Some classname -> (
+          let c = find_class classname env.decl_classes
+          in match c with
+          | Some c -> chckAttributeExists_staticFilter name c env is_static
+          | None -> None
+        )
+        | None -> None
+      )
+    )
+  )
+  in match check with
   | Some var -> Some var
   | None ->
-    print_string "[Error] Static attribute "; print_string name; print_string " cannot be found in "; print_string c.name_class; print_newline ();
+    print_string "[Error] Attribute "; print_string name; print_string " cannot be found in "; print_string c.name_class; print_string " (static : "; print_bool is_static; print_string ")"; print_newline ();
     None
-  )
 
 
 (* Affiche une erreur si une méthode n'appartient pas à une classe, et renvoie la méthode si elle est trouvée *)
@@ -452,7 +467,7 @@ and methAttribCallEnd_verif (verifiedExpr:exprUpward) selections env = (
         | Some c -> (
           match s with
           | AttrSelect name -> (
-            let attrib = chckAttributeExists_staticFilter name c false
+            let attrib = chckAttributeExists_staticFilter name c env false
             in (
               match attrib with
               | None -> emptyExprUpw
@@ -515,7 +530,7 @@ and methAttribCallBeginning_verif (attribOrMeth:attribute_call) (env:environment
         | sel::lis ->
           match sel with
           | AttrSelect name -> (
-            let attrib = chckAttributeExists_staticFilter name c true
+            let attrib = chckAttributeExists_staticFilter name c env true
             in match attrib with
             | None -> emptyExprUpw
             | Some attrib ->

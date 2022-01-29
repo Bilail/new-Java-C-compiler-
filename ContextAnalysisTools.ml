@@ -107,6 +107,10 @@ and filter_meths_static methods is_static =
   List.filter (fun meth -> meth.is_static_method = is_static) methods
 
 
+and filter_attribs_var attributes is_var =
+  List.filter (fun attrib -> attrib.is_var = is_var) attributes
+
+
 
 (*-----------------------------------------------------------------------------------------------
                                        pour les classes
