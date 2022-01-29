@@ -168,7 +168,7 @@ class DefaultPoint() extends PointColore is {
       : PointColore(0, 0, CouleurFactory.blanc()) is { /* empty */ }
 }
 
-class Test () is {
+class Test (x : Integer) is {
    def static test(p: Point, p2: PointColore, p3: PointNoir) is {
       c, c2, c3: String
       true: Integer
@@ -191,13 +191,19 @@ class Test () is {
 
    def static test2(p: PointColore) is { p.couleur().name(1).print(); }
 
-   def Test() is {}
+
+   def static test3(p: Point) is { myint : Integer is /* Rien */ }
+
+
+   def Test(x : Integer) is {}
 }
 
 
 
 class LineSegment(var p1:Point, var p2:Point) is {
+   
    def LineSegment(var p1, p2 : Point) is { }
+
 }
 
 

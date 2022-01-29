@@ -67,6 +67,18 @@ let rec countOccurrences elem lis =
 
 
 
+(* Indique si aucun couple de la liste ne satisfait la condition de predicate *)
+let rec eachUnique (predicate: 'a -> 'a -> bool) lis =
+  match lis with
+  | [] -> None
+  | x::lis -> (
+    match List.find_opt (fun y -> predicate x y) lis with
+    | Some el -> Some el
+    | None -> eachUnique predicate lis
+  )
+      
+
+
 and print_bool b = match b with
 | true -> print_string "YES"
 | false -> print_string "NO"

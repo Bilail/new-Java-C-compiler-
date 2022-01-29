@@ -30,6 +30,9 @@ open ContextAnalysisTools
     5. On ne peut pas s'extend soi-même
     6. On ne peut pas faire d'héritage circulaire
     7. L'appel à la superclasse dans le constructeur a des arguments qui correspondent à la superclasse
+    8. Deux attributs ne peuvent pas avoir le même identificateur
+    9. Deux méthodes ne peuvent pas avoir le même identificateur
+    10. Deux arguments de méthode ou constructeur ne peuvent pas avoir le même identificateur
 
 
 2. Instructions et appels
@@ -40,6 +43,7 @@ open ContextAnalysisTools
     5. Une clause IF ne peut contenir qu'une expression Integer
     6. Une méthode appelée existe dans l'arbre d'héritage
     7. Les variables locales peuvent être écrasées à l'intérieur d'une portée plus spécifique
+    8. On ne peut pas déclarer de variables locales avec le même nom dans la même portée
 
 
 3. Containers
@@ -62,7 +66,10 @@ open ContextAnalysisTools
 
 
 A faire
-    On ne peut pas déclarer de variables locales avec le même nom dans la même portée
+    
+    
+    Deux paramètres de méthodes ne peuvent pas avoir le même identificateur
+    Deux paramètres de constructeurs ne peuvent pas avoir le même identificateur
     This seul est interdit en membre gauche d'une assignation
     This non-appelable dans une méthode statique
     Super appelable dans les méthodes statiques et non-statiques 
@@ -113,7 +120,7 @@ and chckParamsInClaAndConstr c =
     in match check with
     | true -> true
     | false -> 
-        print_string "[Error] A class and its constructor must have the same parameters in "; print_string c.name_class;
+        print_string "[Error] A class and its constructor must have the same parameters in "; print_string c.name_class; print_newline ();
         false
 
 
@@ -213,6 +220,38 @@ and chckSuperclassInClaAndConstr c env =
       )
 
 
+and forbidMethodParamDuplicate parameters =
+  match eachUnique (fun param1 param2 -> param1.name = param2.name) parameters with
+  | None -> true
+  | Some p -> 
+    print_string "[Error] Cannot give two distinct method parameters the same identifier : "; print_string p.name; print_newline ();
+    false
+
+
+and forbidAttributeIdDuplicate c =
+  match eachUnique (fun attrib1 attrib2 -> attrib1.name = attrib2.name) c.attributes with
+  | None -> true
+  | Some p -> 
+    print_string "[Error] Cannot give two attributes the same identifier : "; print_string p.name; print_string ", in class "; print_string c.name_class; print_newline ();
+    false
+
+
+and forbidMethodIdDuplicate c =
+  match eachUnique (fun meth1 meth2 -> meth1.name_method = meth2.name_method) c.methods with
+  | None -> true
+  | Some meth -> 
+    print_string "[Error] Cannot give two methods the same identifier : "; print_string meth.name_method; print_string ", in class "; print_string c.name_class; print_newline ();
+    false
+
+
+and forbidConstrParamDuplicate c =
+  match eachUnique (fun param1 param2 -> param1.name = param2.name) c.params_class with
+  | None -> true
+  | Some p -> 
+    print_string "[Error] Cannot give two distinct constructor parameters the same identifier : "; print_string p.name; print_string " in class "; print_string c.name_class; print_newline ();
+    false
+
+
     
 
 
@@ -237,7 +276,10 @@ and analyseClass env c =
 			forbidClassName env.decl_classes c.name_class &&
       chckParamsInClaAndConstr c &&
       chckSuperclassInClaAndConstr c env &&
-      List.fold_left (fun prevOK meth -> analyseMethod meth c env && prevOK) true c.methods
+      List.fold_left (fun prevOK meth -> analyseMethod meth c env && prevOK) true c.methods &&
+      forbidAttributeIdDuplicate c &&
+      forbidMethodIdDuplicate c &&
+      forbidConstrParamDuplicate c
 	}
     in
     (match newEnv.is_correct_env with
@@ -250,7 +292,8 @@ and analyseClass env c =
 and analyseMethod meth c env =
   let newEnv = add_env_varList meth.param_method env
   in
-  block_verif meth.body_method newEnv
+    block_verif meth.body_method newEnv &&
+    forbidMethodParamDuplicate meth.param_method
 
 
 
@@ -270,7 +313,8 @@ and analyseMethod meth c env =
 and block_verif block env =
   let newEnv = add_env_varList block.declarations env
   in
-  List.fold_left (fun prevOK instr -> prevOK && instr_verif instr newEnv) true block.instructions
+    List.fold_left (fun prevOK instr -> prevOK && instr_verif instr newEnv) true block.instructions &&
+    forbidLocalVarNameDuplicate block.declarations
 
 
 
@@ -295,9 +339,7 @@ and instr_verif instr env =
       verifiedContainer.is_correct_expr &&
       verifiedExpr.is_correct_expr &&
       inheritanceOK
-  
-  (* TODO Vérification des types module heritage *)
-    (* On doit vérifié que le type de e est un type ou sous type de c *)
+
   
   | Ite(ifExpr, thenExpr, elseExpr) -> 
     let verifiedIfExpr = expr_verif ifExpr env
@@ -464,6 +506,16 @@ and chckSelectionClassExistence classname env =
     print_string "[Error] Cannot use selection on a method or attribute returning inexistent type "; print_string classname; print_newline ();
     None
 
+
+ 
+and forbidLocalVarNameDuplicate (variables : variable_def list) =
+  let duplicate = eachUnique (fun x y -> x.name = y.name) variables
+  in
+    match duplicate with
+    | None -> true
+    | Some var ->
+      print_string "[Error] Cannot declare 2 variables with the same identifier in the same scope : "; print_string var.name; print_newline ();
+      false
 
 
 
