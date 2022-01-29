@@ -12,6 +12,17 @@ open ContextAnalysisTools
 **)
 (**
 
+0. Rendu obligatoire par la grammaire
+  1. Chaque classe possède un constructeur
+  2. Une affectation ne peut se faire qu'avec un contenant et une expression évaluant vers une valeur
+  3. 
+
+
+00. Effectif de par la façon de construire l'arbre
+  1. Les paramètres d'un constructeur de classe sont aussi des attributs et leur valeur est assignée implicitement
+
+
+
 1. Classes
     1. Plusieurs classes ne peuvent pas avoir le même nom
     2. Les paramètres de la classe sont les mêmes que les params du constructeur
@@ -21,41 +32,44 @@ open ContextAnalysisTools
     6. On ne peut pas faire d'héritage circulaire
     7. L'appel à la superclasse dans le constructeur a des arguments qui correspondent à la superclasse
 
+
 2. Instructions et appels
     1. Les params des méthodes correspondent aux arguments des appels modulo héritage
     2. Les params du constructeur correspondent aux args de l'instanciation
     3. On ne peut pas instancier une classe inexistante
+    4. Un attribut appelé existe dans l'arbre d'héritage
+    5. Une clause IF ne peut contenir qu'une expression Integer
+
+
+3. Containers
+  1. Le container d'une affectation est d'un type égal ou parent de celui de l'expression
+  2. Un appel d'attribut en sélections en chaîne doit renvoyer une valeur à chaque sélection, y compris la dernière
+  3. Un appel de méthode en sélections en chaîne doit renvoyer une valeur à chaque sélection, sauf à la dernière
+  4. This et super non-appellable en dehors d'une classe
+  5. 
+  7. Une variable locale doit être déclarée pour être utilisée
+  8. 
+  9. 
 
 
 4. Expressions
-  1. 
+  1. On ne peut cast que vers une classe parente
+  2. Les opérateurs + - * / UMINUS et les opérateurs de comparaison ne fonctionnent qu'avec des expressions renvoyant des Integer ou dérivés
+  3. L'opérateur de concaténation & n'accepte que des expressions String ou dérivés
+
+
+
 
 A faire
     On ne peut pas déclarer de variables locales avec le même nom dans la même portée
-    Les membres gauche et droit d'une affectation doivent avoir même type
-    Une expression renvoie un type existant
-    This seulement en membre gauche d'une assignation
-    This seulement non-appelable dans une méthode statique
+    This seul est interdit en membre gauche d'une assignation
+    This non-appelable dans une méthode statique
+    Super appelable dans une méthode classique
     Une méthode appelée existe dans l'arbre d'héritage
-    Un attribut appelé existe dans l'arbre d'héritage
     On ne peut override que une méthode existante dans la chaîne d'héritage
     On ne peut pas override une méthode inexistante dans la chaîne d'héritage
-    On affecte une valeur à un container
-    Le container d'une affectation est d'un type égal ou parent de celui de l'expression
     Une valeur doit avoir été initialisée pour être appelée OU on suppose que toutes les valeurs sont initialisées par défaut
 
-A faire (expressions return)
-  IntLiteral
-  StringLiteral
-  Container : Selec
-  Container : LocalVar
-  Container : This
-  Container : Super
-  Method 
-  Binary
-  Unary
-  Cast
-  NewClass
 
 
 **)
@@ -287,7 +301,7 @@ and instr_verif instr env =
   | Ite(ifExpr, thenExpr, elseExpr) -> 
     let verifiedIfExpr = expr_verif ifExpr env
     in
-      chckExpectedType "Integer" verifiedIfExpr.expr_return_type &&
+      chckExpectedType "Integer" verifiedIfExpr.expr_return_type env &&
       verifiedIfExpr.is_correct_expr &&
       instr_verif thenExpr env &&
       instr_verif elseExpr env
@@ -352,7 +366,7 @@ and chckSuperKeywordCall env =
   match env.current_class with
   
   | None ->
-    print_string "[Error] Keyword \"this\" can only be used inside a class instance"; print_newline ();
+    print_string "[Error] Keyword \"super\" can only be used inside a class instance"; print_newline ();
     None
   
   | Some c -> (
@@ -629,8 +643,8 @@ and chckCastTarget target source classes =
     false
 
 
-and chckExpectedType expected actualType =
-  if expected = actualType then
+and chckExpectedType expected actualType env =
+  if is_subclass_cyclesafe expected actualType env.decl_classes then
     true
   else
     (print_string "[Error] Expected type "; print_string expected; print_string " but found type "; print_string actualType; print_newline ();
@@ -677,7 +691,7 @@ and unary_verif (op:unary_operator_t) e env =
     {
       expr_return_type = "Integer";
       is_correct_expr =
-        chckExpectedType "Integer" verifiedExpr.expr_return_type &&
+        chckExpectedType "Integer" verifiedExpr.expr_return_type env &&
         verifiedExpr.is_correct_expr
     }
 
@@ -693,8 +707,8 @@ and binary_verif op e1 e2 env =
       {
       expr_return_type = "Integer";
       is_correct_expr =
-        chckExpectedType "Integer" verifiedExpr1.expr_return_type &&
-        chckExpectedType "Integer" verifiedExpr2.expr_return_type &&
+        chckExpectedType "Integer" verifiedExpr1.expr_return_type env &&
+        chckExpectedType "Integer" verifiedExpr2.expr_return_type env &&
         verifiedExpr1.is_correct_expr &&
         verifiedExpr2.is_correct_expr
       }
@@ -702,8 +716,8 @@ and binary_verif op e1 e2 env =
     {
       expr_return_type = "String";
       is_correct_expr =
-        chckExpectedType "String" verifiedExpr1.expr_return_type &&
-        chckExpectedType "String" verifiedExpr2.expr_return_type &&
+        chckExpectedType "String" verifiedExpr1.expr_return_type env &&
+        chckExpectedType "String" verifiedExpr2.expr_return_type env &&
         verifiedExpr1.is_correct_expr &&
         verifiedExpr2.is_correct_expr
     }
