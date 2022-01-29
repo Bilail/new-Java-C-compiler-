@@ -1,5 +1,8 @@
 class String() is {
 	def String() is { }
+
+	def print() is { }
+	def println() is { }
 }
 
 

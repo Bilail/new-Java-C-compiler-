@@ -1,6 +1,34 @@
 open Ast
 
 
+let printLn =
+{
+	name_method = "println";
+	param_method = [];
+	body_method =
+		{
+			declarations = [];
+			instructions = []
+		};
+	is_static_method = false;
+	is_override = false;
+	return_type = None
+}
+let printMeth =
+{
+	name_method = "print";
+	param_method = [];
+	body_method =
+		{
+			declarations = [];
+			instructions = []
+		};
+	is_static_method = false;
+	is_override = false;
+	return_type = None
+}
+
+
 let stringClass =
 {
 	name_class = "String";
@@ -18,8 +46,17 @@ let stringClass =
 			super_call = None;
 		};
 	attributes = [];
-	methods = []
+	methods = [printMeth; printLn]
 }
+
+
+
+
+
+
+
+
+
 
 
 

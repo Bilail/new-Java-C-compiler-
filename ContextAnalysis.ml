@@ -19,13 +19,15 @@ open ContextAnalysisTools
     4. On doit extend une classe qui existe (pas forcément déclarée plus haut)
     5. On ne peut pas s'extend soi-même
     6. On ne peut pas faire d'héritage circulaire
-    7. L'appel à la superclasse dans le constructeur a des arguments qui correspondent à la superclasse // A tester
+    7. L'appel à la superclasse dans le constructeur a des arguments qui correspondent à la superclasse
 
-
+2. Instructions et appels
+    1. Les params des méthodes correspondent aux arguments des appels modulo héritage
 
 A faire
     Les params du constructeur correspondent aux args de l'instanciation
-    Les params des méthodes correspondent aux arguments des appels
+    On ne peut pas instancier une classe inexistante
+    
     On ne peut pas déclarer de variables locales avec le même nom dans la même portée
     Les membres gauche et droit d'une affectation doivent avoir même type
     Une expression renvoie un type existant
@@ -37,6 +39,7 @@ A faire
     On ne peut pas override une méthode inexistante dans la chaîne d'héritage
     On affecte une valeur à un container
     Le container d'une affectation est d'un type égal ou parent de celui de l'expression
+    Une valeur doit avoir été initialisée pour être appelée OU on suppose que toutes les valeurs sont initialisées par défaut
 
 A faire (expressions return)
   IntLiteral
@@ -253,7 +256,7 @@ and instr_verif instr env =
     let inheritanceOK = (
       match is_subclass_cyclesafe verifiedContainer.expr_return_type verifiedExpr.expr_return_type env.decl_classes with
       | true -> true
-      | false -> print_string "[Error] "; print_string verifiedExpr.expr_return_type; print_string " cannot be assigned to "; print_string verifiedContainer.expr_return_type; " because it's not a subclass of the latter"; print_newline();
+      | false -> print_string "[Error] "; print_string verifiedExpr.expr_return_type; print_string " type cannot be assigned to "; print_string verifiedContainer.expr_return_type; " because it's not a subclass of the latter"; print_newline();
       false
     )
     in
@@ -284,21 +287,24 @@ and instr_verif instr env =
 
 (* Vérifie que les arguments d'une instantiation "new" correspondent aux paramètres de la classe correspondante *)
 and chckParamsInClaAndNew cName arguments env =
-  let check = (
     let newClass = find_class cName env.decl_classes
     in match newClass with
     | None ->
-      print_string "[Error] Inexistent class in new : "; print_string cName;
+      print_string "[Error] Inexistent class in instanciation (new keyword) : "; print_string cName; print_newline ();
       false
     | Some c -> (
-        (getVarDeclTypes c.params_class).expr_return_types = (getExprTypes arguments env).expr_return_types
+        let expectedTypes = getVarDeclTypes c.params_class
+        in
+        let verifiedExprs = getExprTypes arguments env
+        in (* TODO : Check expressions *) (* TODO : Check matching args *)
+          let check =
+            is_subclasses_cyclesafe expectedTypes.expr_return_types verifiedExprs.expr_return_types env.decl_classes
+          in match check with
+          | true -> verifiedExprs.is_correct_exprs
+          | false ->
+            print_string "[Error] Instanciation of class "; print_string cName; print_string " due to wrong arguments. Expected : "; print_string_list expectedTypes.expr_return_types; print_string " Provided : "; print_string_list verifiedExprs.expr_return_types; print_newline ();
+            false
     )
-  )
-  in match check with
-  | true -> true
-  | false ->
-    print_string "[Error] Instanciation of class  "; print_string cName; print_string " is impossible due to wrong arguments"; print_newline ();
-    false
 
 
 
@@ -354,19 +360,29 @@ and chckAttributeExists_staticFilter name (c:class_def) is_static =
 
 
 (* Affiche une erreur si une méthode n'appartient pas à une classe, et renvoie la méthode si elle est trouvée *)
-and chckMethodExists_staticFilter name (c:class_def) is_static =
+and chckMethodExists_staticFilter name (c:class_def) is_static env =
   let (check:methode_def option) = find_method_in name (filter_meths_static c.methods is_static)
   in (
   match check with
   | Some meth -> Some meth
-  | None ->
-    print_string "[Error] Method "; print_string name; print_string " cannot be found in "; print_string c.name_class; print_string " (static: "; print_bool is_static; print_string ")"; print_newline ();
-    None
+  | None -> (
+    let superclass = (
+      match c.superclass with
+      | None -> None
+      | Some classname -> find_class classname env.decl_classes
+    )
+    in match superclass with
+    | Some superclass -> chckMethodExists_staticFilter name superclass is_static env
+    | None ->
+      print_string "[Error] Method "; print_string name; print_string " cannot be found in "; print_string c.name_class; print_string " (static: "; print_bool is_static; print_string ")"; print_newline ();
+      None
+    )
   )
 
 
+
 and chckMethodExistsAndArgsMatch_staticFilter name (c:class_def) (arguments:expression_t list) (env:environment) is_static =
-  let meth = chckMethodExists_staticFilter name c is_static
+  let meth = chckMethodExists_staticFilter name c is_static env
   in match meth with
   | None -> (None, false)
   | Some meth -> (
@@ -381,13 +397,15 @@ and chckMethodExistsAndArgsMatch_staticFilter name (c:class_def) (arguments:expr
 and chckMethodArgsVsParams (meth:methode_def) (arguments:expression_t list) env =
   let verifiedExprs = getExprTypes arguments env
   in
+  let expectedTypes = (getVarDeclTypes meth.param_method).expr_return_types
+  in
   let check =
-    (getVarDeclTypes meth.param_method).expr_return_types = verifiedExprs.expr_return_types
+    is_subclasses_cyclesafe expectedTypes verifiedExprs.expr_return_types env.decl_classes
   in
   match check with
   | true -> Some verifiedExprs
   | false ->
-    print_string "[Error] Method "; print_string meth.name_method; print_string " was not given the right arguments"; print_newline ();
+    print_string "[Error] Method "; print_string meth.name_method; print_string " was not given the right arguments. Expected : "; print_string_list expectedTypes; print_string " Provided : "; print_string_list verifiedExprs.expr_return_types; print_newline ();
     None
 
 
@@ -676,11 +694,11 @@ and cast_verif expr target env =
 
 
 (* Vérifie qu'une instanciation est valide *)
-and new_verif cName arguments env =
+and new_verif classname arguments env =
   {
-    expr_return_type = cName;
+    expr_return_type = classname;
     is_correct_expr =
-      chckParamsInClaAndNew cName arguments env &&
+      chckParamsInClaAndNew classname arguments env &&
       List.fold_left (fun acc e -> (expr_verif e env).is_correct_expr && acc ) true arguments
   }
 
@@ -703,5 +721,6 @@ let analyseProgram prog =
         is_correct_env = true
     }
     in
-	List.fold_left (fun is_correct c -> (analyseClass env c) && is_correct) true prog.classes
+      List.fold_left (fun is_correct c -> (analyseClass env c) && is_correct) true prog.classes &&
+      block_verif prog.program env
 

@@ -163,6 +163,15 @@ and is_subclass_cyclesafe parentName childName classes =
     findInInheritance parentName childName classes []
 
 
+(* Vérifie pour chaque couple (parentL[i], childL[i]) si childL[i] est bien sous-classe de parentL[i], et renvoie true si ils le sont tous *)
+and is_subclasses_cyclesafe parentL childL classes =
+      match (parentL, childL) with
+      | (parent::parentL, child::childL)
+        when is_subclass_cyclesafe parent child classes
+        -> is_subclasses_cyclesafe parentL childL classes
+      | ([],[]) -> true
+      | _ -> false
+
 
 
 
@@ -221,4 +230,14 @@ let printEnv e =
   print_string "  Classes : "; print_int (List.length e.decl_classes); print_newline ();
   print_string "  Local variables : "; List.iter (fun var -> print_string "-"; print_string var.name) e.decl_vars; print_string " ("; print_int (List.length e.decl_vars); print_string ")"; print_newline ();
   print_string "  Valid ? "; print_string (match e.is_correct_env with | true -> "Yes" | false -> "No"); print_newline ();
-  print_string "}"; print_newline ();
+  print_string "}"; print_newline ()
+
+
+let print_string_list lis =
+  print_string "(";
+  (
+    match lis with
+    | x::lis -> print_string x; List.iter (fun text -> print_string ", "; print_string text) lis
+    | [] -> ()
+  );
+  print_string ")"
