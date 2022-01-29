@@ -296,7 +296,7 @@ and chckParamsInClaAndNew cName arguments env =
         let expectedTypes = getVarDeclTypes c.params_class
         in
         let verifiedExprs = getExprTypes arguments env
-        in (* TODO : Check expressions *) (* TODO : Check matching args *)
+        in
           let check =
             is_subclasses_cyclesafe expectedTypes.expr_return_types verifiedExprs.expr_return_types env.decl_classes
           in match check with
