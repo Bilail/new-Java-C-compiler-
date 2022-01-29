@@ -202,6 +202,15 @@ let generate_hash lc =
     nbAttStat = List.fold_left (fun acc m -> if m.is_static then acc + 1 else acc) 0 c.attributes;
   }) lc
 
+let m_class_list lc =
+  List.fold_left (fun acc c -> if c.superclass == None then acc@[c]) [] lc
+
+let ordered_class lc =
+  let rec ordered_class_rec lc retour = 
+    match retour with 
+    | lc -> retour
+    | hd :: tl -> 
+  in ordered_class_rec lc (m_class_list lc)
 
 
 let meth_code_tv m acc cont= 
