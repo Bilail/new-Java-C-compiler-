@@ -206,11 +206,16 @@ let m_class_list lc =
   List.fold_left (fun acc c -> if c.superclass == None then acc@[c]) [] lc
 
 let ordered_class lc =
-  let rec ordered_class_rec lc retour = 
-    match retour with 
-    | lc -> retour
-    | hd :: tl -> 
-  in ordered_class_rec lc (m_class_list lc)
+  let rec ordered_class_rec lc retour  = 
+    match lc with 
+    | [] -> retour
+    | a::b  -> match a.superclass with
+                  (* Cas ou pas de superclass, on ajoute la classe à la liste retour *)
+                  | None -> ordered_class_rec b retour@[a]
+                  (* Cas ou la classe herite d'une autre classe *)
+                  | Some supername -> if is_in retour supername then ordered_class_rec b retour@[a]
+                  else ordered_class_rec b@[a] retour 
+  in ordered_class_rec lc []
 
 
 let meth_code_tv m acc cont= 
@@ -253,3 +258,11 @@ let generate_code prog =
   
 
 
+(* --------------------------------------------------------- 
+                        Fonction Utile
+ --------------------------------------------------------- *)
+
+let is_in list e =
+  match list with 
+  | [] -> false
+  | a::b -> if a = e then true else is_in b e 
