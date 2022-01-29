@@ -207,6 +207,7 @@ class LineSegment(var p1:Point, var p2:Point) is {
   p1, p2, p3, clone1, clone2: Point
   true, false, fv: Integer
   o: PointColore
+  seg: LineSegment
   pn: PointNoir
   dp: DefaultPoint
   is
@@ -222,6 +223,7 @@ class LineSegment(var p1:Point, var p2:Point) is {
   o := new PointColore(0, 0, CouleurFactory.blanc());
   pn := new PointNoir(+1, -1);
   dp := new DefaultPoint();
+  seg := new LineSegment(pn, dp);
   p1.print(0);
   p2.print(0); 
   p2.move(p1.getx(), p1.gety(), 0);
