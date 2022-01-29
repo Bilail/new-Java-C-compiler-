@@ -203,15 +203,23 @@ and chckSuperclassInClaAndConstr c env =
 -----------------------------------------------------------------------------------------------*)
 
 and analyseClass env c =
+  let env = {
+    decl_classes = env.decl_classes;
+    decl_vars = env.decl_vars;
+    current_class = Some c;
+    is_correct_env = env.is_correct_env
+  }
+  in
 	let newEnv = {
 		decl_classes = c::env.decl_classes;
 		decl_vars = env.decl_vars;
-    current_class = Some c;
+    current_class = env.current_class;
 		is_correct_env =
 			env.is_correct_env &&
 			forbidClassName env.decl_classes c.name_class &&
       chckParamsInClaAndConstr c &&
-      chckSuperclassInClaAndConstr c env
+      chckSuperclassInClaAndConstr c env &&
+      List.fold_left (fun prevOK meth -> analyseMethod meth c env && prevOK) true c.methods
 	}
     in
     (match newEnv.is_correct_env with
@@ -219,6 +227,12 @@ and analyseClass env c =
     | false -> print_string c.name_class; print_string " KO"; print_newline ());
     newEnv.is_correct_env
 
+
+
+and analyseMethod meth c env =
+  let newEnv = add_env_varList meth.param_method env
+  in
+  block_verif meth.body_method newEnv
 
 
 
@@ -634,7 +648,7 @@ and methode_verif (mc:method_call) env =
       selections_to_attrs = mc.selections_to_meths
     }
   in
-  emptyExprUpw; methAttribCallBeginning_verif fakeAttributeCall env
+  methAttribCallBeginning_verif fakeAttributeCall env
 
 
 

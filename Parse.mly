@@ -258,7 +258,9 @@ methode:
   {
     name_method = n;
     param_method = p;
-    body_method = {declarations=[]; instructions=[Affectation(LocalVar("result"), e); Return] };
+    body_method = {
+      declarations=[ {name="result"; is_var=false; is_static=false; typ=r} ];
+      instructions=[Affectation(LocalVar("result"), e); Return] };
     is_static_method = s;
     is_override = o;
     return_type = Some r
