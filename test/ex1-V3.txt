@@ -194,6 +194,15 @@ class Test () is {
    def Test() is {}
 }
 
+
+
+class LineSegment(var p1:Point, var p2:Point) is {
+   def LineSegment(var p1, p2 : Point) is { }
+}
+
+
+
+
 { /* Bloc qui correspond au programme principal */
   p1, p2, p3, clone1, clone2: Point
   true, false, fv: Integer
