@@ -188,18 +188,43 @@ and var_in_env env e =
   List.exists (fun c -> c.name == e) env.decl_vars
 
 
+(* Prend un environnement et écrase une variable avec une nouvelle de même nom *)
+and replace_env_var v env =
+  let rec replace v variables =
+    match variables with
+    | var::lis when var.name = v.name -> (v::lis, true)
+    | var::lis ->
+      let (lis2, hasReplaced) = replace v lis in (var::lis2, hasReplaced) 
+    | [] -> ([], false)
+  in
+    replace v env.decl_vars
+
+
+
 
 (* Ajout d'une variable à un environnement *)
-and add_env_var v env = 
-  {
-    decl_classes = env.decl_classes;
-	  decl_vars = v::env.decl_vars;
-    current_class = env.current_class;
-    is_correct_env = env.is_correct_env
-  }
+and add_env_var v env =
+  let newVars =
+    let (replaceVars, hasReplaced) = replace_env_var v env
+    in
+      if hasReplaced then
+        replaceVars
+      else
+        v::env.decl_vars
+  in
+  let newEnv = 
+    {
+      decl_classes = env.decl_classes;
+      decl_vars = newVars;
+      current_class = env.current_class;
+      is_correct_env = env.is_correct_env
+    }
+  in newEnv
+
 
 (* Ajout d'une liste de variables à un environnement *)
 and add_env_varList (vl:variable_def list) env =
+  
   List.fold_left (fun env v -> add_env_var v env) env vl
 
 
@@ -229,7 +254,7 @@ and add_env_varList (vl:variable_def list) env =
    print_newline ();
 *)
 
-let printEnv env =
+and printEnv env =
   print_string "ENVIRONMENT {"; print_newline ();
   print_string "  Classes : "; print_int (List.length env.decl_classes); print_newline ();
   print_string "  Local variables : "; List.iter (fun var -> print_string "-"; print_string var.name) env.decl_vars; print_string " ("; print_int (List.length env.decl_vars); print_string ")"; print_newline ();
@@ -238,7 +263,7 @@ let printEnv env =
   print_string "}"; print_newline ()
 
 
-let print_string_list lis =
+and print_string_list lis =
   print_string "(";
   (
     match lis with

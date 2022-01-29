@@ -15,7 +15,6 @@ open ContextAnalysisTools
 0. Rendu obligatoire par la grammaire
   1. Chaque classe possède un constructeur
   2. Une affectation ne peut se faire qu'avec un contenant et une expression évaluant vers une valeur
-  3. 
 
 
 00. Effectif de par la façon de construire l'arbre
@@ -39,6 +38,8 @@ open ContextAnalysisTools
     3. On ne peut pas instancier une classe inexistante
     4. Un attribut appelé existe dans l'arbre d'héritage
     5. Une clause IF ne peut contenir qu'une expression Integer
+    6. Une méthode appelée existe dans l'arbre d'héritage
+    7. Les variables locales peuvent être écrasées à l'intérieur d'une portée plus spécifique
 
 
 3. Containers
@@ -64,8 +65,8 @@ A faire
     On ne peut pas déclarer de variables locales avec le même nom dans la même portée
     This seul est interdit en membre gauche d'une assignation
     This non-appelable dans une méthode statique
-    Super appelable dans une méthode classique
-    Une méthode appelée existe dans l'arbre d'héritage
+    Super appelable dans les méthodes statiques et non-statiques 
+    
     On ne peut override que une méthode existante dans la chaîne d'héritage
     On ne peut pas override une méthode inexistante dans la chaîne d'héritage
     Une valeur doit avoir été initialisée pour être appelée OU on suppose que toutes les valeurs sont initialisées par défaut
@@ -287,7 +288,7 @@ and instr_verif instr env =
     let inheritanceOK = (
       match is_subclass_cyclesafe verifiedContainer.expr_return_type verifiedExpr.expr_return_type env.decl_classes with
       | true -> true
-      | false -> print_string "[Error] "; print_string verifiedExpr.expr_return_type; print_string " type cannot be assigned to "; print_string verifiedContainer.expr_return_type; " because it's not a subclass of the latter"; print_newline();
+      | false -> print_string "[Error] "; print_string verifiedExpr.expr_return_type; print_string " type cannot be assigned to "; print_string verifiedContainer.expr_return_type; print_string " because it's not a subclass of the latter"; print_newline();
       false
     )
     in
