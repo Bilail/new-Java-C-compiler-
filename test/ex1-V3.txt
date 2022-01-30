@@ -198,7 +198,11 @@ class Test (x : Integer) is {
    def static test2(p: PointColore) is { p.couleur().name(1).print(); }
 
 
-   def static test3(p: Point) is { myint : Integer is }
+   def static test3(p: Point) is { 
+      myint : Integer
+      is
+      /* Rien pour l'instant */
+   }
 
 
    def test4() is {

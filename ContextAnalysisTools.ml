@@ -30,9 +30,10 @@ type environment = {
 	decl_classes : class_def list;
 	decl_vars : variable_def list;
   current_class : class_def option;
+  current_method : methode_def option;
 	is_correct_env : bool
 }
-let emptyEnv = {decl_classes=[]; decl_vars=[]; current_class=None; is_correct_env=true}
+let emptyEnv = {decl_classes=[]; decl_vars=[]; current_class=None; current_method=None; is_correct_env=true}
 
 
 
@@ -55,6 +56,7 @@ type exprListUpward = {
 exception Error_class_not_found of string
 exception Error_inherit_cycle of string
 exception Error_no_selection_after_class of string
+exception Error_classless_meth_env of string
 
 
 (*-----------------------------------------------------------------------------------------------
@@ -229,6 +231,7 @@ and add_env_var v env =
       decl_classes = env.decl_classes;
       decl_vars = newVars;
       current_class = env.current_class;
+      current_method = env.current_method;
       is_correct_env = env.is_correct_env
     }
   in newEnv
@@ -239,6 +242,16 @@ and add_env_varList (vl:variable_def list) env =
   
   List.fold_left (fun env v -> add_env_var v env) env vl
 
+
+
+and set_env_method (meth:methode_def option) env =
+  {
+    decl_classes = env.decl_classes;
+    decl_vars = env.decl_vars;
+    current_class = env.current_class;
+    current_method = meth;
+    is_correct_env = env.is_correct_env
+  }
 
 (**
 (* Ajout d'une classe à un environnement *)

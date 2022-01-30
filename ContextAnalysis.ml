@@ -52,9 +52,9 @@ open ContextAnalysisTools
   3. Un appel de méthode en sélections en chaîne doit renvoyer une valeur à chaque sélection, sauf à la dernière
   4. This et super non-appellable en dehors d'une classe
   5. Super appelable dans les méthodes statiques et non-statiques, mais jamais seul
-  7. 
-  8. Une variable locale doit être déclarée pour être utilisée
-  9. 
+  7. This seul est interdit en membre gauche d'une assignation
+  8. This non-appelable dans une méthode statique
+  9. Une variable locale doit être déclarée pour être utilisée 
 
 
 4. Expressions
@@ -66,9 +66,6 @@ open ContextAnalysisTools
 
 
 A faire
-    
-    This seul est interdit en membre gauche d'une assignation
-    This non-appelable dans une méthode statique
     
     On ne peut override que une méthode existante dans la chaîne d'héritage
     On ne peut pas override une méthode inexistante dans la chaîne d'héritage
@@ -260,6 +257,7 @@ and analyseClass env c =
     decl_classes = env.decl_classes;
     decl_vars = env.decl_vars;
     current_class = Some c;
+    current_method = env.current_method;
     is_correct_env = env.is_correct_env
   }
   in
@@ -267,6 +265,7 @@ and analyseClass env c =
 		decl_classes = c::env.decl_classes;
 		decl_vars = env.decl_vars;
     current_class = env.current_class;
+    current_method = env.current_method;
 		is_correct_env =
 			env.is_correct_env &&
 			forbidClassName env.decl_classes c.name_class &&
@@ -286,7 +285,7 @@ and analyseClass env c =
 
 
 and analyseMethod meth c env =
-  let newEnv = add_env_varList meth.param_method env
+  let newEnv = add_env_varList meth.param_method (set_env_method (Some meth) env)
   in
     block_verif meth.body_method newEnv &&
     forbidMethodParamDuplicate meth.param_method
@@ -740,6 +739,26 @@ and forbidAloneSuper expr =
     false
 
 
+and forbidThisInStaticMeth expr env =
+  if expr = Container(This) then (
+    match env.current_method with
+    | None -> true
+    | Some meth  -> (
+      if not meth.is_static_method then
+        true
+      else (
+        match env.current_class with
+        | None -> raise (Error_classless_meth_env "An environment with a method but no class is impossible")
+        | Some c ->
+          print_string "[Error] Calling \"this\" does not make sense within a static method : "; print_string meth.name_method; print_string " ("; print_string c.name_class; print_string " class)"; print_newline ();
+          false
+      )
+    )
+  )
+  else
+    true
+
+
 
 
 (*-----------------------------------------------------------------------------------------------
@@ -772,7 +791,8 @@ and expr_verif expr env = (
     {
       expr_return_type = result.expr_return_type;
       is_correct_expr =
-        result.is_correct_expr
+        result.is_correct_expr &&
+        forbidThisInStaticMeth expr env
     }
 )
 
@@ -870,6 +890,7 @@ let analyseProgram prog =
         decl_classes = prog.classes;
         decl_vars = [];
         current_class = None;
+        current_method = None;
         is_correct_env = true
     }
     in
