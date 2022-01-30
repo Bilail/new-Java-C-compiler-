@@ -150,6 +150,12 @@ class PointColore(x, y:Integer, var coul: Couleur) extends Point is {
       super.print(verbose);  /* usage classique de super */
       this.couleur().name(1).println();
    }
+
+   /* Quelque chose d'interdit
+   def cloneColore() : Point is {
+      return is super;
+   }
+   */
 }
 
 class PointNoir(xc, yc:Integer) extends PointColore is {
@@ -192,7 +198,12 @@ class Test (x : Integer) is {
    def static test2(p: PointColore) is { p.couleur().name(1).print(); }
 
 
-   def static test3(p: Point) is { myint : Integer is /* Rien */ }
+   def static test3(p: Point) is { myint : Integer is }
+
+
+   def test4() is {
+      /* super := new Test(3); */
+   }
 
 
    def Test(x : Integer) is {}

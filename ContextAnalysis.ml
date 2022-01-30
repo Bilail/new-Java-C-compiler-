@@ -32,7 +32,7 @@ open ContextAnalysisTools
     7. L'appel à la superclasse dans le constructeur a des arguments qui correspondent à la superclasse
     8. Deux attributs ne peuvent pas avoir le même identificateur
     9. Deux méthodes ne peuvent pas avoir le même identificateur
-    10. Deux arguments de méthode ou constructeur ne peuvent pas avoir le même identificateur
+    10. Deux paramètres de méthode ou constructeur ne peuvent pas avoir le même identificateur
 
 
 2. Instructions et appels
@@ -51,9 +51,9 @@ open ContextAnalysisTools
   2. Un appel d'attribut en sélections en chaîne doit renvoyer une valeur à chaque sélection, y compris la dernière
   3. Un appel de méthode en sélections en chaîne doit renvoyer une valeur à chaque sélection, sauf à la dernière
   4. This et super non-appellable en dehors d'une classe
-  5. 
-  7. Une variable locale doit être déclarée pour être utilisée
-  8. 
+  5. Super appelable dans les méthodes statiques et non-statiques, mais jamais seul
+  7. 
+  8. Une variable locale doit être déclarée pour être utilisée
   9. 
 
 
@@ -67,12 +67,8 @@ open ContextAnalysisTools
 
 A faire
     
-    
-    Deux paramètres de méthodes ne peuvent pas avoir le même identificateur
-    Deux paramètres de constructeurs ne peuvent pas avoir le même identificateur
     This seul est interdit en membre gauche d'une assignation
     This non-appelable dans une méthode statique
-    Super appelable dans les méthodes statiques et non-statiques 
     
     On ne peut override que une méthode existante dans la chaîne d'héritage
     On ne peut pas override une méthode inexistante dans la chaîne d'héritage
@@ -85,7 +81,7 @@ A faire
 
 
 let rec getExprTypes (exprs: expression_t list) env =
-  let upwards = (List.map (fun e -> expr_verif e env) exprs)
+  let upwards = (List.map (fun e -> expr_verif_ban e env) exprs)
   in
   {
     expr_return_types = List.map (fun u -> u.expr_return_type) upwards;
@@ -306,6 +302,35 @@ and analyseMethod meth c env =
 **)
 
 
+and forbidAloneThisInAssign (c:container_t) =
+  match c = This with
+  | false -> true
+  | true ->
+    print_string "[Error] \"this\" cannot be assigned a new value"; print_newline ();
+    false
+
+
+
+and forbidAloneSuperInAssign (c:container_t) (expr:expression_t) =
+  (
+    match c = Super with
+    | false -> true
+    | true ->
+      print_string "[Error] \"super\" cannot be assigned a new value"; print_newline ();
+      false
+  ) &&
+  (
+    match expr = Container(Super) with
+    | false -> true
+    | true ->
+      print_string "[Error] \"super\" cannot be assigned to a variable"; print_newline ();
+      false
+  )
+
+
+
+
+
 (*-----------------------------------------------------------------------------------------------
                                            Appel
 -----------------------------------------------------------------------------------------------*)
@@ -320,14 +345,16 @@ and block_verif block env =
 
 and instr_verif instr env = 
   match instr with 
-  | Exp(e) -> (expr_verif e env).is_correct_expr
+  | Exp(e) ->
+    (expr_verif_ban e env).is_correct_expr
+  
   | Block(b) -> block_verif b env
   | Return -> true
   
   | Affectation(c,e) ->
     let verifiedContainer = analyseContainer c env
     in
-    let verifiedExpr = expr_verif e env
+    let verifiedExpr = expr_verif_ban e env
     in
     let inheritanceOK = (
       match is_subclass_cyclesafe verifiedContainer.expr_return_type verifiedExpr.expr_return_type env.decl_classes with
@@ -338,11 +365,12 @@ and instr_verif instr env =
     in
       verifiedContainer.is_correct_expr &&
       verifiedExpr.is_correct_expr &&
-      inheritanceOK
+      inheritanceOK &&
+      forbidAloneThisInAssign c
 
   
   | Ite(ifExpr, thenExpr, elseExpr) -> 
-    let verifiedIfExpr = expr_verif ifExpr env
+    let verifiedIfExpr = expr_verif_ban ifExpr env
     in
       chckExpectedType "Integer" verifiedIfExpr.expr_return_type env &&
       verifiedIfExpr.is_correct_expr &&
@@ -704,6 +732,14 @@ and chckExpectedType expected actualType env =
     false)
 
 
+and forbidAloneSuper expr =
+  match expr = Container(Super) with
+  | false -> true
+  | true ->
+    print_string "[Error] \"super\" cannot be used alone, without a selection"; print_newline ();
+    false
+
+
 
 
 (*-----------------------------------------------------------------------------------------------
@@ -711,16 +747,33 @@ and chckExpectedType expected actualType env =
 -----------------------------------------------------------------------------------------------*)
 
 
+and expr_verif_ban expr env =
+  let verifiedExpr = expr_verif expr env
+  in
+    {
+      expr_return_type = verifiedExpr.expr_return_type;
+      is_correct_expr =
+        verifiedExpr.is_correct_expr &&
+        forbidAloneSuper expr
+    }
+
 and expr_verif expr env = (
+  let result =
   match expr with 
-  | IntLiteral i -> { expr_return_type="Integer"; is_correct_expr=true }
-  | StringLiteral s -> { expr_return_type="String"; is_correct_expr=true }
-  | Container c  -> analyseContainer c env
-  | Method m -> methode_verif m env 
-  | Binary (op,e1,e2) -> binary_verif op e1 e2 env 
-  | Unary (op,e) -> unary_verif op e env
-  | Cast(target,e) -> cast_verif e target env
-  | NewClass (s,e_list) -> new_verif s e_list env
+    | IntLiteral i -> { expr_return_type="Integer"; is_correct_expr=true }
+    | StringLiteral s -> { expr_return_type="String"; is_correct_expr=true }
+    | Container c  -> analyseContainer c env
+    | Method m -> methode_verif m env 
+    | Binary (op,e1,e2) -> binary_verif op e1 e2 env 
+    | Unary (op,e) -> unary_verif op e env
+    | Cast(target,e) -> cast_verif e target env
+    | NewClass (s,e_list) -> new_verif s e_list env
+  in
+    {
+      expr_return_type = result.expr_return_type;
+      is_correct_expr =
+        result.is_correct_expr
+    }
 )
 
 
