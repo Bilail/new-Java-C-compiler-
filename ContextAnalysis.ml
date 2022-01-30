@@ -288,7 +288,8 @@ and analyseMethod meth c env =
   let newEnv = add_env_varList meth.param_method (set_env_method (Some meth) env)
   in
     block_verif meth.body_method newEnv &&
-    forbidMethodParamDuplicate meth.param_method
+    forbidMethodParamDuplicate meth.param_method &&
+    chckMethodCorrectOverride meth env 
 
 
 
@@ -508,6 +509,59 @@ and chckMethodExistsAndArgsMatch_staticFilter name (c:class_def) (arguments:expr
     | Some verifiedExprs -> (Some meth, verifiedExprs.is_correct_exprs)
     | None -> (None, false)
   )
+
+
+(* Affiche une erreur si aucune méthode ne correspond à un override, ou si une méthode est écrasée sans override *)
+and chckMethodCorrectOverride meth env =
+  match env.current_class with
+    | None -> (raise (Error_classless_meth_env "A method should always come with a class in an environment"))
+    | Some c -> (
+      if meth.is_override then (
+          match c.superclass with
+          | None -> (
+            print_string "[Error] Cannot override a superclass method since "; print_string c.name_class; print_string " doesn't even have a superclass"; print_newline ();
+            false
+          )
+          | Some classname -> (
+            let superclass = find_class classname env.decl_classes
+            in match superclass with
+            | None -> false
+            | Some superclass -> (
+              let supermethod =
+                find_method_in_inheritance (is_same_method_filterNameAndStatic meth) superclass env.decl_classes
+              in match supermethod with
+              | Some meth -> true
+              | None -> (
+                print_string "[Error] Method "; print_string meth.name_method; print_string " is marked as overriding another method, though no such method could be found in the superclasses of "; print_string c.name_class; print_newline ();
+                false
+              )
+            )
+          )
+      )
+      else
+        match c.superclass with
+        | None -> true
+        | Some supername -> (
+          let superclass = find_class supername env.decl_classes
+          in match superclass with
+          | None -> true
+          | Some superclass -> (
+            let supermethod =
+              find_method_in_inheritance (is_same_method_filterNameAndStatic meth) c env.decl_classes
+            in
+              match supermethod with
+              | None -> true
+              | Some meth2 -> (
+                print_string "[Error] Method "; print_string meth.name_method; print_string " was already declared in a superclass of "; print_string c.name_class; print_newline ();
+                false
+            )
+          )
+        )
+
+        
+    )
+
+
 
 (* Affiche une erreur si les paramètres et arguments ne correspondent pas, sinon renvoie un exprListUpward *)
 and chckMethodArgsVsParams (meth:methode_def) (arguments:expression_t list) env =

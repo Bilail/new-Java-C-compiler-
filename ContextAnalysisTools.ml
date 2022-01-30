@@ -125,6 +125,10 @@ and filter_attribs_var attributes is_var =
   List.filter (fun attrib -> attrib.is_var = is_var) attributes
 
 
+and filter_meths_override methods is_override =
+  List.filter (fun meth -> meth.is_override = is_override) methods
+
+
 
 (*-----------------------------------------------------------------------------------------------
                                        pour les classes
@@ -190,6 +194,27 @@ and is_subclasses_cyclesafe parentL childL classes =
       | ([],[]) -> true
       | _ -> false
 
+
+
+and is_same_method_filterNameAndStatic meth1 meth2 =
+  meth1.name_method = meth2.name_method &&
+  meth1.is_static_method = meth2.is_static_method
+
+
+and find_method_in_inheritance predicate c classes =
+  let found = List.find_opt predicate c.methods
+  in match found with
+  | Some meth -> print_string "Found "; print_string meth.name_method; print_string " in class "; print_string c.name_class; print_newline (); found
+  | None -> (
+    match c.superclass with
+    | None -> None
+    | Some classname -> (
+      let superclass = find_class classname classes
+      in match superclass with
+      | None -> None
+      | Some superclass -> find_method_in_inheritance predicate superclass classes
+    )
+  )
 
 
 
