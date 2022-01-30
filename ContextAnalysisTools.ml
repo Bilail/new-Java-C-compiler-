@@ -196,9 +196,26 @@ and is_subclasses_cyclesafe parentL childL classes =
 
 
 
+and is_same_paramList predicate params1 params2 =
+  match (params1,params2) with
+  | (attrib1::lis1, attrib2::lis2) when predicate attrib1 attrib2 ->
+    is_same_paramList predicate lis1 lis2
+  | ([],[]) -> true
+  | _ -> false
+      
+
+
 and is_same_method_filterNameAndStatic meth1 meth2 =
   meth1.name_method = meth2.name_method &&
   meth1.is_static_method = meth2.is_static_method
+
+
+and is_same_method_filterParamsAndReturn meth1 meth2 =
+  is_same_paramList
+    (fun param1 param2 -> param1.name = param2.name && param1.typ = param2.typ) meth1.param_method meth2.param_method &&
+  meth1.return_type = meth2.return_type
+  
+  
 
 
 and find_method_in_inheritance predicate c classes =
@@ -321,3 +338,10 @@ and print_string_list lis =
     | [] -> ()
   );
   print_string ")"
+
+
+
+  and print_opt_return_type name =
+    match name with
+    | Some name -> print_string name
+    | None -> print_string "-Void-"

@@ -12,12 +12,12 @@ open ContextAnalysisTools
 **)
 (**
 
-0. Rendu obligatoire par la grammaire
+Rendu obligatoire par la grammaire
   1. Chaque classe possède un constructeur
   2. Une affectation ne peut se faire qu'avec un contenant et une expression évaluant vers une valeur
 
 
-00. Effectif de par la façon de construire l'arbre
+Effectif de par la façon de construire l'arbre
   1. Les paramètres d'un constructeur de classe sont aussi des attributs et leur valeur est assignée implicitement
 
 
@@ -33,6 +33,10 @@ open ContextAnalysisTools
     8. Deux attributs ne peuvent pas avoir le même identificateur
     9. Deux méthodes ne peuvent pas avoir le même identificateur
     10. Deux paramètres de méthode ou constructeur ne peuvent pas avoir le même identificateur
+    11. On ne peut override que une méthode existante dans la chaîne d'héritage
+    12. On ne peut pas override une méthode inexistante dans la chaîne d'héritage
+    13. Une méthode en écrasant une autre (override) a les mêmes paramètres et types de retour
+    14. On ne peut surcharger une méthode de la chaîne d'héritage que si l'une est statique et l'autre non. On n'aura alors pas véritablement de surcharge puisque Class.myMethod() et instance.myMethod() sont des syntaxes différentes.
 
 
 2. Instructions et appels
@@ -64,12 +68,13 @@ open ContextAnalysisTools
 
 
 
+Autre
+  On suppose que toutes les valeurs sont initialisées par défaut
+
+
 
 A faire
-    
-    On ne peut override que une méthode existante dans la chaîne d'héritage
-    On ne peut pas override une méthode inexistante dans la chaîne d'héritage
-    Une valeur doit avoir été initialisée pour être appelée OU on suppose que toutes les valeurs sont initialisées par défaut
+    Rien pour l'instant
 
 
 
@@ -135,7 +140,7 @@ and chckSuperclassExistence call c classes =
     in match check with
     | true -> true
     | false ->
-        (print_string "[Error] "; print_string c.name_class; print_string " class extends a class that doesn't exist : "; print_string call.superclass_constructor; print_newline (); (print_string "Superclasse existe OK : "; print_string call.superclass_constructor; print_newline ());
+        (print_string "[Error] "; print_string c.name_class; print_string " class extends a class that doesn't exist : "; print_string call.superclass_constructor; print_newline ();
         false)
 
 
@@ -511,6 +516,19 @@ and chckMethodExistsAndArgsMatch_staticFilter name (c:class_def) (arguments:expr
   )
 
 
+
+and chckOverrideMethodMatch meth overrideMeth c =
+  let check = is_same_method_filterParamsAndReturn meth overrideMeth
+  in match check with
+  | true -> true
+  | false ->
+    print_string "[Error] "; print_string overrideMeth.name_method; print_string " (Class "; print_string c.name_class; print_string ") overrides a method in the superclass, though their paramaters and return types don't match.\n";
+    print_string "  Expected : "; print_string_list (List.map (fun v -> v.typ) meth.param_method); print_string " -> "; print_opt_return_type meth.return_type;
+    print_string "\n  Provided : "; print_string_list (List.map (fun v -> v.typ) overrideMeth.param_method); print_string " -> "; print_opt_return_type overrideMeth.return_type; print_newline ();
+    false
+
+
+
 (* Affiche une erreur si aucune méthode ne correspond à un override, ou si une méthode est écrasée sans override *)
 and chckMethodCorrectOverride meth env =
   match env.current_class with
@@ -530,10 +548,12 @@ and chckMethodCorrectOverride meth env =
               let supermethod =
                 find_method_in_inheritance (is_same_method_filterNameAndStatic meth) superclass env.decl_classes
               in match supermethod with
-              | Some meth -> true
               | None -> (
                 print_string "[Error] Method "; print_string meth.name_method; print_string " is marked as overriding another method, though no such method could be found in the superclasses of "; print_string c.name_class; print_newline ();
                 false
+              )
+              | Some meth2 -> (
+                chckOverrideMethodMatch meth2 meth c
               )
             )
           )
