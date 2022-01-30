@@ -234,7 +234,7 @@ methode:
     {
     name_method = n;
     param_method = p;
-    body_method = {declarations=({is_var=false; is_static=false; typ=r; name="result"}::b.declarations); instructions=b.instructions};
+    body_method = {declarations=({is_var=false; is_static=false; typ=r; name="result"}::b.declarations); instructions = (b.instructions @ [Return]) };
     is_static_method = s;
     is_override = o;
     return_type = Some r
