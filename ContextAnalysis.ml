@@ -19,6 +19,7 @@ Rendu obligatoire par la grammaire
 
 Effectif de par la façon de construire l'arbre
   1. Les paramètres d'un constructeur de classe sont aussi des attributs et leur valeur est assignée implicitement
+  2. result n'a pas besoin d'être réservé car la variable est automatiquement ajoutée au bloc principal de chaque méthode
 
 
 
@@ -58,7 +59,7 @@ Effectif de par la façon de construire l'arbre
   5. Super appelable dans les méthodes statiques et non-statiques, mais jamais seul
   7. This seul est interdit en membre gauche d'une assignation
   8. This non-appelable dans une méthode statique
-  9. Une variable locale doit être déclarée pour être utilisée 
+  9. Une variable locale doit être déclarée pour être utilisée
 
 
 4. Expressions
@@ -793,7 +794,7 @@ and chckCastTarget target source classes =
   in match check with
   | true -> true
   | false ->
-    print_string "[Error] Cannot cast "; print_string source; print_string " into "; print_string " because the former doesn't inherit the latter";
+    print_string "[Error] Cannot cast "; print_string source; print_string " into "; print_string target; print_string " because the former doesn't inherit the latter"; print_newline ();
     false
 
 
