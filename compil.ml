@@ -202,20 +202,9 @@ let generate_hash lc =
     nbAttStat = List.fold_left (fun acc m -> if m.is_static then acc + 1 else acc) 0 c.attributes;
   }) lc
 
-let m_class_list lc =
-  List.fold_left (fun acc c -> if c.superclass == None then acc@[c]) [] lc
+(*let m_class_list lc =
+  List.fold_left (fun acc c -> if c.superclass == None then acc@[c]) [] lc*)
 
-let ordered_class lc =
-  let rec ordered_class_rec lc retour  = 
-    match lc with 
-    | [] -> retour
-    | a::b  -> match a.superclass with
-                  (* Cas ou pas de superclass, on ajoute la classe à la liste retour *)
-                  | None -> ordered_class_rec b retour@[a]
-                  (* Cas ou la classe herite d'une autre classe *)
-                  | Some supername -> if is_in retour supername then ordered_class_rec b retour@[a]
-                  else ordered_class_rec b@[a] retour 
-  in ordered_class_rec lc []
 
 
 let meth_code_tv m acc cont= 
@@ -228,6 +217,10 @@ let meth_code_tv m acc cont=
 let generate_class_TV c chan = 
   Hashtbl.find classe_hash c 
   let n = nbMeth+1 in 
+  match c.superclass with 
+    | None ->               
+    | Some s -> generate_class_TV c chan
+
   outpute_string chan "Alloc "^ string_of_int n ^"\n";
   List.fold_left (fun acc m ->meth_code_tv m acc+1 cont) 0 c.methods;
 
@@ -241,7 +234,7 @@ let init_code prog chan =
   
 
 let generate_code prog = 
-  let lc = prog.classes in 
+  let lc = (ordered_class prog.classes) in 
   let bloc = prog.program in
   let hash = generate_hash lc in 
   generate_class_TV c chan
@@ -262,7 +255,35 @@ let generate_code prog =
                         Fonction Utile
  --------------------------------------------------------- *)
 
+(* Permet de trier une liste de classe par ordre d'héritage *)
+let ordered_class lc =
+  let rec ordered_class_rec lc retour  = 
+    match lc with 
+    | [] -> retour
+    | a::b  -> match a.superclass with
+                  (* Cas ou pas de superclass, on ajoute la classe à la liste retour *)
+                  | None -> ordered_class_rec b retour@[a]
+                  (* Cas ou la classe herite d'une autre classe *)
+                  | Some supername -> if is_in retour supername then ordered_class_rec b retour@[a]
+                  else ordered_class_rec b@[a] retour 
+  in ordered_class_rec lc []
+
+
 let is_in list e =
   match list with 
   | [] -> false
   | a::b -> if a = e then true else is_in b e 
+
+
+let getNbMeth_herit c =
+  let f c acc =
+    match c.superclass with 
+    | None -> acc             
+    | Some s -> f s (acc + List.fold_left (fun acc m -> if m.is_static_method then acc + 1 else acc) 0 c.methods)
+
+
+let nb_meth_herit c = 
+  let f c acc = 
+    match c.superclass with 
+    | None -> acc              
+    | Some s -> 

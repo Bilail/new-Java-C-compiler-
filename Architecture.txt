@@ -1,33 +1,24 @@
 Compilation/
-┣ .vscode/
-┃ ┣ launch.json
-┃ ┗ settings.json
 ┣ test/
-┃ ┣ err1.txt
-┃ ┣ err2.txt
-┃ ┣ err3.txt
-┃ ┣ err4.txt
-┃ ┣ errCast.txt
-┃ ┣ errConcat.txt
-┃ ┣ errCycle.txt
-┃ ┣ errResult.txt
-┃ ┣ ex1-V3.txt
-┃ ┣ ex1.txt
-┃ ┣ gn.txt
-┃ ┣ grandMere.txt
-┃ ┗ masking1.txt
-┣ .gitignore
-┣ Architecture.txt
+┃   ┣ err1.txt
+┃   ┣ err2.txt
+┃   ┣ err3.txt
+┃   ┣ err4.txt
+┃   ┣ errCast.txt
+┃   ┣ errConcat.txt
+┃   ┣ errCycle.txt
+┃   ┣ errResult.txt
+┃   ┣ ex1-V3.txt
+┃   ┣ ex1.txt
+┃   ┣ gn.txt
+┃   ┣ grandMere.txt
+┃   ┗ masking1.txt
 ┣ ast.ml
-┣ brouillon.ml
 ┣ compil.ml
 ┣ ContextAnalysis.ml
 ┣ Lex.mll
 ┣ main.ml
 ┣ Makefile
-┣ out.txt
 ┣ Parse.mly
 ┣ print.ml
-┣ projet_2021-22.pdf
-┣ README.md
 ┗ testLex.ml
