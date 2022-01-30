@@ -204,7 +204,7 @@ and is_same_method_filterNameAndStatic meth1 meth2 =
 and find_method_in_inheritance predicate c classes =
   let found = List.find_opt predicate c.methods
   in match found with
-  | Some meth -> print_string "Found "; print_string meth.name_method; print_string " in class "; print_string c.name_class; print_newline (); found
+  | Some meth -> found
   | None -> (
     match c.superclass with
     | None -> None

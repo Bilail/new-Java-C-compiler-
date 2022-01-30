@@ -547,7 +547,7 @@ and chckMethodCorrectOverride meth env =
           | None -> true
           | Some superclass -> (
             let supermethod =
-              find_method_in_inheritance (is_same_method_filterNameAndStatic meth) c env.decl_classes
+              find_method_in_inheritance (is_same_method_filterNameAndStatic meth) superclass env.decl_classes
             in
               match supermethod with
               | None -> true
