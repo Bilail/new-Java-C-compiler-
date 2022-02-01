@@ -148,7 +148,7 @@ Coder = On doit encore écrire le code OCaml qui définit ce qu'on renvoie entre
 (* 1 programme = Des classees + un bloc de programme principal à la fin *)
 prog: cl=list(classe) b=block EOF {
   {
-    classes = cl;
+    classes = StringAndInteger.integerClass::StringAndInteger.stringClass::cl;
     program = b;
   }
 }
@@ -161,8 +161,9 @@ classe: CLASSE n=CLASSNAME p=factoredVarParamList s=option(extends) IS LBRACKET 
 { 
   {
     name_class = n;
+    params_class = p;
     superclass = s; 
-    attributes = b.attrs;
+    attributes = b.attrs @ (ContextAnalysisTools.filter_attribs_var p true);
     methods = b.meths;
     constructor = nonOptionalConstr b.construct
   }
@@ -196,7 +197,7 @@ anyClDeclAndConstructor :
     {
       attrs = (newAny.attrs @ next.attrs);
       meths = (newAny.meths @ next.meths);
-      construct = None
+      construct = next.construct
     }
   }
 | c=constructor {
@@ -233,7 +234,7 @@ methode:
     {
     name_method = n;
     param_method = p;
-    body_method = {declarations=({is_var=false; is_static=false; typ=r; name="result"}::b.declarations); instructions=b.instructions};
+    body_method = {declarations=({is_var=false; is_static=false; typ=r; name="result"}::b.declarations); instructions = (b.instructions @ [Return]) };
     is_static_method = s;
     is_override = o;
     return_type = Some r
@@ -257,23 +258,34 @@ methode:
   {
     name_method = n;
     param_method = p;
-    body_method = {declarations=[]; instructions=[Affectation(LocalVar("result"), e); Return] };
+    body_method = {
+      declarations=[ {name="result"; is_var=false; is_static=false; typ=r} ];
+      instructions=[Affectation(LocalVar("result"), e); Return] };
     is_static_method = s;
     is_override = o;
     return_type = Some r
     }
    }
 
-(* Constructeur de classee *)
+(* Constructeur de classe *)
 constructor:
-  DEF n = CLASSNAME p = factoredVarParamList s=option(superclasseCall) IS b = block 
-  { (* Ajouter dans l'AST UN ARGUMENT DASN CONSTRUCTOR POUR PRENDRE EN COMPLE LE SuperClasseCall ?? *)
-    {
-    name_constructor = n;
-    param_constructor = p; 
-    body_constructor = b;
-    super_call = s
-    } 
+  DEF n=CLASSNAME p=factoredVarParamList s=option(superclasseCall) IS b=block 
+  {
+    let implicitAssignments =
+      List.map (fun var ->
+        Affectation(Select({beginning=ExpSelect(Container(This)); selections_to_attrs=[AttrSelect(var.name)]}), Container(LocalVar(var.name)))
+      ) (ContextAnalysisTools.filter_attribs_var p true)
+    in
+      {
+      name_constructor = n;
+      param_constructor = p; 
+      body_constructor =
+        {
+          declarations = b.declarations;
+          instructions = implicitAssignments @ b.instructions
+        };
+      super_call = s
+      } 
   }
 
 
