@@ -189,7 +189,7 @@ let compile ld e chan =
 
 
   (* Début du code *)
-type info_classe {index : int , nbMeth = int, nbAtt = int, nbMethStat = int, nbAttStat = int}
+type info_classe {index : int , nbMeth = int, nbAtt = int, nbMethStat = int, nmMethnonStat = int ,nbAttStat = int}
 let classe_hash = (string, info_classe) Hashtbl.create 16
 
 let generate_hash lc = 
@@ -199,6 +199,7 @@ let generate_hash lc =
     nbMeth = List.lenght c.methods;
     nbAtt = List.length c.attributes;
     nbMethStat = List.fold_left (fun acc m -> if m.is_static_method then acc + 1 else acc) 0 c.methods;
+    nmMethnonStat = nbMeth - nbMethStat;
     nbAttStat = List.fold_left (fun acc m -> if m.is_static then acc + 1 else acc) 0 c.attributes;
   }) lc
 
