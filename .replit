@@ -1,2 +1,0 @@
-language = "Ocaml"
-run = "run "./main""

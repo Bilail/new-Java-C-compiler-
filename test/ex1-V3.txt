@@ -150,6 +150,12 @@ class PointColore(x, y:Integer, var coul: Couleur) extends Point is {
       super.print(verbose);  /* usage classique de super */
       this.couleur().name(1).println();
    }
+
+   /* Quelque chose d'interdit
+   def cloneColore() : Point is {
+      return is super;
+   }
+   */
 }
 
 class PointNoir(xc, yc:Integer) extends PointColore is {
@@ -168,7 +174,7 @@ class DefaultPoint() extends PointColore is {
       : PointColore(0, 0, CouleurFactory.blanc()) is { /* empty */ }
 }
 
-class Test () is {
+class Test (x : Integer) is {
    def static test(p: Point, p2: PointColore, p3: PointNoir) is {
       c, c2, c3: String
       true: Integer
@@ -191,13 +197,38 @@ class Test () is {
 
    def static test2(p: PointColore) is { p.couleur().name(1).print(); }
 
-   def Test() is {}
+
+   def static test3(p: Point) is { 
+      myint : Integer
+      is
+      /* Rien pour l'instant */
+   }
+
+
+   def test4() is {
+      /* super := new Test(3); */
+   }
+
+
+   def Test(x : Integer) is {}
 }
+
+
+
+class LineSegment(var p1:Point, var p2:Point) is {
+   
+   def LineSegment(var p1, p2 : Point) is { }
+
+}
+
+
+
 
 { /* Bloc qui correspond au programme principal */
   p1, p2, p3, clone1, clone2: Point
   true, false, fv: Integer
   o: PointColore
+  seg: LineSegment
   pn: PointNoir
   dp: DefaultPoint
   is
@@ -213,6 +244,7 @@ class Test () is {
   o := new PointColore(0, 0, CouleurFactory.blanc());
   pn := new PointNoir(+1, -1);
   dp := new DefaultPoint();
+  seg := new LineSegment(pn, dp.move(1,2,0));
   p1.print(0);
   p2.print(0); 
   p2.move(p1.getx(), p1.gety(), 0);
@@ -252,6 +284,16 @@ class Test () is {
   Test.test2(o);
   Test.test2(pn);
   o := pn;  /* Idem : on doit avoir de la liaison dynamique ci-dessous */
+
+   /* Un test d'écrasement de variable locale dans un sous-bloc */
+   {
+      p1: Couleur
+      p3 : LineSegment
+      p4 : Point
+      is
+      p3 := new LineSegment(new PointColore(-7, 7, p1), p2);
+   }
+
 
   "test(PointNoir, PointNoir, PointNoir)".println();
   Test.test(p1, o, pn);

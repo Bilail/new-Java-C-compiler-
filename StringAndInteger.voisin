@@ -1,0 +1,18 @@
+class String() is {
+	def String() is { }
+
+	def print() is { }
+	def println() is { }
+}
+
+
+class Integer() {
+	def Integer() is { }
+	
+	def toString() : String is {
+		result : String
+		is
+		result = "UNDEFINED";
+		return;
+	}
+}

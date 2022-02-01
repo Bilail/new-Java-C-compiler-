@@ -4,6 +4,10 @@ builds/
 Parse.ml
 Parse.mli
 Parse.automaton
+brouillon.ml
+Lex.ml
+tp
+awesomeCompiler
 
 
 *.annot
@@ -35,3 +39,5 @@ setup.log
 
 # Local OPAM switch
 _opam/
+tp
+Parse.conflicts
