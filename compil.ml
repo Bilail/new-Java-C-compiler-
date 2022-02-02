@@ -175,20 +175,30 @@ let compile ld e chan =
   flush chan;
   close_out chan;
 
-  (* Ci-dessus on aurait pu écrire sous la forme
-     List.iter
-          (fun s -> output_string chan s; output_string chan "\n")
-          [ "PUSHS \"Resultat: \"";
-            "WRITES";
-            "WRITEI";
-            "PUSHS \"\\n"\"";
-            "WRITES";
-            "STOP"
-          ]
-  *)
+  and compileInstr instr env =
+    match instr with
+    | Exp e -> compileExpr e env
 
+    | Block b -> compileBlock b env
 
-  (* Début du code *)
+    | Ite (si, alors, sinon) ->
+      let (etiElse, etiFin) = makeEti () in
+      compileExpr si env;
+      output_string chan "JZ "; output_string chan etiElse;
+      output_string chan "\n";
+      compileInstr alors env;
+      output_string chan "JUMP "; output_string chan etiFin;
+      output_string chan "\n";
+      output_string chan etiElse; output_string chan ": NOP\n";
+      compileInstr sinon env;
+      output_string chan etiFin; output_string chan ": NOP\n"
+
+    | Return -> output_string chan "RETURN"
+
+    | Affectation cont expr -> 
+    
+  and compileBlock b env =
+    
 type info_classe {index : int , nbMeth = int, nbAtt = int, nbMethStat = int, nmMethnonStat = int ,nbAttStat = int}
 let classe_hash = (string, info_classe) Hashtbl.create 16
 
