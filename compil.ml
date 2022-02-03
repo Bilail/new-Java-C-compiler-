@@ -224,6 +224,10 @@ let classe_hash = (string, info_classe) Hashtbl.create 16;;
 (*let m_class_list lc =
   List.fold_left (fun acc c -> if c.superclass == None then acc@[c]) [] lc*)
 
+let generate_class_instance c chan =
+  let n = nbAtt in 
+  outpute_string chan "ALLOC "^ string_of_int n ^"\n";
+
 
 
 let meth_code_tv m acc cont= 
