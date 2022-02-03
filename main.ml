@@ -1,6 +1,5 @@
 open Ast
 open Lexing
-open Compil
 open Print 
 
 (* lexbuf: correspond au buffer d'entrée associé au programme qu'on traite
@@ -29,10 +28,9 @@ let parse_with_error lexbuf file_in chan =
     let prog = Parse.prog Lex.token lexbuf
     in 
     ContextAnalysis.analyseProgram prog; 
-    Compil.generate_code prog chan;
-    (*Compil.compile ld e chan;*)
+    (*Compil.generate_code prog chan;
+    Compil.compile ld e chan;*)
 
-     PrintAnalyCont.printEnv (ContextAnalysis.analyseProgram prog);
      Print.printProg prog;
     (* Dans ce TP d'initiation on réalise à la fois l'impression des AST,
      * les vérifications contextuelles, une version sous forme d'interprète
