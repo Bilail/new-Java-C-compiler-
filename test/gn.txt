@@ -1,10 +1,6 @@
 class TriNombre() is {
-/* representation d'entiers POSITIFS ou NULS arbitrairement grands par tranches
- * de nombres inferieurs a 1000.
- * Ex: 33259 est represente par une liste a deux elements 33 et 259
- */
+
    var trinome:Integer
-   /* 'last' palie le fait qu'on n'a rien pour representer NULL */
    var last: Integer          /* Par defaut, on est isole */
    var suivant: TriNombre     /* valeur arbitraire si last = 1 */
 

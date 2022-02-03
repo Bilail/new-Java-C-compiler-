@@ -1,0 +1,15 @@
+class TriNombre() is {
+
+   var trinome:Integer
+   var last: Integer          /* Par defaut, on est isole */
+   var suivant: TriNombre     /* valeur arbitraire si last = 1 */
+
+   def TriNombre () is { trinome := 0; }
+
+   def suivant() : TriNombre := this.suivant
+
+   def trinome() : Integer := this.trinome
+
+   def last() : Integer := this.last
+
+}
