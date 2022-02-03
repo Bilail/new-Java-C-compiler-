@@ -12,6 +12,8 @@ let makeEti () =
 (* paramètres: la liste de déclarations, l'expression finale et le fichier
  * dans lequel on écrit le code engendré par notre compilateur
 *)
+
+(*
 let compile ld e chan =
   let rec compileDecl ld env rang =
     (* compile chaque partie droite de declaration et associe à sa partie
@@ -33,8 +35,9 @@ let compile ld e chan =
 
   and compileClassDef attributes methods env 
     
-  and compileExpr e env =
-    match e with
+  and*) 
+  let compileExpr e chan=
+    match e with(*
     | Container c ->
       (match c with
        | Select att -> 
@@ -75,7 +78,7 @@ let compile ld e chan =
 
       )
 
-    | Cast (s, expr) ->
+    | Cast (s, expr) -> *)
 
     | NewClass (s, expr_list) ->
       output_string chan ""
@@ -96,7 +99,7 @@ let compile ld e chan =
 
     | Binary (binaryOp, g, d) ->
 
-      compileExpr g env; compileExpr d env;
+      compileExpr g chan; compileExpr d chan;
       (match binaryOp with
 
        (* -- -- -- -- -- -- -- -- Gestion des intBinaryOp -- -- -- -- -- -- -- -- *)
@@ -148,18 +151,6 @@ let compile ld e chan =
        | UMINUS -> (* traduit en 0 - d *)
          output_string chan "SUB\n")
 
-    | Ite (si, alors, sinon) ->
-      let (etiElse, etiFin) = makeEti () in
-      compileExpr si env;
-      output_string chan "JZ "; output_string chan etiElse;
-      output_string chan "\n";
-      compileExpr alors env;
-      output_string chan "JUMP "; output_string chan etiFin;
-      output_string chan "\n";
-      output_string chan etiElse; output_string chan ": NOP\n";
-      compileExpr sinon env;
-      output_string chan etiFin; output_string chan ": NOP\n"
-
   in
   output_string chan "START\n";
   compileExpr e (compileDecl ld [] 0);
@@ -173,9 +164,9 @@ let compile ld e chan =
   output_string chan
     "PUSHS \"Resultat: \"\nWRITES\nWRITEI\nPUSHS \"\\n\"\nWRITES\nSTOP\n";
   flush chan;
-  close_out chan;
+  close_out chan;;
 
-  and compileInstr instr env =
+  let compileInstr instr env =
     match instr with
     | Exp e -> compileExpr e env
 
@@ -193,25 +184,42 @@ let compile ld e chan =
       compileInstr sinon env;
       output_string chan etiFin; output_string chan ": NOP\n"
 
-    | Return -> output_string chan "RETURN"
+    | Return -> output_string chan "RETURN";
 
-    | Affectation cont expr -> 
+    | Affectation (cont, expr) -> 
+      compileExpr expr; 
+      outpute_string chan "STORE "^ string_of_int n ^"\n" ;;
     
-  and compileBlock b env =
-    
-type info_classe {index : int , nbMeth = int, nbAtt = int, nbMethStat = int, nmMethnonStat = int ,nbAttStat = int}
-let classe_hash = (string, info_classe) Hashtbl.create 16
+  let compileBlock b =
+    let dec = b.declarations in 
+      let rec f l_d = 
+      match dec with 
+      | [] -> None
+      | a::b ->  generate_decl a; f b 
+      in f dec;;
 
-let generate_hash lc = 
+  let generate_decl d = 
+    outpute_string chan "ALLOC "^ string_of_int 1 ^"\n";
+    outpute_string chan "PUSHG "^ string_of_int 0 ^"\n";
+    outpute_string chan "PUSHI "^ string_of_int 0 ^"\n"; (* Verifier la valeur*)
+    outpute_string chan "STORE "^ string_of_int 0 ^"\n"
+
+  
+    
+    
+type info_classe = {index : int ; nbMeth: int; nbAtt: int; nbMethStat : int; nmMethnonStat :int ;nbAttStat : int};;
+let classe_hash = (string, info_classe) Hashtbl.create 16;;
+
+(*let generate_hash lc = 
   let i = ref -1 in 
   List.iter(fun c -> Hastbl.add classe_hash c.name_class {
-    index = i := !i + 1; !i
+    index = i := !i + 1; !i;
     nbMeth = List.lenght c.methods;
     nbAtt = List.length c.attributes;
     nbMethStat = List.fold_left (fun acc m -> if m.is_static_method then acc + 1 else acc) 0 c.methods;
     nmMethnonStat = nbMeth - nbMethStat;
     nbAttStat = List.fold_left (fun acc m -> if m.is_static then acc + 1 else acc) 0 c.attributes;
-  }) lc
+  }) lc  *)
 
 (*let m_class_list lc =
   List.fold_left (fun acc c -> if c.superclass == None then acc@[c]) [] lc*)
@@ -222,41 +230,31 @@ let meth_code_tv m acc cont=
   outpute_string chan "DUPN 1 "^"\n";
   outpute_string chan "PUSHA"^ makeEti ^"\n";
   outpute_string chan "STORE"^ string_of_int acc ^"\n"
-  cont (* ajoute les infos index, etickette*)
+   (* ajoute les infos index, etickette*)
 
 
 let generate_class_TV c chan = 
-  Hashtbl.find classe_hash c 
+  (*Hashtbl.find classe_hash c *)
   let n = nbMeth+1 in 
   match c.superclass with 
-    | None ->               
+    | None ->   None            
     | Some s -> generate_class_TV c chan
 
-  outpute_string chan "Alloc "^ string_of_int n ^"\n";
-  List.fold_left (fun acc m ->meth_code_tv m acc+1 cont) 0 c.methods;
+  outpute_string chan "ALLOC "^ string_of_int n ^"\n";
+  List.fold_left (fun acc m ->meth_code_tv m acc+1 cont) 0 c.methods
 
   (*List.iter (c -> meth_code_tv c.methods ) lc;*)
 
 
-
-let init_code prog chan =
-  let n = 
-  outpute_string chan "PUSHN "^ string_of_int n ^"\n"
-  
-
-let generate_code prog = 
-  let lc = (ordered_class prog.classes) in 
-  let bloc = prog.program in
+let generate_code prog chan =
+  ordered_class prog.classes
+  (*let lc = (ordered_class prog.classes) in *)
+  (*let bloc = prog.program in
   let hash = generate_hash lc in 
   generate_class_TV c chan
-
-
-  
-
-
  
   init_code prog;
-  block_code bloc;
+  block_code bloc;*)
 
  (* Essayer de trier les classes dans l'ordre en commancencant par ceux qui n'hérite de personne*)
   
@@ -271,15 +269,18 @@ let ordered_class lc =
   let rec ordered_class_rec lc retour  = 
     match lc with 
     | [] -> retour
-    | a::b  -> match a.superclass with
+    | a::b  -> (match a.superclass with
                   (* Cas ou pas de superclass, on ajoute la classe à la liste retour *)
                   | None -> ordered_class_rec b retour@[a]
                   (* Cas ou la classe herite d'une autre classe *)
-                  | Some supername -> if is_in retour supername then ordered_class_rec b retour@[a]
-                  else ordered_class_rec b@[a] retour 
+                  | Some supername -> 
+                    if is_in retour supername 
+                    then ordered_class_rec b retour@[a]
+                    else ordered_class_rec b@[a] retour)
+
   in ordered_class_rec lc []
 
-
+(* Permet de verifier si un element est dans la liste *)
 let is_in list e =
   match list with 
   | [] -> false
@@ -287,14 +288,15 @@ let is_in list e =
 
 
 let getNbMeth_herit c =
-  let f c acc =
+  let rec f c acc =
     match c.superclass with 
     | None -> acc             
     | Some s -> f s (acc + List.fold_left (fun acc m -> if m.is_static_method then acc + 1 else acc) 0 c.methods)
+    in f c 0
 
-
-let nb_meth_herit c = 
+(* Retourn le nombre de methode de toutes les classes herites *)
+(*let nb_meth_herit c = 
   let f c acc = 
     match c.superclass with 
     | None -> acc              
-    | Some s -> 
+    | Some s -> *)
