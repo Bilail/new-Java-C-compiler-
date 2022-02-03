@@ -1,6 +1,7 @@
 open Ast
 open Lexing
-(* open Print *)
+open Compil
+open Print 
 
 (* lexbuf: correspond au buffer d'entrée associé au programme qu'on traite
  * file_in: descripteur de fichier pour ce programme
@@ -26,7 +27,10 @@ let parse_with_error lexbuf file_in chan =
      * une déclaration et l'ast de l'expression comprise entre begin et end
      *)
     let prog = Parse.prog Lex.token lexbuf
-    in (ContextAnalysis.analyseProgram prog); 
+    in 
+    ContextAnalysis.analyseProgram prog; 
+    Compil.generate_code prog chan;
+    (*Compil.compile ld e chan;*)
 
      PrintAnalyCont.printEnv (ContextAnalysis.analyseProgram prog);
      Print.printProg prog;
@@ -54,7 +58,7 @@ let parse_with_error lexbuf file_in chan =
 let _ =
   let argc = Array.length Sys.argv in
   if argc = 1 then
-    print_endline "usage: tp programme [fichier-pour-le-code] "
+    print_endline "usage:  programme [fichier-pour-le-code] "
   else
     begin
       (* si on ne passe pas à l'appel le nom du fichier dans lequel
